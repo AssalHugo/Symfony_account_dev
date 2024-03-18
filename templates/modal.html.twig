@@ -1,0 +1,46 @@
+<div
+    class="modal fade"
+    tabindex="-1"
+    aria-hidden="true"
+    data-modal-target="modal"
+>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Historique des contrats</h5>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Début</th>
+                            <th scope="col">Fin</th>
+                            <th scope="col">statut</th>
+                            <th scope="col">quotite</th>
+                            <th scope="col">Remarque</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for contrat in contrats %}
+                        <tr>
+                            <td>{{ contrat.datedebut | date('d-m-Y')}}</td>
+                            <td>{{ contrat.datefin | date('d-m-Y')}}</td>
+                            <td>{{contrat.status.type}}</td>
+                            <td>{{contrat.quotite}}</td>
+                            <td>{{contrat.remarque}}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

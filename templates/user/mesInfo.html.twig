@@ -1,0 +1,116 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <img src="employe.photo" class="img-thumbnail" alt="Photo inconnue">
+        </div>    
+        <div class="row">
+            <div class="col-sm">
+                <h5 class="text-left">Prénom : {{employe.prenom}}</h5>
+           </div>    
+            <div class="col-sm">
+                <h5 class="text-left">Nom : {{employe.nom}}</h5>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <h5 class="text-left">Mail : {{user.email}}</h5>
+            </div>    
+            <div class="col-sm">
+                <div class="row">
+                    <div class="col-sm">
+                        <h5 class="text-left">Sync Reseda : </h5>
+                    </div>
+                    <div class="col-sm">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="flexRadioDisabled" {% if employe.syncReseda == true %} checked {% endif %} disabled>
+                            <label class="form-check-label" for="flexRadioDisabled">
+                                Oui
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="flexRadioDisabled" {% if employe.syncReseda == false %} checked {% endif %} disabled>
+                            <label class="form-check-label" for="flexRadioCheckedDisabled">
+                                Non
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <h5 class="text-left">Statut : {{contrat.status.type}}</h5>
+           </div>    
+            <div class="col-sm">
+                <h5 class="text-left">Année de naissance : {{employe.anneenaissance}}</h5>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <h5 class="text-left">Contrat Début : {{ contrat.datedebut | date('d-m-Y')}}</h5>
+           </div>
+           {% if contrat.datefin != null %}
+            <div class="col-sm">
+                <h5 class="text-left">Contrat Fin : {{ contrat.datefin | date('d-m-Y')}}</h5>
+            </div>
+            {% endif %}
+            <div class="col-sm">
+                <div {{ stimulus_controller('modal') }}>
+                    <button class="btn btn-primary my-2" data-action="modal#openModal">Historique des contrats</button>
+                    {{ include('modal.html.twig')}}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <h5 class="text-left">Localisations : </h5>
+            <div class="col-sm">
+                <ul class="list-group">
+                    {% set i = 1 %}
+                    {% for localisation in localisations %}
+                        <li class="list-group-item">
+                            Localisation {{i}} : <a class="btn btn-warning my-2" href="{{path('removeLocalisation', {id: localisation.id})}}" >&#128465;&#65039;</a>
+                            </br>
+                            <b>&nbsp;&nbsp;&nbsp;Batiment : {{localisation.batiment.nom}}</b>
+                            </br>
+                            <b>&nbsp;&nbsp;&nbsp;Bureau : {{localisation.bureau}}</b>
+                        </li>
+                        {% set i = i + 1 %}
+                    {% endfor %}
+                    <li class="list-group-item">
+                        {{form(formLocalisation)}}
+                    </li>    
+                </ul>    
+           </div>
+        </div>
+        <div class="row">
+            <h5 class="text-left">Téléphones : </h5>
+            <div class="col-sm">
+                <ul class="list-group">
+                    {% set i = 1 %}
+                    {% for telephone in telephones %}
+                        <li class="list-group-item">
+                            Telephone {{i}} : <a class="btn btn-warning my-2" href="{{path('removeTelephone', {id: telephone.id})}}" >&#128465;&#65039;</a>
+                            </br>
+                            <b>&nbsp;&nbsp;&nbsp;Numéro de téléphone : {{telephone.numero}}</b>
+                        </li>
+                        {% set i = i + 1 %}
+                    {% endfor %}
+                    <li class="list-group-item">
+                        {{form(formTelephone)}}
+                    </li>
+                </ul>
+           </div>
+        </div>
+        <div class="row">
+            <h5 class="text-left">Contacter le support : </h5>
+            <div class="col-sm">
+                {{form(formContact)}}
+            </div>
+        </div>      
+    </div>
+
+{% endblock %}

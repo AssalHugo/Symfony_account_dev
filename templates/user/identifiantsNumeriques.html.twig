@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        {{form(formIdentifiants)}}
+        <h5 class="text-left">Test publications : </h5>
+        {{form(formTest)}}
+        <div class="overflow-scroll">
+            {{content | raw}}
+        </div>
+    </div>    
+{% endblock %}

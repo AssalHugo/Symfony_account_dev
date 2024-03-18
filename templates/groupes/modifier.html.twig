@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        {{form(formGroupePrincipal)}}
+        <p>Groupes secondaires :</p>
+        <ul class="list-group">
+                    {% set i = 1 %}
+                    {% for groupe in groupesSecondairesEmploye %}
+                        <li class="list-group-item">
+                            groupe {{i}} : <a class="btn btn-warning my-2" href="{{path('removeGroupeSecondaire', {id: groupe.id})}}" >&#128465;&#65039;</a>
+                            </br>
+                            <b>&nbsp;&nbsp;&nbsp;{{groupe.nom}}</b>
+                        </li>
+                        {% set i = i + 1 %}
+                    {% endfor %}
+                    <li class="list-group-item">
+                        {{form(formGroupesSecondaires)}}
+                    </li>
+                </ul>
+    </div>    
+{% endblock %}
