@@ -14,6 +14,12 @@ use Symfony\Component\HttpFoundation\Request;
 
 class GroupesController extends AbstractController
 {
+    /**
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
     #[Route('/groupes/modifier', name: 'modifier')]
     public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -21,6 +27,7 @@ class GroupesController extends AbstractController
         //On récupère l'employe qui est connecté
         $employe = $this->getUser()->getEmploye();
 
+        //On crée le formulaire dans le controlleur
         $formGroupePrincipal = $this->createForm(GroupesPrincipalType::class,$employe);
 
         $groupesSecondairesEmploye = $employe->getGroupesSecondaires();
@@ -67,7 +74,7 @@ class GroupesController extends AbstractController
         ]);
     }
 
-    #[Route('/user/groupes/removeGroupeSecondaire/{id}', name: 'removeGroupeSecondaire')]
+    #[Route('/groupes/removeGroupeSecondaire/{id}', name: 'removeGroupeSecondaire')]
     public function removeGroupeSecondaire(Request $request, EntityManagerInterface $entityManager, int $id): Response{
 
         
@@ -80,9 +87,23 @@ class GroupesController extends AbstractController
         $entityManager->flush();
 
         $session = $request->getSession();
-        $session->getFlashBag()->add('message', 'Le groupe a été supprimé');
+        $session->getFlashBag()->add('message', "{$groupe->getNom()} a été supprimé");
         $session->set('statut', 'success');
 
         return $this->redirect($this->generateUrl('modifier'));
+    }
+
+
+    /**
+     * Controleur qui permet d'afficher la liste des utilisateurs de chaque groupe
+     */
+    #[Route('/groupes/liste', name: 'liste')]
+    public function liste(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $groupes = $entityManager->getRepository(Groupes::class)->findAll();
+
+        return $this->render('groupes/liste.html.twig', [
+            'groupes' => $groupes,
+        ]);
     }
 }
