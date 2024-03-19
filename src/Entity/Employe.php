@@ -71,6 +71,9 @@ class Employe
     #[ORM\ManyToOne(inversedBy: 'employes_grp_principaux')]
     private ?Groupes $groupe_principal = null;
 
+    #[ORM\OneToOne(mappedBy: 'responsable', cascade: ['persist', 'remove'])]
+    private ?Departement $responsable_departement = null;
+
 
     public function __construct()
     {
@@ -384,6 +387,28 @@ class Employe
     public function setGroupePrincipal(?Groupes $groupe_principal): static
     {
         $this->groupe_principal = $groupe_principal;
+
+        return $this;
+    }
+
+    public function getResponsableDepartement(): ?Departement
+    {
+        return $this->responsable_departement;
+    }
+
+    public function setResponsableDepartement(?Departement $responsable_departement): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($responsable_departement === null && $this->responsable_departement !== null) {
+            $this->responsable_departement->setResponsable(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($responsable_departement !== null && $responsable_departement->getResponsable() !== $this) {
+            $responsable_departement->setResponsable($this);
+        }
+
+        $this->responsable_departement = $responsable_departement;
 
         return $this;
     }

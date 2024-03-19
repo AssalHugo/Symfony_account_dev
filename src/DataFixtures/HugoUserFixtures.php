@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Departement;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use App\Entity\Employe;
@@ -105,8 +106,17 @@ class HugoUserFixtures extends Fixture
         $groupe2->setStatut("statut");
         $groupe2->setResponsable($employe2);
         $groupe2->addAdjoint($employe);
-        
-        
+
+
+        $departement = new Departement();
+        $departement->setNom("Informatique");
+        $departement->setAcronyme("Info");
+        $departement->setResponsable($employe);
+
+        $groupe2->setDepartement($departement);
+
+
+        //On persiste les entités
         $manager->persist($user);
         $manager->persist($employe);
         $manager->persist($status);
@@ -121,6 +131,7 @@ class HugoUserFixtures extends Fixture
         $manager->persist($groupe2);
         $manager->persist($user2);
         $manager->persist($employe2);
+        $manager->persist($departement);
         $manager->flush();
 
         $employe->setGroupePrincipal($groupe);

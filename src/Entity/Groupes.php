@@ -37,6 +37,9 @@ class Groupes
     #[ORM\OneToMany(targetEntity: Employe::class, mappedBy: 'groupe_principal')]
     private Collection $employes_grp_principaux;
 
+    #[ORM\ManyToOne(inversedBy: 'groupes')]
+    private ?Departement $departement = null;
+
     public function __construct()
     {
         $this->adjoints = new ArrayCollection();
@@ -174,6 +177,18 @@ class Groupes
                 $employesGrpPrincipaux->setGroupePrincipal(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDepartement(): ?Departement
+    {
+        return $this->departement;
+    }
+
+    public function setDepartement(?Departement $departement): static
+    {
+        $this->departement = $departement;
 
         return $this;
     }
