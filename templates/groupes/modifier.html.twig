@@ -2,8 +2,10 @@
 
 {% block body %}
     <div class="container">
-        {{form(formGroupePrincipal)}}
-        <p>Groupes secondaires :</p>
+        <h5>Groupe principal :</h5>
+        <p>{{groupePrincipal.nom}}</p>
+        <br>
+        <h5>Groupes secondaires :</h5>
         <ul class="list-group">
                     {% set i = 1 %}
                     {% for groupe in groupesSecondairesEmploye %}

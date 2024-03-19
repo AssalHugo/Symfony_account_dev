@@ -28,11 +28,28 @@ class HugoUserFixtures extends Fixture
         $employe->setTelephoneSecondaire("0101010101");
         $employe->setAnneeNaissance(2024);
 
+        $employe2 = new Employe();
+        $employe2->setNom("Jean");
+        $employe2->setPrenom("Paul");
+        $employe2->setSyncReseda(true);
+        $employe2->setPagePro("page");
+        $employe2->setIdhal("sebastien-geiger");
+        $employe2->setOrcid("0000-0003-1412-9991");
+        $employe2->setMailSecondaire("jean@jean");
+        $employe2->setTelephoneSecondaire("0101010101");
+        $employe2->setAnneeNaissance(2004);
+
         $user = new User();
         $user->setUsername("hassal");
         $user->setEmail("hugo@mail.com");
         $user->setPassword("hugo26**");
         $user->setEmploye($employe);
+
+        $user2 = new User();
+        $user2->setUsername("jean");
+        $user2->setEmail("jean@mail.com");
+        $user2->setPassword("jean26**");
+        $user2->setEmploye($employe2);
 
         $status = new Status();
         $status->setType("Stagiaire");
@@ -50,7 +67,7 @@ class HugoUserFixtures extends Fixture
         $contrat2->setDateFin(new \DateTime("2018-09-31"));
         $contrat2->setRemarque("remarque 2");
         $contrat2->setQuotite(20);
-        $contrat2->setEmploye($employe);
+        $contrat2->setEmploye($employe2);
         $contrat2->setStatus($status);
 
         $batiment = new Batiments();
@@ -67,6 +84,7 @@ class HugoUserFixtures extends Fixture
         $localisation->setBatiment($batiment);
 
         $employe->addLocalisation($localisation);
+        $employe2->addLocalisation($localisation);
 
         
         $telephone = new Telephones();
@@ -78,13 +96,15 @@ class HugoUserFixtures extends Fixture
         $groupe->setNom("groupe 1");
         $groupe->setAcronyme("Grp1");
         $groupe->setStatut("statut");
-        
-
         $groupe->setResponsable($employe);
-        
-        $manager->persist($user);
-        $manager->persist($employe);
-        $manager->persist($groupe);
+
+
+        $groupe2 = new Groupes();
+        $groupe2->setNom("groupe 2");
+        $groupe2->setAcronyme("Grp2");
+        $groupe2->setStatut("statut");
+        $groupe2->setResponsable($employe2);
+        $groupe2->addAdjoint($employe);
         
         
         $manager->persist($user);
@@ -98,10 +118,15 @@ class HugoUserFixtures extends Fixture
         $manager->persist($localisation);
         $manager->persist($telephone);
         $manager->persist($groupe);
+        $manager->persist($groupe2);
+        $manager->persist($user2);
+        $manager->persist($employe2);
         $manager->flush();
 
         $employe->setGroupePrincipal($groupe);
         $manager->persist($employe);
+        $employe2->setGroupePrincipal($groupe2);
+        $manager->persist($employe2);
         $manager->flush();
     }
 }

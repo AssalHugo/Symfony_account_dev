@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Employe;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -28,7 +29,7 @@ class GroupesController extends AbstractController
         $employe = $this->getUser()->getEmploye();
 
         //On crée le formulaire dans le controlleur
-        $formGroupePrincipal = $this->createForm(GroupesPrincipalType::class,$employe);
+        $groupePrincipal = $employe->getGroupePrincipal();
 
         $groupesSecondairesEmploye = $employe->getGroupesSecondaires();
 
@@ -77,7 +78,7 @@ class GroupesController extends AbstractController
 
         return $this->render('groupes/modifier.html.twig', [
 
-            'formGroupePrincipal' => $formGroupePrincipal->createView(),
+            'groupePrincipal' => $groupePrincipal,
             'groupesSecondairesEmploye' => $groupesSecondairesEmploye,
             'formGroupesSecondaires' => $formGroupesSecondaires->createView(),
         ]);
@@ -120,4 +121,27 @@ class GroupesController extends AbstractController
             'groupes' => $groupes,
         ]);
     }
+
+    #[Route('/groupes/supprimerEmpGroupe/{idEmploye}/{idGroupe}', name: 'supprimerEmployeDuGroupe')]
+    public function supprimerEmployeDuGroupe(Request $request, EntityManagerInterface $entityManager, int $idEmploye, int $idGroupe): Response
+    {
+
+        $employeRepo = $entityManager->getRepository(Employe::class);
+        $employe = $employeRepo->find($idEmploye);
+
+        $groupeRepo = $entityManager->getRepository(Groupes::class);
+        $groupe = $groupeRepo->find($idGroupe);
+
+        $employe->removeGroupesSecondaire($groupe);
+        $entityManager->persist($employe);
+        $entityManager->flush();
+
+        $session = $request->getSession();
+        $session->getFlashBag()->add('message', "L'employé a été supprimé du groupe");
+        $session->set('statut', 'success');
+
+        return $this->redirect($this->generateUrl('liste'));
+    }
+
+
 }

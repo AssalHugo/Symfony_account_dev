@@ -1,11 +1,15 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-
+    <div class="container">
+        <h1 class="text-center">Liste des groupes</h1>
+        <br>
+        <br>
     {% for groupe in groupes %}
 
         <h3>Groupe : {{ groupe.nom }}</h3>
-        <h5>Responsable : {{ groupe.responsable.prenom }} {{ groupe.responsable.nom }}</h5>
+        <h5>Responsable :  </h5>
+        <p>{{ groupe.responsable.prenom }} {{ groupe.responsable.nom }}</p>
         <h5>Adjoints :</h5>
         <ul>
             {% for adjoint in groupe.adjoints %}
@@ -20,7 +24,7 @@
                 <th scope="col">Date début contrat</th>
                 <th scope="col">Date fin contrat</th>
                 <th scope="col">Statut</th>
-                <th scope="col">Supprimer</th>
+                <th scope="col"></th>
             </tr>
             </thead>
             <tbody>
@@ -31,7 +35,7 @@
                     <td>{{ employe.contrats| last .datedebut|date('d/m/Y') }}</td>
                     <td>{{ employe.contrats| last .datefin|date('d/m/Y') }}</td>
                     <td>{{ employe.contrats| last .status.type }}</td>
-                    <td><a href="#" class="btn btn-danger">Supprimer</a></td>
+                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer</a></td>
                 </tr>
             {% endfor %}
             {% for employeSec in groupe.employegrpsecondaires %}
@@ -41,7 +45,7 @@
                     <td>{{ employeSec.contrats| last .datedebut|date('d/m/Y') }}</td>
                     <td>{{ employeSec.contrats| last .datefin|date('d/m/Y') }}</td>
                     <td>{{ employeSec.contrats| last .status.type }}</td>
-                    <td><a href="#" class="btn btn-danger">Supprimer</a></td>
+                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer</a></td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -49,4 +53,5 @@
         <br>
         <br>
     {% endfor %}
+    </div>
 {% endblock %}
