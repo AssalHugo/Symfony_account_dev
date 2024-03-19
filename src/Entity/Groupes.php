@@ -34,10 +34,14 @@ class Groupes
     #[ORM\ManyToMany(targetEntity: Employe::class, mappedBy: 'groupes_secondaires')]
     private Collection $employe_grp_secondaires;
 
+    #[ORM\OneToMany(targetEntity: Employe::class, mappedBy: 'groupe_principal')]
+    private Collection $employes_grp_principaux;
+
     public function __construct()
     {
         $this->adjoints = new ArrayCollection();
         $this->employe_grp_secondaires = new ArrayCollection();
+        $this->employes_grp_principaux = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -143,4 +147,35 @@ class Groupes
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Employe>
+     */
+    public function getEmployesGrpPrincipaux(): Collection
+    {
+        return $this->employes_grp_principaux;
+    }
+
+    public function addEmployesGrpPrincipaux(Employe $employesGrpPrincipaux): static
+    {
+        if (!$this->employes_grp_principaux->contains($employesGrpPrincipaux)) {
+            $this->employes_grp_principaux->add($employesGrpPrincipaux);
+            $employesGrpPrincipaux->setGroupePrincipal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEmployesGrpPrincipaux(Employe $employesGrpPrincipaux): static
+    {
+        if ($this->employes_grp_principaux->removeElement($employesGrpPrincipaux)) {
+            // set the owning side to null (unless already changed)
+            if ($employesGrpPrincipaux->getGroupePrincipal() === $this) {
+                $employesGrpPrincipaux->setGroupePrincipal(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

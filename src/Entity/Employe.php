@@ -65,11 +65,11 @@ class Employe
     #[ORM\ManyToMany(targetEntity: Groupes::class, mappedBy: 'adjoints')]
     private Collection $adjoint_de;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    private ?Groupes $groupe_principal;
-
     #[ORM\ManyToMany(targetEntity: Groupes::class, inversedBy: 'employe_grp_secondaires')]
     private Collection $groupes_secondaires;
+
+    #[ORM\ManyToOne(inversedBy: 'employes_grp_principaux')]
+    private ?Groupes $groupe_principal = null;
 
 
     public function __construct()
@@ -352,18 +352,6 @@ class Employe
         return $this;
     }
 
-    public function getGroupePrincipal(): ?Groupes
-    {
-        return $this->groupe_principal;
-    }
-
-    public function setGroupePrincipal(Groupes $groupe_principal): static
-    {
-        $this->groupe_principal = $groupe_principal;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Groupes>
      */
@@ -384,6 +372,18 @@ class Employe
     public function removeGroupesSecondaire(Groupes $groupesSecondaire): static
     {
         $this->groupes_secondaires->removeElement($groupesSecondaire);
+
+        return $this;
+    }
+
+    public function getGroupePrincipal(): ?Groupes
+    {
+        return $this->groupe_principal;
+    }
+
+    public function setGroupePrincipal(?Groupes $groupe_principal): static
+    {
+        $this->groupe_principal = $groupe_principal;
 
         return $this;
     }

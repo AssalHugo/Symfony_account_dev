@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20240318143236 extends AbstractMigration
+final class Version20240319113454 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -25,7 +25,7 @@ final class Version20240318143236 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_7268396C6BF700BD ON contrats (status_id)');
         $this->addSql('CREATE INDEX IDX_7268396C1B65292 ON contrats (employe_id)');
         $this->addSql('CREATE TABLE employe (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, groupe_principal_id INTEGER DEFAULT NULL, nom VARCHAR(64) NOT NULL, prenom VARCHAR(64) NOT NULL, photo VARCHAR(255) DEFAULT NULL, sync_reseda BOOLEAN NOT NULL, page_pro VARCHAR(255) DEFAULT NULL, idhal VARCHAR(50) DEFAULT NULL, orcid VARCHAR(50) DEFAULT NULL, mail_secondaire VARCHAR(128) DEFAULT NULL, telephone_secondaire VARCHAR(10) DEFAULT NULL, annee_naissance INTEGER DEFAULT NULL, CONSTRAINT FK_F804D3B93B1B422A FOREIGN KEY (groupe_principal_id) REFERENCES groupes (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
-        $this->addSql('CREATE UNIQUE INDEX UNIQ_F804D3B93B1B422A ON employe (groupe_principal_id)');
+        $this->addSql('CREATE INDEX IDX_F804D3B93B1B422A ON employe (groupe_principal_id)');
         $this->addSql('CREATE TABLE employe_localisations (employe_id INTEGER NOT NULL, localisations_id INTEGER NOT NULL, PRIMARY KEY(employe_id, localisations_id), CONSTRAINT FK_6B3955B21B65292 FOREIGN KEY (employe_id) REFERENCES employe (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_6B3955B21E0EE9AA FOREIGN KEY (localisations_id) REFERENCES localisations (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_6B3955B21B65292 ON employe_localisations (employe_id)');
         $this->addSql('CREATE INDEX IDX_6B3955B21E0EE9AA ON employe_localisations (localisations_id)');

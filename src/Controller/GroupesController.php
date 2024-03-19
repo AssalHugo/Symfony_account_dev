@@ -32,7 +32,16 @@ class GroupesController extends AbstractController
 
         $groupesSecondairesEmploye = $employe->getGroupesSecondaires();
 
-        $listeGroupes = $entityManager->getRepository(Groupes::class)->findAll();
+        //On récupere tous les groupes à l'exception des groupes que l'employé possède déjà
+        $groupes = $entityManager->getRepository(Groupes::class)->findAll();
+
+        $listeGroupes = [];
+
+        foreach($groupes as $groupe){
+            if(!$groupesSecondairesEmploye->contains($groupe) && $employe->getGroupePrincipal() != $groupe){
+                $listeGroupes[] = $groupe;
+            }
+        }
 
         //On crée le formulaire dans le controlleur
         $formGroupesSecondaires = $this->createFormBuilder()->add('groupeSecondaire', ChoiceType::class, [
@@ -95,14 +104,19 @@ class GroupesController extends AbstractController
 
 
     /**
-     * Controleur qui permet d'afficher la liste des utilisateurs de chaque groupe
+     * Controleur qui permet d'afficher la liste des utilisateurs de chaque groupe appartenant à l'employé connecté
      */
     #[Route('/groupes/liste', name: 'liste')]
     public function liste(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $groupes = $entityManager->getRepository(Groupes::class)->findAll();
+        $employe = $this->getUser()->getEmploye();
 
-        return $this->render('groupes/liste.html.twig', [
+        $groupes = $employe->getGroupesSecondaires();
+
+        //On ajoute le groupe principal à la liste des groupes secondaires
+        $groupes[] = $employe->getGroupePrincipal();
+
+        return $this->render('groupes/listeUtilisateurs.html.twig', [
             'groupes' => $groupes,
         ]);
     }

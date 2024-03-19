@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    {% for groupe in groupes %}
+
+        <h3>Groupe : {{ groupe.nom }}</h3>
+        <h5>Responsable : {{ groupe.responsable.prenom }} {{ groupe.responsable.nom }}</h5>
+        <h5>Adjoints :</h5>
+        <ul>
+            {% for adjoint in groupe.adjoints %}
+                <li>{{ adjoint.prenom }} {{ adjoint.nom }}</li>
+            {% endfor %}
+        </ul>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Prénom</th>
+                <th scope="col">Nom</th>
+                <th scope="col">Date début contrat</th>
+                <th scope="col">Date fin contrat</th>
+                <th scope="col">Statut</th>
+                <th scope="col">Supprimer</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for employe in groupe.employesgrpprincipaux %}
+                <tr>
+                    <td>{{ employe.prenom }}</td>
+                    <td>{{ employe.nom }}</td>
+                    <td>{{ employe.contrats| last .datedebut|date('d/m/Y') }}</td>
+                    <td>{{ employe.contrats| last .datefin|date('d/m/Y') }}</td>
+                    <td>{{ employe.contrats| last .status.type }}</td>
+                    <td><a href="#" class="btn btn-danger">Supprimer</a></td>
+                </tr>
+            {% endfor %}
+            {% for employeSec in groupe.employegrpsecondaires %}
+                <tr>
+                    <td>{{ employeSec.prenom }}</td>
+                    <td>{{ employeSec.nom }}</td>
+                    <td>{{ employeSec.contrats| last .datedebut|date('d/m/Y') }}</td>
+                    <td>{{ employeSec.contrats| last .datefin|date('d/m/Y') }}</td>
+                    <td>{{ employeSec.contrats| last .status.type }}</td>
+                    <td><a href="#" class="btn btn-danger">Supprimer</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <br>
+        <br>
+    {% endfor %}
+{% endblock %}
