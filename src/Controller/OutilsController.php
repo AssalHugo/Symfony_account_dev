@@ -43,9 +43,33 @@ class OutilsController extends AbstractController
             //On récupère les utilisateurs en fonction des filtres
             $employes = $employeRepository->findByFiltre($departement, $groupe, $statut);
         }
-        else {
+        //Sinon si le GET est vide
+        else if (empty($request->query->all())) {
             //On récupère tous les utilisateurs
             $employes = $employeRepository->findAll();
+        }
+        //Sinon
+        else {
+            //On récupère les utilisateurs en fonction des filtres
+            if ($request->query->get('departement') != null) {
+                $departement = $request->query->get('departement');
+            } else {
+                $departement = "";
+            }
+
+            if ($request->query->get('groupe') != null) {
+                $groupe = $request->query->get('groupe');
+            } else {
+                $groupe = "";
+            }
+
+            if ($request->query->get('statut') != null) {
+                $statut = $request->query->get('statut');
+            } else {
+                $statut = "";
+            }
+
+            $employes = $employeRepository->findByFiltreId($departement, $groupe, $statut);
         }
 
         //On récupère le nombres d'employés, de départements et de groupes au total dans la bd et le nombre affiché
@@ -78,7 +102,7 @@ class OutilsController extends AbstractController
 
             //Pour chaque groupes secondaires de l'employé, on vérifie si il est déjà dans le tableau
             foreach ($employe->getGroupesSecondaires() as $groupe) {
-                if ($groupe != null && in_array($groupe, $groupes)) {
+                if ($groupe != null && !in_array($groupe, $groupes)) {
                     $nbGroupesAffiches++;
                     if ($groupe->getDepartement() != null && !in_array($groupe->getDepartement(), $departements)) {
                         $nbDepartementsAffiches++;

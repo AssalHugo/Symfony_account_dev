@@ -56,6 +56,18 @@ class HugoUserFixtures extends Fixture
 
         $status = new Status();
         $status->setType("Stagiaire");
+
+        $status2 = new Status();
+        $status2->setType("CDI");
+
+        $status3 = new Status();
+        $status3->setType("CDD");
+
+        $status4 = new Status();
+        $status4->setType("Chercheur");
+
+        $status5 = new Status();
+        $status5->setType("Doctorant");
         
         $contrat = new Contrats;
         $contrat->setDateDebut(new \DateTime("2015-09-31"));
@@ -162,16 +174,25 @@ class HugoUserFixtures extends Fixture
             $user->setPassword("password" . $i);
             $user->setEmploye($employe);
 
-            $status = new Status();
-            $status->setType("Stagiaire");
-
             $contrat = new Contrats;
             $contrat->setDateDebut(new \DateTime("2015-09-31"));
             $contrat->setDateFin(new \DateTime("2016-09-31"));
             $contrat->setRemarque("remarque");
             $contrat->setQuotite(20);
             $contrat->setEmploye($employe);
-            $contrat->setStatus($status);
+
+            //On attribue un status différent aléatoirement
+            if ($i % 2 == 0) {
+                $contrat->setStatus($status);
+            } else if ($i % 3 == 0) {
+                $contrat->setStatus($status2);
+            } else if ($i % 5 == 0) {
+                $contrat->setStatus($status3);
+            } else if ($i % 7 == 0) {
+                $contrat->setStatus($status4);
+            } else {
+                $contrat->setStatus($status5);
+            }
 
             $batiment = new Batiments();
             $batiment->setNom("4");
@@ -196,15 +217,18 @@ class HugoUserFixtures extends Fixture
                 $groupe->setStatut("statut");
                 $groupe->setResponsable($employe);
 
-                $departement = new Departement();
-                $departement->setNom("Departement" . $i);
-                $departement->setAcronyme("Dep" . $i);
-                $departement->setResponsable($employe);
+                if ($i % 2 == 0) {
+                    $departement = new Departement();
+                    $departement->setNom("Departement" . $i);
+                    $departement->setAcronyme("Dep" . $i);
+                    $departement->setResponsable($employe);
+
+                    $manager->persist($departement);
+                }
 
                 $groupe->setDepartement($departement);
-
                 $manager->persist($groupe);
-                $manager->persist($departement);
+
             }
 
             $manager->persist($employe);

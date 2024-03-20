@@ -57,6 +57,42 @@ class EmployeRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+
+    /**
+     * Fonction qui permet de récupérer les employés en fonction des id des groupes, des id des départements et des id des statuts
+     */
+    public function findByFiltreId($departement, $groupe, $statut): array
+    {
+
+        //ne pas oublier que l'employé peut posséder plusieurs groupes il a les groupes secondaires et sont groupe principal
+        $qb = $this->createQueryBuilder('e')
+            ->leftJoin('e.contrats', 'c')
+            ->leftJoin('c.status', 's')
+            ->leftJoin('e.groupe_principal', 'gP')
+            ->leftJoin('e.groupes_secondaires', 'gS')
+            ->leftJoin('gP.departement', 'dP')
+            ->leftJoin('gS.departement', 'dS');
+
+        if (!empty($statut)) {
+            $qb->Where('s.id = :statut')
+                ->setParameter('statut', $statut);
+        }
+
+        if (!empty($groupe)) {
+            $qb->andWhere('gP.id = :groupe')
+                ->orWhere('gS.id = :groupe')
+                ->setParameter('groupe', $groupe);
+        }
+
+        if (!empty($departement)) {
+            $qb->andWhere('dP.id = :departement')
+                ->orWhere('dS.id = :departement')
+                ->setParameter('departement', $departement);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return Employe[] Returns an array of Employe objects
     //     */
