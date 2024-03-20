@@ -28,6 +28,7 @@ class HugoUserFixtures extends Fixture
         $employe->setMailSecondaire("hugo2@mail.com");
         $employe->setTelephoneSecondaire("0101010101");
         $employe->setAnneeNaissance(2024);
+        $employe->setPhoto("img/user.png");
 
         $employe2 = new Employe();
         $employe2->setNom("Jean");
@@ -39,6 +40,7 @@ class HugoUserFixtures extends Fixture
         $employe2->setMailSecondaire("jean@jean");
         $employe2->setTelephoneSecondaire("0101010101");
         $employe2->setAnneeNaissance(2004);
+        $employe2->setPhoto("img/user.png");
 
         $user = new User();
         $user->setUsername("hassal");
@@ -115,7 +117,6 @@ class HugoUserFixtures extends Fixture
 
         $groupe2->setDepartement($departement);
 
-
         //On persiste les entités
         $manager->persist($user);
         $manager->persist($employe);
@@ -139,5 +140,84 @@ class HugoUserFixtures extends Fixture
         $employe2->setGroupePrincipal($groupe2);
         $manager->persist($employe2);
         $manager->flush();
+
+
+        //boucle qui crée 100 employés des groupes différents, des localisations différentes, des batiments différents, des départements différents, des contrats différents, des status différents, des téléphones différents
+        for ($i=0; $i < 100; $i++) {
+            $employe = new Employe();
+            $employe->setNom("nom" . $i);
+            $employe->setPrenom("prenom" . $i);
+            $employe->setSyncReseda(true);
+            $employe->setPagePro("page");
+            $employe->setIdhal("sebastien-geiger");
+            $employe->setOrcid("0000-0003-1412-9991");
+            $employe->setMailSecondaire("mail secondaire" . $i);
+            $employe->setTelephoneSecondaire("0101010101");
+            $employe->setAnneeNaissance(2024);
+            $employe->setPhoto("img/user.png");
+
+            $user = new User();
+            $user->setUsername("user" . $i);
+            $user->setEmail("mail" . $i);
+            $user->setPassword("password" . $i);
+            $user->setEmploye($employe);
+
+            $status = new Status();
+            $status->setType("Stagiaire");
+
+            $contrat = new Contrats;
+            $contrat->setDateDebut(new \DateTime("2015-09-31"));
+            $contrat->setDateFin(new \DateTime("2016-09-31"));
+            $contrat->setRemarque("remarque");
+            $contrat->setQuotite(20);
+            $contrat->setEmploye($employe);
+            $contrat->setStatus($status);
+
+            $batiment = new Batiments();
+            $batiment->setNom("4");
+
+            $localisation = new Localisations();
+            $localisation->setBureau("bureau 1");
+            $localisation->setBatiment($batiment);
+
+            $employe->addLocalisation($localisation);
+
+            $telephone = new Telephones();
+            $telephone->setNumero("0101010101");
+            $telephone->setEmploye($employe);
+
+            $employe->setGroupePrincipal($groupe);
+
+            //condition pour créer des groupes différents 1 fois sur 4
+            if ($i % 4 == 0) {
+                $groupe = new Groupes();
+                $groupe->setNom("groupe" . $i);
+                $groupe->setAcronyme("Grp" . $i);
+                $groupe->setStatut("statut");
+                $groupe->setResponsable($employe);
+
+                $departement = new Departement();
+                $departement->setNom("Departement" . $i);
+                $departement->setAcronyme("Dep" . $i);
+                $departement->setResponsable($employe);
+
+                $groupe->setDepartement($departement);
+
+                $manager->persist($groupe);
+                $manager->persist($departement);
+            }
+
+            $manager->persist($employe);
+            $manager->persist($user);
+            $manager->persist($status);
+            $manager->persist($contrat);
+            $manager->persist($batiment);
+            $manager->persist($localisation);
+            $manager->persist($telephone);
+        }
+
+
+        $manager->flush();
+
     }
 }

@@ -25,7 +25,8 @@
         "symfony/stimulus-bundle": "^2.16",
         "symfony/twig-bundle": "7.0.*",
         "symfony/webpack-encore-bundle": "^2.1",
-        "symfony/yaml": "7.0.*"
+        "symfony/yaml": "7.0.*",
+      "ext-http": "*"
     },
     "config": {
         "allow-plugins": {
