@@ -10,11 +10,25 @@
     {{ form(formFiltre) }}
 
     <h2>Trombinoscope : </h2>
+    {% set i = 0 %}
     {% for employe in employes %}
-        <div class="employe">
-            <img src="{{ asset('images/' ~ employe.photo) }}" alt="{{ employe.nom }}" />
-            <p>{{ employe.nom }} {{ employe.prenom }}</p>
+        {% if i % 4 == 0 %}
+            <div class="row">
+        {% endif %}
+        <div class="col-sm">
+        <div class="card" style="width: 18rem;">
+            <img class="card-img-top" src="{{ employe.photo }}" alt="{{ employe.nom }} image non trouvé">
+            <div class="card-body">
+                <h5 class="card-title">{{ employe.nom }} {{ employe.prenom }}</h5>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+            </div>
         </div>
+        </div>
+        {% if i % 4 == 3 %}
+            </div>
+        {% endif %}
+        {% set i = i + 1 %}
     {% endfor %}
 </div>
 {% endblock %}
