@@ -25,6 +25,9 @@ class Localisations
     #[ORM\ManyToMany(targetEntity: Employe::class, mappedBy: 'localisation')]
     private Collection $employes;
 
+    #[ORM\OneToOne(mappedBy: 'localisation', cascade: ['persist', 'remove'])]
+    private ?Requetes $requetes = null;
+
     public function __construct()
     {
         $this->employes = new ArrayCollection();
@@ -82,6 +85,28 @@ class Localisations
         if ($this->employes->removeElement($employe)) {
             $employe->removeLocalisation($this);
         }
+
+        return $this;
+    }
+
+    public function getRequetes(): ?Requetes
+    {
+        return $this->requetes;
+    }
+
+    public function setRequetes(?Requetes $requetes): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($requetes === null && $this->requetes !== null) {
+            $this->requetes->setLocalisation(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($requetes !== null && $requetes->getLocalisation() !== $this) {
+            $requetes->setLocalisation($this);
+        }
+
+        $this->requetes = $requetes;
 
         return $this;
     }

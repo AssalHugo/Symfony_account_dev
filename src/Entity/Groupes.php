@@ -40,11 +40,15 @@ class Groupes
     #[ORM\ManyToOne(inversedBy: 'groupes')]
     private ?Departement $departement = null;
 
+    #[ORM\OneToMany(targetEntity: Requetes::class, mappedBy: 'groupe_principal')]
+    private Collection $requetes;
+
     public function __construct()
     {
         $this->adjoints = new ArrayCollection();
         $this->employe_grp_secondaires = new ArrayCollection();
         $this->employes_grp_principaux = new ArrayCollection();
+        $this->requetes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -189,6 +193,36 @@ class Groupes
     public function setDepartement(?Departement $departement): static
     {
         $this->departement = $departement;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Requetes>
+     */
+    public function getRequetes(): Collection
+    {
+        return $this->requetes;
+    }
+
+    public function addRequete(Requetes $requete): static
+    {
+        if (!$this->requetes->contains($requete)) {
+            $this->requetes->add($requete);
+            $requete->setGroupePrincipal($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRequete(Requetes $requete): static
+    {
+        if ($this->requetes->removeElement($requete)) {
+            // set the owning side to null (unless already changed)
+            if ($requete->getGroupePrincipal() === $this) {
+                $requete->setGroupePrincipal(null);
+            }
+        }
 
         return $this;
     }

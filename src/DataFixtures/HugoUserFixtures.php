@@ -128,6 +128,7 @@ class HugoUserFixtures extends Fixture
         $departement->setResponsable($employe);
 
         $groupe2->setDepartement($departement);
+        $groupe->setDepartement($departement);
 
         //On persiste les entités
         $manager->persist($user);

@@ -12,9 +12,18 @@ class TrombinoscopeType extends AbstractType
     {
         //Aucun des champs n'est obligatoire
         $builder
-            ->add('departement', null, ['required' => false])
-            ->add('groupe', null, ['required' => false])
-            ->add('statut', null, ['required' => false])
+            ->add('departement', null, [
+                'required' => false,
+                'label' => 'Département : '
+            ])
+            ->add('groupe', null, [
+                'required' => false,
+                'label' => 'Groupe : '
+            ])
+            ->add('statut', null, [
+                'required' => false,
+                'label' => 'Statut : '
+            ])
         ;
     }
 }

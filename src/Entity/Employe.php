@@ -74,6 +74,9 @@ class Employe
     #[ORM\OneToOne(mappedBy: 'responsable', cascade: ['persist', 'remove'])]
     private ?Departement $responsable_departement = null;
 
+    #[ORM\OneToMany(targetEntity: Requetes::class, mappedBy: 'referent')]
+    private Collection $referentDe;
+
 
     public function __construct()
     {
@@ -82,6 +85,7 @@ class Employe
         $this->telephones = new ArrayCollection();
         $this->adjoint_de = new ArrayCollection();
         $this->groupes_secondaires = new ArrayCollection();
+        $this->referentDe = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -409,6 +413,36 @@ class Employe
         }
 
         $this->responsable_departement = $responsable_departement;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Requetes>
+     */
+    public function getReferentDe(): Collection
+    {
+        return $this->referentDe;
+    }
+
+    public function addReferentDe(Requetes $referentDe): static
+    {
+        if (!$this->referentDe->contains($referentDe)) {
+            $this->referentDe->add($referentDe);
+            $referentDe->setReferent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReferentDe(Requetes $referentDe): static
+    {
+        if ($this->referentDe->removeElement($referentDe)) {
+            // set the owning side to null (unless already changed)
+            if ($referentDe->getReferent() === $this) {
+                $referentDe->setReferent(null);
+            }
+        }
 
         return $this;
     }

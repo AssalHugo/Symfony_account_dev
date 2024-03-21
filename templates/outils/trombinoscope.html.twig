@@ -2,11 +2,12 @@
 {% block body %}
 <div class="container">
     <h2>Infos : </h2>
-    <p>Utilisateurs : {{ nbEmployesAffiches }}/{{ nbEmployes }}</p>
-    <p>Groupes : {{ nbGroupesAffiches }}/{{ nbGroupes }}</p>
-    <p>Departements : {{ nbDepartementsAffiches }}/{{ nbDepartements }}</p>
+    <h6>Utilisateurs : <strong>{{ nbEmployesAffiches }}/{{ nbEmployes }}</strong></h6>
+    <h6>Groupes : <strong>{{ nbGroupesAffiches }}/{{ nbGroupes }}</strong></h6>
+    <h6>Departements : <strong>{{ nbDepartementsAffiches }}/{{ nbDepartements }}</strong></h6>
 
     <h2>Filtre : </h2>
+    <a href="{{ path('trombinoscope') }}" class="btn btn-primary">Réinitialiser les filtres</a>
     {{ form(formFiltre) }}
 
     <h2>Trombinoscope : </h2>
@@ -20,13 +21,23 @@
             <img class="card-img-top" src="{{ employe.photo }}" alt="{{ employe.nom }} image non trouvé">
             <div class="card-body">
                 <h5 class="card-title">{{ employe.nom }} {{ employe.prenom }}</h5>
-                <p class="card-text">Statut :  <a href="?statut={{ employe.contrats| last .status.id }}">{{ employe.contrats| last .status.type }}</a></p>
-                <p class="card-text">Groupes :
+                <p class="card-text">Statut :  <a class="link-info" href="?statut={{ employe.contrats| last .status.id }}">{{ employe.contrats| last .status.type }}</a></p>
+                <p class="card-text">Groupe(s) :
                     {% if employe.groupeprincipal %}
-                        <a href="?groupe={{ employe.groupeprincipal.id }}">{{ employe.groupeprincipal.nom }}</a>
+                        <a class="link-info" href="?groupe={{ employe.groupeprincipal.id }}">{{ employe.groupeprincipal.nom }}</a>
                     {% endif %}
                     {% for groupe in employe.groupessecondaires %}
-                        {% if not loop.last - 1 %}, {% endif %}<a href="?groupe={{ groupe.id }}">{{ groupe.nom }}</a>
+                        {% if not loop.last - 1 %}, {% endif %}<a class="link-info" href="?groupe={{ groupe.id }}">{{ groupe.nom }}</a>
+                    {% endfor %}
+                </p>
+                <p class="card-text">Departement(s) :
+                    {% if employe.groupeprincipal.departement %}
+                        <a class="link-info" href="?departement={{ employe.groupeprincipal.departement.id }}">{{ employe.groupeprincipal.departement.nom }}</a>
+                    {% endif %}
+                    {% for groupe in employe.groupessecondaires %}
+                        {% if groupe.departement and groupe.departement.id != employe.groupeprincipal.departement.id %}
+                            {% if not loop.last - 1 %}, {% endif %}<a class="link-info" href="?departement={{ groupe.departement.id }}">{{ groupe.departement.nom }}</a>
+                        {% endif %}
                     {% endfor %}
                 </p>
             </div>

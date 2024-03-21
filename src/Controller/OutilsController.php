@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Departement;
 use App\Entity\Employe;
 use App\Entity\Groupes;
+use App\Entity\Requetes;
+use App\Form\RequeteType;
 use App\Form\TrombinoscopeType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -123,6 +125,23 @@ class OutilsController extends AbstractController
             'nbEmployesAffiches' => $nbEmployesAffiches,
             'nbDepartementsAffiches' => $nbDepartementsAffiches,
             'nbGroupesAffiches' => $nbGroupesAffiches
+        ]);
+    }
+
+
+    #[Route('/outils/formulaire', name: 'formulaireDemandeCompte')]
+    public function formulaireDemandeCompte(): Response {
+
+        $requete = new Requetes();
+
+        $formDemandeCompte = $this->createForm(RequeteType::class);
+
+        $formDemandeCompte->add('valider', SubmitType::class, ['label' => 'Valider']);
+
+
+
+        return $this->render('outils/formulaireDemandeCompte.html.twig', [
+            'formDemandeCompte' => $formDemandeCompte->createView()
         ]);
     }
 }
