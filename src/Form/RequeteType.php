@@ -9,6 +9,7 @@ use App\Entity\Localisations;
 use App\Entity\Requetes;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -17,26 +18,29 @@ class RequeteType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('nom')
             ->add('prenom')
+            ->add('nom')
             ->add('mail')
-            ->add('commentaire')
+            //On ajoute les champs statut, date arrivée et date départ dans le formulaire qui vont créer un Contrat
+            ->add('contrat', ContratType::class, [
+                'label' => ' '
+            ]) //On appelle le formulaire ContratType deja créé
             ->add('groupe_principal', EntityType::class, [
                 'class' => Groupes::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
             ])
-            ->add('localisation', EntityType::class, [
-                'class' => Localisations::class,
-                'choice_label' => 'id',
-            ])
+            ->add('localisation', LocalisationType::class, [
+                'label' => ' '
+            ])//On appelle le formulaire LocalisationType deja créé
             ->add('referent', EntityType::class, [
                 'class' => Employe::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
             ])
             ->add('etat_requete', EntityType::class, [
                 'class' => EtatsRequetes::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
             ])
+            ->add('commentaire', TextareaType::class)
         ;
     }
 

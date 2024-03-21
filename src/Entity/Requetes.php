@@ -37,6 +37,10 @@ class Requetes
     #[ORM\ManyToOne(inversedBy: 'requetes')]
     private ?EtatsRequetes $etat_requete = null;
 
+    #[ORM\ManyToOne(inversedBy: 'requetes')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Contrats $contrat = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -134,6 +138,18 @@ class Requetes
     public function setEtatRequete(?EtatsRequetes $etat_requete): static
     {
         $this->etat_requete = $etat_requete;
+
+        return $this;
+    }
+
+    public function getContrat(): ?Contrats
+    {
+        return $this->contrat;
+    }
+
+    public function setContrat(?Contrats $contrat): static
+    {
+        $this->contrat = $contrat;
 
         return $this;
     }

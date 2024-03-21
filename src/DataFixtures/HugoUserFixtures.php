@@ -195,12 +195,18 @@ class HugoUserFixtures extends Fixture
                 $contrat->setStatus($status5);
             }
 
-            $batiment = new Batiments();
-            $batiment->setNom("4");
-
+            //On crée une localisation différente aléatoirement
             $localisation = new Localisations();
-            $localisation->setBureau("bureau 1");
-            $localisation->setBatiment($batiment);
+            $localisation->setBureau("bureau" . $i);
+
+            //On attribue un batiment différent aléatoirement
+            if ($i % 2 == 0) {
+                $localisation->setBatiment($batiment);
+            } else if ($i % 3 == 0) {
+                $localisation->setBatiment($batiment2);
+            } else {
+                $localisation->setBatiment($batiment3);
+            }
 
             $employe->addLocalisation($localisation);
 

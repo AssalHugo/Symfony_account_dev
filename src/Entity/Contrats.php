@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ContratsRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Status;
@@ -34,6 +36,14 @@ class Contrats
 
     #[ORM\ManyToOne(inversedBy: 'contrats')]
     private ?Employe $employe = null;
+
+    #[ORM\OneToMany(targetEntity: Requetes::class, mappedBy: 'contrat')]
+    private Collection $requetes;
+
+    public function __construct()
+    {
+        $this->requetes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -108,6 +118,36 @@ class Contrats
     public function setStatus(?Status $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Requetes>
+     */
+    public function getRequetes(): Collection
+    {
+        return $this->requetes;
+    }
+
+    public function addRequete(Requetes $requete): static
+    {
+        if (!$this->requetes->contains($requete)) {
+            $this->requetes->add($requete);
+            $requete->setContrat($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRequete(Requetes $requete): static
+    {
+        if ($this->requetes->removeElement($requete)) {
+            // set the owning side to null (unless already changed)
+            if ($requete->getContrat() === $this) {
+                $requete->setContrat(null);
+            }
+        }
 
         return $this;
     }
