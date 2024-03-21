@@ -1,16 +1,16 @@
 {% extends 'base.html.twig' %}
 {% block body %}
 <div class="container">
-    <h2>Infos : </h2>
+    <h3>Infos : </h3>
     <h6>Utilisateurs : <strong>{{ nbEmployesAffiches }}/{{ nbEmployes }}</strong></h6>
     <h6>Groupes : <strong>{{ nbGroupesAffiches }}/{{ nbGroupes }}</strong></h6>
     <h6>Departements : <strong>{{ nbDepartementsAffiches }}/{{ nbDepartements }}</strong></h6>
 
-    <h2>Filtre : </h2>
+    <h3>Filtre : </h3>
     <a href="{{ path('trombinoscope') }}" class="btn btn-primary">Réinitialiser les filtres</a>
     {{ form(formFiltre) }}
 
-    <h2>Trombinoscope : </h2>
+    <h3>Trombinoscope : </h3>
     {% set i = 0 %}
     {% for employe in employes %}
         {% if i % 5 == 0 %}

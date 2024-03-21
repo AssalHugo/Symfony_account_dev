@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Departement;
 use App\Entity\Employe;
+use App\Entity\EtatsRequetes;
 use App\Entity\Groupes;
 use App\Entity\Requetes;
 use App\Form\RequeteType;
@@ -130,15 +131,34 @@ class OutilsController extends AbstractController
 
 
     #[Route('/outils/formulaire', name: 'formulaireDemandeCompte')]
-    public function formulaireDemandeCompte(): Response {
+    public function formulaireDemandeCompte(Request $request, EntityManagerInterface $entityManager): Response {
 
         $requete = new Requetes();
 
-        $formDemandeCompte = $this->createForm(RequeteType::class);
+        $formDemandeCompte = $this->createForm(RequeteType::class, $requete);
 
         $formDemandeCompte->add('valider', SubmitType::class, ['label' => 'Valider']);
 
+        $formDemandeCompte->handleRequest($request);
 
+        if ($formDemandeCompte->isSubmitted() && $formDemandeCompte->isValid()) {
+
+            $employe = $this->getUser()->getEmploye();
+            //On donne le référent qui est l'utilisateur connecté
+            $requete->setReferent($employe);
+            //On donne l'état de la requête qui est en attente
+            $etatRequete = $entityManager->getRepository(EtatsRequetes::class)->findOneBy(['etat' => 'Demandé']);
+            $requete->setEtatRequete($etatRequete);
+
+            $entityManager->persist($requete);
+            $entityManager->flush();
+
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', 'La demande a bien été envoyée, aux RH pour validation.');
+            $session->set('statut', 'success');
+
+            return $this->redirectToRoute('formulaireDemandeCompte');
+        }
 
         return $this->render('outils/formulaireDemandeCompte.html.twig', [
             'formDemandeCompte' => $formDemandeCompte->createView()

@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+
+        <h3>Liste des demandes de compte</h3>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Prénom</th>
+                    <th>Nom</th>
+                    <th>Date de début</th>
+                    <th>Date de fin</th>
+                    <th>Mail</th>
+                    <th>Groupe</th>
+                    <th>Bureau</th>
+                    <th>Batiment</th>
+                    <th>Téléphone</th>
+                    <th>Commentaire</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for demande in demandes %}
+                    <tr>
+                        <td>{{ demande.prenom }}</td>
+                        <td>{{ demande.nom }}</td>
+                        <td>{{ demande.contrat.datedebut|date('d/m/Y') }}</td>
+                        <td>{{ demande.contrat.datefin|date('d/m/Y') }}</td>
+                        <td>{{ demande.mail }}</td>
+                        <td>{{ demande.groupePrincipal.nom }}</td>
+                        <td>{{ demande.localisation.bureau }}</td>
+                        <td>{{ demande.localisation.batiment.nom }}</td>
+                        <td>{{ demande.telephone }}</td>
+                        <td>{{ demande.commentaire }}</td>
+                        <td>
+                            <a href="" class="btn btn-success">Valider</a>
+                            <a href="" class="btn btn-danger">Refuser</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

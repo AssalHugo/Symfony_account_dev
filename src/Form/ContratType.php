@@ -17,13 +17,16 @@ class ContratType extends AbstractType
         $builder
             ->add('status', EntityType::class, [
                 'class' => Status::class,
-                'choice_label' => 'id',
+                'choice_label' => 'type',
+                'label' => 'Statut : '
             ])
             ->add('date_debut', null, [
                 'widget' => 'single_text',
+                'label' => 'Date de début : '
             ])
             ->add('date_fin', null, [
                 'widget' => 'single_text',
+                'label' => 'Date de fin : '
             ])
         ;
     }

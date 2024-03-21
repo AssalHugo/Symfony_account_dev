@@ -58,6 +58,8 @@
                 <h5 class="text-left">Contrat Fin : {{ contrat.datefin | date('d-m-Y')}}</h5>
             </div>
             {% endif %}
+        </div>
+        <div class="row">
             <div class="col-sm">
                 <div {{ stimulus_controller('modal') }}>
                     <button class="btn btn-primary my-2" data-action="modal#openModal">Historique des contrats</button>

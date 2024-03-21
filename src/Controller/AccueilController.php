@@ -21,6 +21,6 @@ class AccueilController extends AbstractController
 
         $security->login($user, CustomAuthenticator::class);
 
-        return $this->render('accueil/index.html.twig');
+        return $this->render('accueil/demandesCompte.html.twig');
     }
 }

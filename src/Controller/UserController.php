@@ -226,7 +226,7 @@ class UserController extends AbstractController
 
                 $orcid = $employe->getOrcid();
 
-                $q = $orcid;
+                $q = "authOrcidIdExt_id:" . $orcid;
             }
             else {//Si aucune cases n'est cochés on affiche la page
 

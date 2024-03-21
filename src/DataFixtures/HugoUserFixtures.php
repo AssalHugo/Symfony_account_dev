@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Departement;
+use App\Entity\EtatsRequetes;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use App\Entity\Employe;
@@ -246,6 +247,29 @@ class HugoUserFixtures extends Fixture
             $manager->persist($localisation);
             $manager->persist($telephone);
         }
+
+        //On initialise les différentes états de requêtes
+        $etat1 = new EtatsRequetes();
+        $etat1->setEtat("Demandé");
+
+        $etat2 = new EtatsRequetes();
+        $etat2->setEtat("Informations manquantes");
+
+        $etat3 = new EtatsRequetes();
+        $etat3->setEtat("Validé par admin");
+
+        $etat4 = new EtatsRequetes();
+        $etat4->setEtat("Refusé");
+
+        $etat5 = new EtatsRequetes();
+        $etat5->setEtat("Validé par RH");
+
+
+        $manager->persist($etat1);
+        $manager->persist($etat2);
+        $manager->persist($etat3);
+        $manager->persist($etat4);
+        $manager->persist($etat5);
 
 
         $manager->flush();

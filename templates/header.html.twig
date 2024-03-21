@@ -36,7 +36,15 @@
             </div>
         </li>
         <li><a href="#" class="nav-link px-2 link-dark">Ressources</a></li>
-        <li><a href="#" class="nav-link px-2 link-dark">R.H.</a></li>
+        <li>
+            <div class="dropdown">
+                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-mdb-toggle="dropdown" aria-expanded="false"> RH </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <li><a class="dropdown-item" href="#">Liste des groupes</a></li>
+                    <li><a class="dropdown-item" href="{{ path('listeDemandesComptes') }}">Liste des demandes de compte</a></li>
+                </ul>
+            </div>
+        </li>
         <li><a href="#" class="nav-link px-2 link-dark">Admin</a></li>
       </ul>
 
