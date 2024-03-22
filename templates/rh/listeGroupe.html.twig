@@ -24,6 +24,7 @@
             {{ form_label(form.submit, 'Ajouter un employé au groupe : ') }}
             {{ form_widget(form.submit, {'attr': {'class': 'btn btn-primary'}}) }}
         </div>
+        {{ form_end(form) }}
         <br>
         <table class="table">
             <thead>
@@ -57,7 +58,12 @@
                     <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
                 </tr>
             {% endfor %}
+                <tr>
+
+                    <td>{{ form(formAjoutEmploye) }}</td>
+                </tr>
             </tbody>
         </table>
+
     </div>
 {% endblock %}

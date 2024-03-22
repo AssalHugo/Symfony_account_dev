@@ -3,12 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\Departement;
+use App\Entity\Employe;
 use App\Entity\EtatsRequetes;
 use App\Entity\Groupes;
 use App\Entity\Requetes;
+use App\Form\AjoutEmployeType;
 use App\Form\ResponsableType;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -120,9 +124,60 @@ class RhController extends AbstractController
             return $this->redirectToRoute('listeGroupe', ['id' => $id]);
         }
 
+        //Formulaire ajout d'un employé dans le groupe
+        //On récupère les employés qui ne sont pas dans le groupe
+        $employeRepo = $entityManager->getRepository(Employe::class);
+
+        $employes = $employeRepo->findAll();
+
+        $employesGroupe = $groupe->getEmployesGrpPrincipaux()->toArray();
+
+        $employesNonGroupe = array_udiff($employes, $employesGroupe,
+            function ($obj_a, $obj_b) {
+                return $obj_a->getId() - $obj_b->getId();
+            }
+        );
+
+        //On met dans le formulaire les nom des employés
+        $formAjoutEmploye = $this->createFormBuilder()
+            ->add('groupesSecondaires', EntityType::class, [
+                'choices' => $employesNonGroupe,
+                'class' => Employe::class,
+                'choice_label' => function($employe) {
+                    return $employe->getPrenom() . ' ' . $employe->getNom();
+                },
+                'label' => 'Ajouter un employé :',
+            ])
+            ->add('submit', SubmitType::class, [
+                'label' => 'Ajouter',
+            ])
+            ->getForm();
+
+        $formAjoutEmploye->handleRequest($request);
+
+        if ($formAjoutEmploye->isSubmitted() && $formAjoutEmploye->isValid()) {
+            $data = $formAjoutEmploye->getData();
+
+            $employe = $data['groupesSecondaires'];
+
+            $employe->addGroupesSecondaire($groupe);
+
+            $entityManager->persist($employe);
+            $entityManager->flush();
+
+            //On crée un message flash pour informer l'utilisateur que l'employé a bien été ajouté
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "L'employé a bien été ajouté.");
+            $session->set('statut', 'success');
+
+            return $this->redirectToRoute('listeGroupe', ['id' => $id]);
+        }
+
+
         return $this->render('rh/listeGroupe.html.twig', [
             'groupe' => $groupe,
             'form' => $form->createView(),
+            'formAjoutEmploye' => $formAjoutEmploye->createView(),
         ]);
     }
 }
