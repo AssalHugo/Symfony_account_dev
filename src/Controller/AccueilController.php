@@ -16,7 +16,6 @@ class AccueilController extends AbstractController
     #[Route('', name: 'accueil')]
     public function index(EntityManagerInterface $entityManager, Security $security): Response
     {
-
         return $this->render('accueil/index.html.twig');
     }
 }

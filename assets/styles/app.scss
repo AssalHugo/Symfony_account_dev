@@ -8,3 +8,7 @@ $headings-color: rgb(7,22,73);
 .dropdown>.dropdown-toggle:active {
     pointer-events: none;
 }
+
+.scrollable {
+  max-height: 150px;
+}

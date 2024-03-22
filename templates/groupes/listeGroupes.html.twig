@@ -8,14 +8,17 @@
     {% for groupe in groupes %}
 
         <h3>Groupe : {{ groupe.nom }}</h3>
+        <br>
         <h5>Responsable :  </h5>
         <p>{{ groupe.responsable.prenom }} {{ groupe.responsable.nom }}</p>
+        <br>
         <h5>Adjoints :</h5>
         <ul>
             {% for adjoint in groupe.adjoints %}
                 <li>{{ adjoint.prenom }} {{ adjoint.nom }}</li>
             {% endfor %}
         </ul>
+        <br>
         <table class="table">
             <thead>
             <tr>
@@ -35,7 +38,7 @@
                     <td>{{ employe.contrats| last .datedebut|date('d/m/Y') }}</td>
                     <td>{{ employe.contrats| last .datefin|date('d/m/Y') }}</td>
                     <td>{{ employe.contrats| last .status.type }}</td>
-                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer</a></td>
+                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
                 </tr>
             {% endfor %}
             {% for employeSec in groupe.employegrpsecondaires %}
@@ -45,7 +48,7 @@
                     <td>{{ employeSec.contrats| last .datedebut|date('d/m/Y') }}</td>
                     <td>{{ employeSec.contrats| last .datefin|date('d/m/Y') }}</td>
                     <td>{{ employeSec.contrats| last .status.type }}</td>
-                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer</a></td>
+                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
                 </tr>
             {% endfor %}
             </tbody>

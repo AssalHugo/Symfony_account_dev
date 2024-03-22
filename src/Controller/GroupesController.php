@@ -117,7 +117,7 @@ class GroupesController extends AbstractController
         //On ajoute le groupe principal à la liste des groupes secondaires
         $groupes[] = $employe->getGroupePrincipal();
 
-        return $this->render('groupes/listeUtilisateurs.html.twig', [
+        return $this->render('groupes/listeGroupes.html.twig', [
             'groupes' => $groupes,
         ]);
     }

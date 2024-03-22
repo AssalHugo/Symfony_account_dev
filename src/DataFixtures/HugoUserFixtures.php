@@ -225,7 +225,7 @@ class HugoUserFixtures extends Fixture
                 $groupe->setStatut("statut");
                 $groupe->setResponsable($employe);
 
-                if ($i % 2 == 0) {
+                if ($i % 5 == 0) {
                     $departement = new Departement();
                     $departement->setNom("Departement" . $i);
                     $departement->setAcronyme("Dep" . $i);

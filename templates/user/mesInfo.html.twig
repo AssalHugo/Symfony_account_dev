@@ -2,6 +2,8 @@
 
 {% block body %}
     <div class="container">
+        <h1 class="text-center">Mes informations</h1>
+        <br>
         <div class="row">
             <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png" class="img-thumbnail w-25" alt="Photo inconnue">
         </div>    
@@ -67,6 +69,7 @@
                 </div>
             </div>
         </div>
+        <br>
         <div class="row">
             <h5 class="text-left">Localisations : </h5>
             <div class="col-sm">
@@ -74,7 +77,7 @@
                     {% set i = 1 %}
                     {% for localisation in localisations %}
                         <li class="list-group-item">
-                            Localisation {{i}} : <a class="btn btn-warning my-2" href="{{path('removeLocalisation', {id: localisation.id})}}" >&#128465;&#65039;</a>
+                            Localisation {{i}} : <a class="btn btn-danger my-2" href="{{path('removeLocalisation', {id: localisation.id})}}" >&#128465;&#65039;</a>
                             </br>
                             <b>&nbsp;&nbsp;&nbsp;Batiment : {{localisation.batiment.nom}}</b>
                             </br>
@@ -88,6 +91,7 @@
                 </ul>    
            </div>
         </div>
+        <br>
         <div class="row">
             <h5 class="text-left">Téléphones : </h5>
             <div class="col-sm">
@@ -95,7 +99,7 @@
                     {% set i = 1 %}
                     {% for telephone in telephones %}
                         <li class="list-group-item">
-                            Telephone {{i}} : <a class="btn btn-warning my-2" href="{{path('removeTelephone', {id: telephone.id})}}" >&#128465;&#65039;</a>
+                            Telephone {{i}} : <a class="btn btn-danger my-2" href="{{path('removeTelephone', {id: telephone.id})}}" >&#128465;&#65039;</a>
                             </br>
                             <b>&nbsp;&nbsp;&nbsp;Numéro de téléphone : {{telephone.numero}}</b>
                         </li>
@@ -107,6 +111,7 @@
                 </ul>
            </div>
         </div>
+        <br>
         <div class="row">
             <h5 class="text-left">Contacter le support : </h5>
             <div class="col-sm">

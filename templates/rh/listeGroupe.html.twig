@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="text-center">Liste des utilisateurs du groupe : {{ groupe.nom }}</h1>
+        <br>
+        <br>
+
+        <h3>Groupe : {{ groupe.nom }}</h3>
+        <br>
+        {{ form_start(form) }}
+        <div class="form-group">
+            {{ form_label(form.responsable, 'Responsable : ') }}
+            {{ form_widget(form.responsable) }}
+            {{ form_errors(form.responsable) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(form.adjoints, 'Adjoint(s) : ') }}
+            {{ form_widget(form.adjoints, {'attr': {'class': 'overflow-auto scrollable'}}) }}
+            {{ form_errors(form.adjoints) }}
+        </div>
+        <br>
+        <div class="form-group">
+            {{ form_label(form.submit, 'Ajouter un employé au groupe : ') }}
+            {{ form_widget(form.submit, {'attr': {'class': 'btn btn-primary'}}) }}
+        </div>
+        <br>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Prénom</th>
+                <th scope="col">Nom</th>
+                <th scope="col">Date début contrat</th>
+                <th scope="col">Date fin contrat</th>
+                <th scope="col">Statut</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for employe in groupe.employesgrpprincipaux %}
+                <tr>
+                    <td>{{ employe.prenom }}</td>
+                    <td>{{ employe.nom }}</td>
+                    <td>{{ employe.contrats| last .datedebut|date('d/m/Y') }}</td>
+                    <td>{{ employe.contrats| last .datefin|date('d/m/Y') }}</td>
+                    <td>{{ employe.contrats| last .status.type }}</td>
+                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
+                </tr>
+            {% endfor %}
+            {% for employeSec in groupe.employegrpsecondaires %}
+                <tr>
+                    <td>{{ employeSec.prenom }}</td>
+                    <td>{{ employeSec.nom }}</td>
+                    <td>{{ employeSec.contrats| last .datedebut|date('d/m/Y') }}</td>
+                    <td>{{ employeSec.contrats| last .datefin|date('d/m/Y') }}</td>
+                    <td>{{ employeSec.contrats| last .status.type }}</td>
+                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

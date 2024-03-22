@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="text-center">Liste départements</h1>
+        <br>
+        {% for departement in departements %}
+            <div class="card">
+                <div class="card-header">
+                    <h2>{{ departement.nom }} ({{ departement.acronyme }})</h2>
+                </div>
+                <div class="card-body">
+                    {% for groupe in departement.groupes %}
+                        <a href="{{ path('listeGroupe', {'id': groupe.id}) }}" class="btn btn-primary">{{ groupe.nom }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            <br>
+        {% endfor %}
+    </div>
+{% endblock %}
