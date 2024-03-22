@@ -21,6 +21,21 @@ class RequetesRepository extends ServiceEntityRepository
         parent::__construct($registry, Requetes::class);
     }
 
+    /**
+     * Fonction qui permet de récupérer les demandes de comptes en fonction de l'état de la requête
+     * @param $etat
+     * @return array
+     */
+    public function findByEtatRequete($etat): array
+    {
+        return $this->createQueryBuilder('r')
+            ->join('r.etat_requete', 'e')
+            ->Where('e.etat = :etat')
+            ->setParameter('etat', $etat)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Requetes[] Returns an array of Requetes objects
     //     */

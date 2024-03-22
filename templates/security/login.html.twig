@@ -6,7 +6,7 @@
 <div class="container">
 <form method="post">
     {% if error %}
-        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+        <div class="alert alert-danger">Identifiant et/ou mot de passe invalides.</div>
     {% endif %}
 
     {% if app.user %}

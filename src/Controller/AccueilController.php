@@ -17,10 +17,6 @@ class AccueilController extends AbstractController
     public function index(EntityManagerInterface $entityManager, Security $security): Response
     {
 
-        $user = $entityManager->getRepository(User::class)->findAll()[0];
-
-        $security->login($user, CustomAuthenticator::class);
-
-        return $this->render('accueil/demandesCompte.html.twig');
+        return $this->render('accueil/index.html.twig');
     }
 }

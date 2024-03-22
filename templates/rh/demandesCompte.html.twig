@@ -19,7 +19,6 @@
                     <th>Téléphone</th>
                     <th>Commentaire</th>
                     <th></th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -35,10 +34,12 @@
                         <td>{{ demande.localisation.batiment.nom }}</td>
                         <td>{{ demande.telephone }}</td>
                         <td>{{ demande.commentaire }}</td>
+                        {% block validerSupprimer %}
                         <td>
-                            <a href="" class="btn btn-success">Valider</a>
-                            <a href="" class="btn btn-danger">Refuser</a>
+                            <a href="{{ path('validerDemandeCompte', {'id': demande.id}) }}" class="btn btn-success">Valider</a>
+                            <a href="{{ path('refuserDemandeCompte', {'id': demande.id}) }}" class="btn btn-danger">Refuser</a>
                         </td>
+                        {% endblock %}
                     </tr>
                 {% endfor %}
             </tbody>

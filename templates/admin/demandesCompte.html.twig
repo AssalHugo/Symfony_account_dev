@@ -1,0 +1,7 @@
+{% extends 'rh/demandesCompte.html.twig' %}
+{% block validerSupprimer %}
+    <td>
+        <a href="{{ path('validerDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-success">Valider</a>
+        <a href="{{ path('refuserDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-danger">Refuser</a>
+    </td>
+{% endblock %}
