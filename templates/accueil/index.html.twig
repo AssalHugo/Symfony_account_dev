@@ -4,12 +4,16 @@
   <section class="py-5 text-center container">
     <div class="row py-lg-5">
       <div class="col-lg-6 col-md-8 mx-auto">
-        <h1 class="fw-light">Bienvenue sur le Portail de Gestion de comptes.</h1>
         {% if not app.user %}
-        <p class="lead text-muted">Veuillez vous connecter afin de poursuivre.</p>
-        <p>
-          <a href="{{path('app_login')}}" class="btn btn-primary my-2">Se connecter</a>
-        </p>
+          <h1 class="fw-light">Bienvenue sur le portail de gestion de comptes.</h1>
+          <p class="lead text-muted">Veuillez vous connecter afin de poursuivre.</p>
+          <p>
+            <a href="{{path('app_login')}}" class="btn btn-primary my-2">Se connecter</a>
+          </p>
+        {% endif %}
+        {% if app.user %}
+          <h1 class="fw-light">Bienvenue, {{ app.user.employe.prenom }} {{ app.user.employe.nom }}</h1>
+          <p class="lead text-muted">Vous êtes connecté.</p>
         {% endif %}
       </div>
     </div>
