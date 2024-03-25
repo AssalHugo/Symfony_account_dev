@@ -310,7 +310,11 @@ class UserController extends AbstractController
 
             $tabResponse = $response->toArray();
 
-            $tabResponse = $tabResponse["response"]["docs"];
+            if (isset($tabResponse["response"]["docs"]))
+                $tabResponse = $tabResponse["response"]["docs"];
+            else
+                $tabResponse[0] = ["label_s" => "Aucune publication trouvée", "uri_s" => "https://api.archives-ouvertes.fr/search/?fq=(+{$q}+)" ];
+
 
             foreach ($tabResponse as $key){
                 if (isset($key["label_s"]) && isset($key["uri_s"])){

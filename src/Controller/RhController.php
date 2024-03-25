@@ -98,8 +98,10 @@ class RhController extends AbstractController
 
     #[Route('/rh/listeGroupe/{id}', name: 'listeGroupe')]
     public function listeGroupe($id, EntityManagerInterface $entityManager, Request $request): Response {
+
         //On récupère le departement
         $groupesRepo = $entityManager->getRepository(Groupes::class);
+
 
         $groupe = $groupesRepo->find($id);
 
@@ -109,6 +111,8 @@ class RhController extends AbstractController
         $form->add('submit', SubmitType::class, [
             'label' => 'Modifier',
         ]);
+
+
 
         $form->handleRequest($request);
 

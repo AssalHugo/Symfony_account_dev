@@ -59,8 +59,8 @@ class Employe
     #[ORM\OneToMany(targetEntity: Telephones::class, mappedBy: 'employe')]
     private Collection $telephones;
 
-    #[ORM\OneToOne(mappedBy: 'responsable', cascade: ['persist', 'remove'])]
-    private ?Groupes $responsable_de = null;
+    #[ORM\OneToMany(targetEntity: Groupes::class, mappedBy: 'responsable')]
+    private Collection $responsable_de;
 
     #[ORM\ManyToMany(targetEntity: Groupes::class, mappedBy: 'adjoints')]
     private Collection $adjoint_de;
@@ -86,6 +86,7 @@ class Employe
         $this->adjoint_de = new ArrayCollection();
         $this->groupes_secondaires = new ArrayCollection();
         $this->referentDe = new ArrayCollection();
+        $this->responsable_de = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -315,23 +316,6 @@ class Employe
         return $this;
     }
 
-    public function getReponsableDe(): ?Groupes
-    {
-        return $this->responsable_de;
-    }
-
-    public function setReponsableDe(Groupes $reponsable_de): static
-    {
-        // set the owning side of the relation if necessary
-        if ($reponsable_de->getResponsable() !== $this) {
-            $reponsable_de->setResponsable($this);
-        }
-
-        $this->responsable_de = $reponsable_de;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Groupes>
      */
@@ -447,25 +431,34 @@ class Employe
         return $this;
     }
 
-    public function getResponsableDe(): ?Groupes
+    /**
+     * @return Collection<int, Groupes>
+     */
+    public function getResponsableDe(): Collection
     {
         return $this->responsable_de;
     }
 
-    public function setResponsableDe(?Groupes $responsable_de): static
+    public function addResponsableDe(Groupes $responsableDe): static
     {
-        // unset the owning side of the relation if necessary
-        if ($responsable_de === null && $this->responsable_de !== null) {
-            $this->responsable_de->setResponsable(null);
+        if (!$this->responsable_de->contains($responsableDe)) {
+            $this->responsable_de->add($responsableDe);
+            $responsableDe->setResponsable($this);
         }
-
-        // set the owning side of the relation if necessary
-        if ($responsable_de !== null && $responsable_de->getResponsable() !== $this) {
-            $responsable_de->setResponsable($this);
-        }
-
-        $this->responsable_de = $responsable_de;
 
         return $this;
     }
+
+    public function removeResponsableDe(Groupes $responsableDe): static
+    {
+        if ($this->responsable_de->removeElement($responsableDe)) {
+            // set the owning side to null (unless already changed)
+            if ($responsableDe->getResponsable() === $this) {
+                $responsableDe->setResponsable(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

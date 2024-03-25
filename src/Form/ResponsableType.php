@@ -21,13 +21,8 @@ class ResponsableType extends AbstractType
                 'choice_label' => function(Employe $employe) {
                     return $employe->getPrenom() . ' ' . $employe->getNom();
                 },
-                'query_builder' => function (EntityRepository $er) use ($options) {
-                    $currentGroup = $options['data'];
-                    return $er->createQueryBuilder('e')
-                        ->leftJoin('e.responsable_de', 'g')
-                        ->where('g.responsable IS NULL OR e = :currentResponsable')
-                        ->setParameter('currentResponsable', $currentGroup->getResponsable());
-                },
+                'multiple' => false,
+                'expanded' => false,
             ])
             ->add('adjoints', EntityType::class, [
                 'class' => Employe::class,

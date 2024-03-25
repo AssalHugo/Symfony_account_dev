@@ -24,8 +24,7 @@ class Groupes
     #[ORM\Column(length: 34)]
     private ?string $statut = null;
 
-    #[ORM\OneToOne(inversedBy: 'responsable_de', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Employe::class, inversedBy: 'responsable_de')]
     private ?Employe $responsable = null;
 
     #[ORM\ManyToMany(targetEntity: Employe::class, inversedBy: 'adjoint_de')]
@@ -88,18 +87,6 @@ class Groupes
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
-
-        return $this;
-    }
-
-    public function getResponsable(): ?Employe
-    {
-        return $this->responsable;
-    }
-
-    public function setResponsable(Employe $responsable): static
-    {
-        $this->responsable = $responsable;
 
         return $this;
     }
@@ -227,4 +214,15 @@ class Groupes
         return $this;
     }
 
+    public function getResponsable(): ?Employe
+    {
+        return $this->responsable;
+    }
+
+    public function setResponsable(?Employe $responsable): static
+    {
+        $this->responsable = $responsable;
+
+        return $this;
+    }
 }
