@@ -45,21 +45,23 @@
                 </ul>
             </div>
         </li>
-        <li>            <div class="dropdown">
+        <li>
+            <div class="dropdown">
               <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-mdb-toggle="dropdown" aria-expanded="false">Admin</button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <li><a class="dropdown-item" href="{{ path('changerMotDePasseAdmin') }}">Changer mot de passes</a></li>
                   <li><a class="dropdown-item" href="{{ path('listeDemandesComptesAdmin') }}">Liste des demandes de compte</a></li>
               </ul>
-          </div></li>
+          </div>
+        </li>
       </ul>
 
       <div class="col-md-3 text-end">
         {% if not app.user %}
           <a href="{{path('app_login')}}" class="btn btn-primary my-2">Se connecter</a>
         {% else %}
-            <a  href="{{path('mesInfos')}}">{{ app.user.username }}</a>
-          <a href="{{path('app_logout')}}" class="btn btn-outline-primary my-2">Se déconnecter</a>
+            <a class="btn btn-primary" href="{{path('mesInfos')}}">{{ app.user.username }}</a>
+            <a href="{{path('app_logout')}}" class="btn btn-outline-primary my-2">Se déconnecter</a>
         {% endif %}
       </div>
     </header>
