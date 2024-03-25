@@ -2,6 +2,11 @@
 {% block validerSupprimer %}
     <td>
         <a href="{{ path('validerDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-success">Valider</a>
+    </td>
+    <td>
+        <a href="{{ path('modifierDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-primary">Modifier</a>
+    </td>
+    <td>
         <a href="{{ path('refuserDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-danger">Refuser</a>
     </td>
 {% endblock %}

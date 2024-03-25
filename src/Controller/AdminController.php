@@ -6,6 +6,7 @@ use App\Entity\EtatsRequetes;
 use App\Entity\Requetes;
 use App\Entity\User;
 use App\Form\ChangerMDPType;
+use App\Form\RequeteType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -22,7 +23,7 @@ class AdminController extends AbstractController
         //On récupère les demandes de comptes ou le statut est 'Demandé'
         $requetesRepo = $entityManager->getRepository(Requetes::class);
 
-        $demandesComptes = $requetesRepo->findByEtatRequete('Validé par RH');
+        $demandesComptes = $requetesRepo->findAll();
 
         return $this->render('admin/demandesCompte.html.twig', [
             'demandes' => $demandesComptes,
@@ -89,6 +90,42 @@ class AdminController extends AbstractController
         $session->set('statut', 'success');
 
         return $this->redirectToRoute('listeDemandesComptesAdmin');
+    }
+
+    #[Route('/rh/modifierDemandeCompteAdmin/{id}', name: 'modifierDemandeCompteAdmin')]
+    public function modifierDemandeCompte($id, EntityManagerInterface $entityManager, Request $request): Response
+    {
+        //On récupère la demande de compte
+        $requetesRepo = $entityManager->getRepository(Requetes::class);
+
+        $demandeCompte = $requetesRepo->find($id);
+
+        //On crée un formulaire pour modifier la demande de compte
+        $form = $this->createForm(RequeteType::class, $demandeCompte);
+
+        $form->add('valider', SubmitType::class, ['label' => 'Valider']);
+        $form->add('annuler', SubmitType::class, ['label' => 'Annuler', 'attr' => ['class' => 'btn-secondary']]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() && $form->get('valider')->isClicked()) {
+            $entityManager->persist($demandeCompte);
+            $entityManager->flush();
+
+            //On crée un message flash pour informer l'utilisateur que la demande a bien été modifiée
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "La demande a bien été modifiée.");
+            $session->set('statut', 'success');
+
+            return $this->redirectToRoute('listeDemandesComptesAdmin');
+        }
+        else if ($form->get('annuler')->isClicked()) {
+            return $this->redirectToRoute('listeDemandesComptesAdmin');
+        }
+
+        return $this->render('rh/modifierDemandeCompte.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
