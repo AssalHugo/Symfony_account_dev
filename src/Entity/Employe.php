@@ -60,7 +60,7 @@ class Employe
     private Collection $telephones;
 
     #[ORM\OneToOne(mappedBy: 'responsable', cascade: ['persist', 'remove'])]
-    private ?Groupes $reponsable_de = null;
+    private ?Groupes $responsable_de = null;
 
     #[ORM\ManyToMany(targetEntity: Groupes::class, mappedBy: 'adjoints')]
     private Collection $adjoint_de;
@@ -317,7 +317,7 @@ class Employe
 
     public function getReponsableDe(): ?Groupes
     {
-        return $this->reponsable_de;
+        return $this->responsable_de;
     }
 
     public function setReponsableDe(Groupes $reponsable_de): static
@@ -327,7 +327,7 @@ class Employe
             $reponsable_de->setResponsable($this);
         }
 
-        $this->reponsable_de = $reponsable_de;
+        $this->responsable_de = $reponsable_de;
 
         return $this;
     }
@@ -443,6 +443,28 @@ class Employe
                 $referentDe->setReferent(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getResponsableDe(): ?Groupes
+    {
+        return $this->responsable_de;
+    }
+
+    public function setResponsableDe(?Groupes $responsable_de): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($responsable_de === null && $this->responsable_de !== null) {
+            $this->responsable_de->setResponsable(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($responsable_de !== null && $responsable_de->getResponsable() !== $this) {
+            $responsable_de->setResponsable($this);
+        }
+
+        $this->responsable_de = $responsable_de;
 
         return $this;
     }

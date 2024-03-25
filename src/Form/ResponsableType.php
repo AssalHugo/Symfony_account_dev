@@ -24,7 +24,7 @@ class ResponsableType extends AbstractType
                 'query_builder' => function (EntityRepository $er) use ($options) {
                     $currentGroup = $options['data'];
                     return $er->createQueryBuilder('e')
-                        ->leftJoin('e.reponsable_de', 'g')
+                        ->leftJoin('e.responsable_de', 'g')
                         ->where('g.responsable IS NULL OR e = :currentResponsable')
                         ->setParameter('currentResponsable', $currentGroup->getResponsable());
                 },

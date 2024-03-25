@@ -23,8 +23,8 @@ use App\Form\ContactSecondairesType;
 
 class UserController extends AbstractController
 {
-    #[Route('/user/mesInformations', name: 'mesInfos')]
-    public function mesInformations(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response {
+    #[Route('/user/mesInformations/{indexTelephone}/{indexLocalisation}', name: 'mesInfos', requirements: ['indexTelephone' => '\d*', 'indexLocalisation' => '\d*'], defaults: ['indexTelephone' => null, 'indexLocalisation' => null])]
+    public function mesInformations($indexLocalisation, $indexTelephone, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response {
 
         //On récupère le User connecté
         $user = $this->getUser();
@@ -46,6 +46,39 @@ class UserController extends AbstractController
 
 
         //Partie localisation
+        //Pour chaques localisation de l'employe on crée un formulaire pour les modifier
+        $formsLocalisations = [];
+        foreach ($localisations as $i => $localisation){
+            // Créez une nouvelle instance de Localisations pour chaque formulaire
+            $newLocalisation = new Localisations();
+            $newLocalisation->setBureau($localisation->getBureau());
+            $newLocalisation->setBatiment($localisation->getBatiment());
+
+            $form = $this->createForm(LocalisationType::class, $newLocalisation);
+            $form->add('modifier', SubmitType::class, ['label' => 'Modifier', 'attr' => ['data-index' => $indexLocalisation]]);
+            $form->handleRequest($request);
+
+            //Si le formulaire est soumis et valide et que ce soit le bon formulaire
+            if($request->isMethod('POST') && $form->isSubmitted() && $form->isValid() && $form->get('modifier')->isClicked() && $i == $indexLocalisation){
+                // Mettez à jour l'adresse original avec les nouvelles informations
+                $localisation->setBureau($newLocalisation->getBureau());
+                $localisation->setBatiment($newLocalisation->getBatiment());
+
+                $entityManager->persist($localisation);
+                $entityManager->flush();
+
+                $session = $request->getSession();
+                $session->getFlashBag()->add('message', 'La localisation a bien été modifiée');
+                $session->set('statut', 'success');
+
+                return $this->redirect($this->generateUrl('mesInfos'));
+            }
+
+            $formsLocalisations[] = $form->createView();
+        }
+
+
+
         $localisation = new Localisations();
         $formLocalisation = $this->createForm(LocalisationType::class,$localisation);
 
@@ -70,6 +103,36 @@ class UserController extends AbstractController
         }
 
         //-----Partie Telephone-----
+        //Pour chaques numéros de téléphone de l'employe on crée un formulaire pour les modifier
+        $formsTelephones = [];
+        foreach ($telephones as $i => $telephone){
+            // Créez une nouvelle instance de Telephones pour chaque formulaire
+            $newTelephone = new Telephones();
+            $newTelephone->setNumero($telephone->getNumero());
+
+            $form = $this->createForm(TelephonesType::class, $newTelephone);
+            $form->add('modifier', SubmitType::class, ['label' => 'Modifier', 'attr' => ['data-index' => $indexTelephone]]);
+            $form->handleRequest($request);
+
+            //Si le formulaire est soumis et valide et que ce soit le bon formulaire
+            if($request->isMethod('POST') && $form->isSubmitted() && $form->isValid() && $form->get('modifier')->isClicked() && $i == $indexTelephone){
+                // Mettez à jour le numéro de téléphone original avec les nouvelles informations
+                $telephone->setNumero($newTelephone->getNumero());
+
+                $entityManager->persist($telephone);
+                $entityManager->flush();
+
+                $session = $request->getSession();
+                $session->getFlashBag()->add('message', 'Le téléphone a bien été modifié');
+                $session->set('statut', 'success');
+
+                return $this->redirect($this->generateUrl('mesInfos'));
+            }
+
+            $formsTelephones[] = $form->createView();
+        }
+
+
         $telephone = new Telephones();
         $formTelephone = $this->createForm(TelephonesType::class,$telephone);
 
@@ -127,7 +190,9 @@ class UserController extends AbstractController
             'contrat' => $contrat,
             'contrats' => $contrats,
             'localisations' => $localisations,
+                'formsLocalisations' => $formsLocalisations,
             'formLocalisation' => $formLocalisation->createView(),
+            'formsTelephones' => $formsTelephones,
             'formTelephone' => $formTelephone->createView(),
             'formContact' => $formContact->createView(),
             'telephones' => $telephones,
@@ -135,7 +200,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/user/mesInformations/removeLocalisation/{id}', name: 'removeLocalisation')]
-    public function removeLocalisation(Request $request, EntityManagerInterface $entityManager, int $id): Response{
+    public function removeLocalisation(Request $request, EntityManagerInterface $entityManager, $id): Response{
 
         $locaRepo = $entityManager->getRepository(Localisations::class);
         $localisation = $locaRepo->find($id);

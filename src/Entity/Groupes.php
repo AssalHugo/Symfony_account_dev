@@ -24,7 +24,7 @@ class Groupes
     #[ORM\Column(length: 34)]
     private ?string $statut = null;
 
-    #[ORM\OneToOne(inversedBy: 'reponsable_de', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'responsable_de', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Employe $responsable = null;
 
