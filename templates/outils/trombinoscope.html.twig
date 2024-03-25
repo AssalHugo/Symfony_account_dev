@@ -29,7 +29,7 @@
                         <a class="link-info" href="?groupe={{ employe.groupeprincipal.id }}">{{ employe.groupeprincipal.nom }}</a>
                     {% endif %}
                     {% for groupe in employe.groupessecondaires %}
-                        {% if not loop.last - 1 %}, {% endif %}<a class="link-info" href="?groupe={{ groupe.id }}">{{ groupe.nom }}</a>
+                        {% if loop.first %}, {% endif %}<a class="link-info" href="?groupe={{ groupe.id }}">{{ groupe.nom }}</a>{% if not loop.last %}, {% endif %}
                     {% endfor %}
                 </p>
                 <p class="card-text">Departement(s) :
@@ -38,7 +38,7 @@
                     {% endif %}
                     {% for groupe in employe.groupessecondaires %}
                         {% if groupe.departement and groupe.departement.id != employe.groupeprincipal.departement.id %}
-                            {% if not loop.last - 1 %}, {% endif %}<a class="link-info" href="?departement={{ groupe.departement.id }}">{{ groupe.departement.nom }}</a>
+                            {% if loop.first %}, {% endif %}<a class="link-info" href="?departement={{ groupe.departement.id }}">{{ groupe.departement.nom }}</a>{% if not loop.last %}, {% endif %}
                         {% endif %}
                     {% endfor %}
                 </p>
