@@ -11,6 +11,7 @@ use App\Form\RequeteType;
 use App\Form\TrombinoscopeType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -46,13 +47,11 @@ class OutilsController extends AbstractController
 
             //On récupère les utilisateurs en fonction des filtres
             $employes = $employeRepository->findByFiltre($departement, $groupe, $statut);
-        }
-        //Sinon si le GET est vide
+        } //Sinon si le GET est vide
         else if (empty($request->query->all())) {
             //On récupère tous les utilisateurs
             $employes = $employeRepository->findAll();
-        }
-        //Sinon
+        } //Sinon
         else {
             //On récupère les utilisateurs en fonction des filtres
             if ($request->query->get('departement') != null) {
@@ -131,8 +130,9 @@ class OutilsController extends AbstractController
     }
 
 
-    #[Route('/outils/formulaire', name: 'formulaireDemandeCompte')]
-    public function formulaireDemandeCompte(Request $request, EntityManagerInterface $entityManager): Response {
+    #[Route('/outils/formulaire/{indexRequete}', name: 'formulaireDemandeCompte', requirements: ['indexRequete' => '\d*'], defaults: ['indexRequete' => null])]
+    public function formulaireDemandeCompte($indexRequete, Request $request, EntityManagerInterface $entityManager): Response
+    {
 
         $requete = new Requetes();
 
@@ -140,9 +140,13 @@ class OutilsController extends AbstractController
 
         $formDemandeCompte->add('valider', SubmitType::class, ['label' => 'Valider']);
 
-        $formDemandeCompte->handleRequest($request);
+        //Si l'index de la requete est null, on handle la requete de demande de compte
+        if ($indexRequete == null) {
+            $formDemandeCompte->handleRequest($request);
+        }
 
-        if ($formDemandeCompte->isSubmitted() && $formDemandeCompte->isValid()) {
+        //Si le formulaire est soumis et valide et que le bouton valider est cliqué
+        if ($formDemandeCompte->isSubmitted() && $formDemandeCompte->isValid() && $formDemandeCompte->get('valider')->isClicked()) {
 
             $employe = $this->getUser()->getEmploye();
             //On donne le référent qui est l'utilisateur connecté
@@ -165,43 +169,43 @@ class OutilsController extends AbstractController
         $requeteRepository = $entityManager->getRepository(Requetes::class);
         $etatRequeteRepo = $entityManager->getRepository(EtatsRequetes::class);
 
-        $demande = $etatRequeteRepo->findOneBy(['etat' => 'Demandé']);
-        $infoManquantes = $etatRequeteRepo->findOneBy(['etat' => 'Information manquante']);
-        $valideRH = $etatRequeteRepo->findOneBy(['etat' => 'Validé par RH']);
+        $etatRequete = [];
+        $etatRequete[] = $etatRequeteRepo->findOneBy(['etat' => 'Demandé']);
+        $etatRequete[] = $etatRequeteRepo->findOneBy(['etat' => 'Information manquante']);
+        $etatRequete[] = $etatRequeteRepo->findOneBy(['etat' => 'Validé par RH']);
 
         //On récupère les requetes coreespondantes
-        $tabDemandes = [];
-        $tabDemandes[] = $requeteRepository->findBy(['etat_requete' => $demande, 'referent' => $this->getUser()->getEmploye()]);
-        $tabDemandes[] = $requeteRepository->findBy(['etat_requete' => $infoManquantes, 'referent' => $this->getUser()->getEmploye()]);
-        $tabDemandes[] = $requeteRepository->findBy(['etat_requete' => $valideRH, 'referent' => $this->getUser()->getEmploye()]);
+        $tabDemandes = $requeteRepository->findBy(['etat_requete' => $etatRequete, 'referent' => $this->getUser()->getEmploye()]);
 
         //on crée un formulaire pour chaque demande
         $tabFormDemande = [];
-        foreach ($tabDemandes as $demandes) {
-            foreach ($demandes as $demande) {
-                $formDemande = $this->createForm(RequeteType::class, $demande);
-                //On rajoute le statut de la demande qui ne peut pas être modifié
-                $formDemande->add('etat_requete', EntityType::class, [
-                    'class' => EtatsRequetes::class,
-                    'choice_label' => 'etat',
-                    'disabled' => true
-                ]);
-                $formDemande->add('modifier', SubmitType::class, ['label' => 'Modifier']);
+        foreach ($tabDemandes as $index => $demande) {
+            $formDemande = $this->createForm(RequeteType::class, $demande);
+            $formDemande->add('etat_requete', EntityType::class, [
+                'class' => EtatsRequetes::class,
+                'choice_label' => 'etat',
+                'label' => 'Etat de la demande : ',
+                'disabled' => true
+            ]);
+            $formDemande->add('id', HiddenType::class, ['mapped' => false, 'data' => $demande->getId()]);
+            $formDemande->add('modifier', SubmitType::class, ['label' => 'Modifier', 'attr' => ['data-index' => $index]]);
+
+            if ($index == $indexRequete) {
                 $formDemande->handleRequest($request);
 
-                if ($formDemande->isSubmitted() && $formDemande->isValid()) {
+                if ($formDemande->isSubmitted() && $formDemande->isValid() && $formDemande->get('modifier')->isClicked() && $formDemande->get('id')->getData() == $demande->getId()) {
                     $entityManager->persist($demande);
                     $entityManager->flush();
 
                     $session = $request->getSession();
-                    $session->getFlashBag()->add('message', 'La demande a bien été envoyée, aux RH pour validation.');
+                    $session->getFlashBag()->add('message', 'La demande a bien été modifiée.');
                     $session->set('statut', 'success');
 
                     return $this->redirectToRoute('formulaireDemandeCompte');
                 }
-
-                $tabFormDemande[] = $formDemande->createView();
             }
+
+            $tabFormDemande[] = $formDemande->createView();
         }
 
         return $this->render('outils/formulaireDemandeCompte.html.twig', [

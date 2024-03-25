@@ -96,17 +96,15 @@
             <h5 class="text-left">Téléphones : </h5>
             <div class="col-sm">
                 <ul class="list-group">
-                    {% set i = 1 %}
                     {% for telephone in telephones %}
                         <li class="list-group-item">
-                            Telephone {{i}} : <a class="btn btn-danger my-2" href="{{path('removeTelephone', {id: telephone.id})}}" >&#128465;&#65039;</a>
+                            Telephone {{loop.index}} : <a class="btn btn-danger my-2" href="{{path('removeTelephone', {id: telephone.id})}}" >&#128465;&#65039;</a>
                             </br>
 
-                                {{ form_start(formsTelephones[i-1], {'action': path('mesInfos', {'indexTelephone': loop.index0})}) }}
-                                {{ form_widget(formsTelephones[i-1]) }}
-                                {{ form_end(formsTelephones[i-1]) }}
+                                {{ form_start(formsTelephones[loop.index0], {'action': path('mesInfos', {'indexTelephone': loop.index0})}) }}
+                                {{ form_widget(formsTelephones[loop.index0]) }}
+                                {{ form_end(formsTelephones[loop.index0]) }}
                             </li>
-                        {% set i = i + 1 %}
                     {% endfor %}
                     <li class="list-group-item">
                         {{form(formTelephone)}}
