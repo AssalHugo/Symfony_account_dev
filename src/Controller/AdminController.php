@@ -48,6 +48,14 @@ class AdminController extends AbstractController
         $entityManager->persist($demandeCompte);
         $entityManager->flush();
 
+        //On crée un nouvel utilisateur
+        /*$user = new User();
+        //On set le nom d'utilisateur de l'utilisateur la premiere lettre du prenom suivie du nom avec un max de 8 caracteres
+        $username = substr($demandeCompte->getEmploye()->getPrenom(), 0, 1) . $demandeCompte->getEmploye()->getNom();
+        $username = substr($username, 0, 8);
+        $user->setUsername($username);*/
+
+
         //On crée un message flash pour informer l'utilisateur que la demande a bien été validée
         $session = $request->getSession();
         $session->getFlashBag()->add('message', "L'utilisateur a bien été validé.");

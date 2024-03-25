@@ -1,8 +1,22 @@
 {% extends 'base.html.twig' %}
 {% block body %}
 <div class="container">
-    <h1 class="text-center">Formulaire demande Compte</h1>
+    <h1 class="text-center">Demande de compte</h1>
     <br>
+    <h2 class="text-center">Liste de vos demandes de compte en cours</h2>
+    {% for demande in demandes %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-center">Demande de compte {{ loop.index }}</h3>
+        </div>
+        <div class="card-body">
+            {{ form(demande) }}
+        </div>
+    </div>
+    <br>
+    {% endfor %}
+    <br>
+    <h2 class="text-center">Formulaire demande de compte</h2>
     {{ form(formDemandeCompte) }}
 </div>
 {% endblock %}

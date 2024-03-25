@@ -10,6 +10,7 @@ use App\Entity\Requetes;
 use App\Form\RequeteType;
 use App\Form\TrombinoscopeType;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -160,8 +161,52 @@ class OutilsController extends AbstractController
             return $this->redirectToRoute('formulaireDemandeCompte');
         }
 
+        //On récupere toutes les requetes qui n'ont pas été validées par l'admin ou pas refusées de l'utilisateur connecté
+        $requeteRepository = $entityManager->getRepository(Requetes::class);
+        $etatRequeteRepo = $entityManager->getRepository(EtatsRequetes::class);
+
+        $demande = $etatRequeteRepo->findOneBy(['etat' => 'Demandé']);
+        $infoManquantes = $etatRequeteRepo->findOneBy(['etat' => 'Information manquante']);
+        $valideRH = $etatRequeteRepo->findOneBy(['etat' => 'Validé par RH']);
+
+        //On récupère les requetes coreespondantes
+        $tabDemandes = [];
+        $tabDemandes[] = $requeteRepository->findBy(['etat_requete' => $demande, 'referent' => $this->getUser()->getEmploye()]);
+        $tabDemandes[] = $requeteRepository->findBy(['etat_requete' => $infoManquantes, 'referent' => $this->getUser()->getEmploye()]);
+        $tabDemandes[] = $requeteRepository->findBy(['etat_requete' => $valideRH, 'referent' => $this->getUser()->getEmploye()]);
+
+        //on crée un formulaire pour chaque demande
+        $tabFormDemande = [];
+        foreach ($tabDemandes as $demandes) {
+            foreach ($demandes as $demande) {
+                $formDemande = $this->createForm(RequeteType::class, $demande);
+                //On rajoute le statut de la demande qui ne peut pas être modifié
+                $formDemande->add('etat_requete', EntityType::class, [
+                    'class' => EtatsRequetes::class,
+                    'choice_label' => 'etat',
+                    'disabled' => true
+                ]);
+                $formDemande->add('modifier', SubmitType::class, ['label' => 'Modifier']);
+                $formDemande->handleRequest($request);
+
+                if ($formDemande->isSubmitted() && $formDemande->isValid()) {
+                    $entityManager->persist($demande);
+                    $entityManager->flush();
+
+                    $session = $request->getSession();
+                    $session->getFlashBag()->add('message', 'La demande a bien été envoyée, aux RH pour validation.');
+                    $session->set('statut', 'success');
+
+                    return $this->redirectToRoute('formulaireDemandeCompte');
+                }
+
+                $tabFormDemande[] = $formDemande->createView();
+            }
+        }
+
         return $this->render('outils/formulaireDemandeCompte.html.twig', [
-            'formDemandeCompte' => $formDemandeCompte->createView()
+            'formDemandeCompte' => $formDemandeCompte->createView(),
+            'demandes' => $tabFormDemande
         ]);
     }
 }
