@@ -159,14 +159,44 @@ class RhController extends AbstractController
     public function listeGroupesParDepartements(EntityManagerInterface $entityManager): Response
     {
         //On récupère les departements
+        global $request;
         $departementRepo = $entityManager->getRepository(Departement::class);
 
         $departements = $departementRepo->findAll();
 
+        $formsResponsableDep = [];
+        foreach ($departements as $departement) {
+            //On crée un formulaire pour modifier le responsable du département
+            $form = $this->createFormBuilder($departement)
+                ->add('responsable', EntityType::class, [
+                    'class' => Employe::class,
+                    'choice_label' => function ($employe) {
+                        return $employe->getPrenom() . ' ' . $employe->getNom();
+                    },
+                    'label' => 'Responsable :',
+                ])
+                ->getForm();
 
+            $form->add('submit', SubmitType::class, [
+                'label' => 'Modifier',
+            ]);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $entityManager->persist($departement);
+                $entityManager->flush();
+
+                //On crée un message flash pour informer l'utilisateur que le responsable a bien été modifié
+                $session = $request->getSession();
+                $session->getFlashBag()->add('message', "Le responsable a bien été modifié.");
+                $session->set('statut', 'success');
+            }
+
+            $formsResponsableDep[] = $form->createView();
+        }
 
         return $this->render('rh/listeDepartements.html.twig', [
             'departements' => $departements,
+            'formsResponsableDep' => $formsResponsableDep,
         ]);
     }
 
