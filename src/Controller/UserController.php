@@ -164,16 +164,19 @@ class UserController extends AbstractController
 
         $formContact->handleRequest($request);
 
-        if($request->isMethod('POST') && $formContact->isSubmitted() && $formContact->isValid()){
+        if($formContact->isSubmitted() && $formContact->isValid()){
+
+            //On récupère le corps du message 'corps'
+            $message = $formContact->getData()['corps'];
 
             $email = (new Email())
             ->from('hello@example.com')
             ->to('you@example.com')
-            ->subject('Time for Symfony Mailer!')
-            ->text('Sending emails is fun again!')
-            ->html('<p>See Twig integration for better HTML integration!</p>');
+            ->subject('Contact Support Message')
+            ->text('')
+            ->html("<p>$message</p>");
 
-        $mailer->send($email);
+            $mailer->send($email);
 
             $session = $request->getSession();
             $session->getFlashBag()->add('message', 'Le message a bien été envoyé');

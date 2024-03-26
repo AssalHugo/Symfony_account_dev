@@ -1,5 +1,6 @@
 {% extends 'rh/demandesCompte.html.twig' %}
 {% block validerSupprimer %}
+    {% if demande.etatRequete.etat == 'Validé par RH'%}
     <td>
         <a href="{{ path('validerDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-success">Valider</a>
     </td>
@@ -9,4 +10,5 @@
     <td>
         <a href="{{ path('refuserDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-danger">Refuser</a>
     </td>
+    {% endif %}
 {% endblock %}

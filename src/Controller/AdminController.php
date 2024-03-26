@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Employe;
 use App\Entity\EtatsRequetes;
 use App\Entity\Requetes;
+use App\Entity\Telephones;
 use App\Entity\User;
 use App\Form\ChangerMDPType;
 use App\Form\RequeteType;
@@ -31,7 +33,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/admin/validerDemandeCompte/{id}', name: 'validerDemandeCompteAdmin')]
-    public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request): Response
+    public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher): Response
     {
         //On récupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
@@ -50,11 +52,43 @@ class AdminController extends AbstractController
         $entityManager->flush();
 
         //On crée un nouvel utilisateur
-        /*$user = new User();
+        $user = new User();
         //On set le nom d'utilisateur de l'utilisateur la premiere lettre du prenom suivie du nom avec un max de 8 caracteres
-        $username = substr($demandeCompte->getEmploye()->getPrenom(), 0, 1) . $demandeCompte->getEmploye()->getNom();
+        $username = substr($demandeCompte->getPrenom(), 0, 1) . $demandeCompte->getNom();
         $username = substr($username, 0, 8);
-        $user->setUsername($username);*/
+        $user->setUsername($username);
+
+        //On set le mot de passe de l'utilisateur qui va etre généré automatiquement
+        $mdp = self::randomPassword();
+
+        //On hashe le mot de passe
+        $hashedPassword = $passwordHasher->hashPassword($user, $mdp);
+        $user->setPassword($hashedPassword);
+
+        //On set le role de l'utilisateur
+        $user->setRoles(['ROLE_USER']);
+
+        //On set l'email de l'utilisateur
+        $user->setEmail($demandeCompte->getMail());
+
+        //On crée un employé
+        $employe = new Employe();
+        $employe->setNom($demandeCompte->getNom());
+        $employe->setPrenom($demandeCompte->getPrenom());
+        $tel = new Telephones();
+        $tel->setNumero($demandeCompte->getTelephone());
+        $employe->addTelephone($tel);
+        $employe->setGroupePrincipal($demandeCompte->getGroupePrincipal());
+        $employe->addLocalisation($demandeCompte->getLocalisation());
+        $employe->addContrat($demandeCompte->getContrat());
+        $employe->setSyncReseda(false);
+        $employe->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
+        $employe->setUser($user);
+
+        $entityManager->persist($employe);
+        $entityManager->persist($user);
+        $entityManager->persist($tel);
+        $entityManager->flush();
 
 
         //On crée un message flash pour informer l'utilisateur que la demande a bien été validée
@@ -63,6 +97,17 @@ class AdminController extends AbstractController
         $session->set('statut', 'success');
 
         return $this->redirectToRoute('listeDemandesComptesAdmin');
+    }
+
+    static function randomPassword() : string{
+        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+        $pass = array(); //remember to declare $pass as an array
+        $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
+        for ($i = 0; $i < 8; $i++) {
+            $n = rand(0, $alphaLength);
+            $pass[] = $alphabet[$n];
+        }
+        return implode($pass); //turn the array into a string
     }
 
     #[Route('/admin/refuserDemandeCompte/{id}', name: 'refuserDemandeCompteAdmin')]

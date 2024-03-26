@@ -105,7 +105,7 @@
             "ref": "df66ee1f226c46f01e85c29c2f7acce0596ba35a"
         },
         "files": [
-            "config/packages/mailer.yaml"
+            "./config/packages/mailer.yaml"
         ]
     },
     "symfony/maker-bundle": {
