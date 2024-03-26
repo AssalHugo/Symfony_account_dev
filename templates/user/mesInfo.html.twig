@@ -104,7 +104,7 @@
                                 {{ form_start(formsTelephones[loop.index0], {'action': path('mesInfos', {'indexTelephone': loop.index0})}) }}
                                 {{ form_widget(formsTelephones[loop.index0]) }}
                                 {{ form_end(formsTelephones[loop.index0]) }}
-                            </li>
+                        </li>
                     {% endfor %}
                     <li class="list-group-item">
                         {{form(formTelephone)}}

@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Employe;
+use App\Entity\Localisations;
+use App\Form\GroupesType;
+use App\Form\LocalisationType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -21,8 +24,8 @@ class GroupesController extends AbstractController
      * @param EntityManagerInterface $entityManager
      * @return Response
      */
-    #[Route('/groupes/modifier', name: 'modifier')]
-    public function index(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/groupes/modifier/{index}', name: 'modifier', requirements: ['index' => '\d*'], defaults: ['index' => null ])]
+    public function index(Request $request, EntityManagerInterface $entityManager, $index): Response
     {
 
         //On récupère l'employe qui est connecté
@@ -34,14 +37,54 @@ class GroupesController extends AbstractController
         $groupesSecondairesEmploye = $employe->getGroupesSecondaires();
 
         //On récupere tous les groupes à l'exception des groupes que l'employé possède déjà
-        $groupes = $entityManager->getRepository(Groupes::class)->findAll();
+        $groupesRepo = $entityManager->getRepository(Groupes::class);
+        $groupes = $groupesRepo->findAll();
 
+        //Ce tableau contiendra les groupes qui ne sont pas des groupes secondaires de l'employé et qui ne sont pas le groupe principal
         $listeGroupes = [];
 
         foreach($groupes as $groupe){
             if(!$groupesSecondairesEmploye->contains($groupe) && $employe->getGroupePrincipal() != $groupe){
                 $listeGroupes[] = $groupe;
             }
+        }
+
+        $formsGroupesSecondaires = [];
+        foreach ($groupesSecondairesEmploye as $i => $groupesSec){
+
+            //On crée le formulaire dans le controlleur avec comme valeur par défaut le groupe secondaire de l'employé
+            $form = $this->createFormBuilder(['groupeSecondaire' => $groupesSec])
+                ->add('groupeSecondaire', ChoiceType::class, [
+                    'choices'  => $groupes,
+                    'choice_value' => 'id',
+                    'choice_label' => function (?Groupes $Groupes): string {
+                        return $Groupes ? strtoupper($Groupes->getNom()) : '';
+                    },
+                ])
+                ->getForm();
+
+            $form->add('modifier', SubmitType::class, ['label' => 'Modifier', 'attr' => ['data-index' => $index]]);
+            $form->handleRequest($request);
+
+            //Si le formulaire est soumis et valide et que ce soit le bon formulaire
+            if ($form->isSubmitted() && $form->isValid() && $form->get('modifier')->isClicked() && $i == $index) {
+                // on supprime le groupe secondaire de l'employé et on le remplace par le nouveau groupe
+                $groupe= $form->getData()['groupeSecondaire'];
+
+                $employe->removeGroupesSecondaire($groupesSec);
+                $employe->addGroupesSecondaire($groupe);
+
+                $entityManager->persist($employe);
+                $entityManager->flush();
+
+                $session = $request->getSession();
+                $session->getFlashBag()->add('message', 'Le groupe secondaire a bien été modifiée');
+                $session->set('statut', 'success');
+
+                return $this->redirect($this->generateUrl('modifier'));
+            }
+
+            $formsGroupesSecondaires[] = $form->createView();
         }
 
         //On crée le formulaire dans le controlleur
@@ -57,11 +100,11 @@ class GroupesController extends AbstractController
 
         $formGroupesSecondaires->handleRequest($request);
 
-        if($request->isMethod('POST') && $formGroupesSecondaires->isSubmitted() && $formGroupesSecondaires->isValid()){
+        if($request->isMethod('POST') && $formGroupesSecondaires->isSubmitted() && $formGroupesSecondaires->isValid()) {
 
-            $groupeId = $formGroupesSecondaires->getData()['groupeSecondaire'];
+            $groupeID = $formGroupesSecondaires->getData()['groupeSecondaire'];
 
-            $groupe = $entityManager->getRepository(Groupes::class)->find($groupeId);
+            $groupe = $groupesRepo->find($groupeID);
 
             $employe->addGroupesSecondaire($groupe);
 
@@ -79,7 +122,7 @@ class GroupesController extends AbstractController
         return $this->render('groupes/modifier.html.twig', [
 
             'groupePrincipal' => $groupePrincipal,
-            'groupesSecondairesEmploye' => $groupesSecondairesEmploye,
+            'groupesSecondairesEmploye' => $formsGroupesSecondaires,
             'formGroupesSecondaires' => $formGroupesSecondaires->createView(),
         ]);
     }

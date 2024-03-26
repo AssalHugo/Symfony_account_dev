@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Contrats;
@@ -59,7 +61,7 @@ class UserController extends AbstractController
             $form->handleRequest($request);
 
             //Si le formulaire est soumis et valide et que ce soit le bon formulaire
-            if($request->isMethod('POST') && $form->isSubmitted() && $form->isValid() && $form->get('modifier')->isClicked() && $i == $indexLocalisation){
+            if($form->isSubmitted() && $form->isValid() && $form->get('modifier')->isClicked() && $i == $indexLocalisation){
                 // Mettez à jour l'adresse original avec les nouvelles informations
                 $localisation->setBureau($newLocalisation->getBureau());
                 $localisation->setBatiment($newLocalisation->getBatiment());
@@ -76,7 +78,6 @@ class UserController extends AbstractController
 
             $formsLocalisations[] = $form->createView();
         }
-
 
 
         $localisation = new Localisations();
@@ -169,14 +170,27 @@ class UserController extends AbstractController
             //On récupère le corps du message 'corps'
             $message = $formContact->getData()['corps'];
 
-            $email = (new Email())
-            ->from('hello@example.com')
-            ->to('you@example.com')
-            ->subject('Contact Support Message')
-            ->text('')
-            ->html("<p>$message</p>");
+            //On récupere tous les emails des admins
+            $adminRepo = $entityManager->getRepository(User::class);
+            $admins = $adminRepo->findByRole("ROLE_ADMIN");
 
-            $mailer->send($email);
+            //On envoie un mail à chaque admin
+            foreach ($admins as $admin) {
+                $email = (new Email())
+                    ->from('mail@gmail.com')
+                    ->to($admin->getEmail())
+                    ->subject('Contact support')
+                    ->text($message);
+
+                try {
+                    $mailer->send($email);
+                } catch (TransportExceptionInterface $e) {
+                    $session = $request->getSession();
+                    $session->getFlashBag()->add('message', 'Le message n\'a pas pu être envoyé');
+                    $session->set('statut', 'danger');
+                    return $this->redirect($this->generateUrl('mesInfos'));
+                }
+            }
 
             $session = $request->getSession();
             $session->getFlashBag()->add('message', 'Le message a bien été envoyé');
@@ -193,7 +207,7 @@ class UserController extends AbstractController
             'contrat' => $contrat,
             'contrats' => $contrats,
             'localisations' => $localisations,
-                'formsLocalisations' => $formsLocalisations,
+            'formsLocalisations' => $formsLocalisations,
             'formLocalisation' => $formLocalisation->createView(),
             'formsTelephones' => $formsTelephones,
             'formTelephone' => $formTelephone->createView(),
@@ -350,8 +364,10 @@ class UserController extends AbstractController
         if($request->isMethod('POST') && $formContacts->isSubmitted() && $formContacts->isValid()){
 
             $entityManager->persist($employe);
-
             $entityManager->flush();
+
+            //On envoie un mail sur son adresse mail secondaire
+            $email = new Email();
 
             $session = $request->getSession();
             $session->getFlashBag()->add('message', 'Les contacts secondaires ont bien étés modifiés');
@@ -365,7 +381,4 @@ class UserController extends AbstractController
             'formContacts' => $formContacts,
         ]);
     }
-    
-    
-
 }

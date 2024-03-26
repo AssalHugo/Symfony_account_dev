@@ -9,14 +9,16 @@
         <br>
         <h5>Groupes secondaires :</h5>
         <ul class="list-group">
-                    {% set i = 1 %}
                     {% for groupe in groupesSecondairesEmploye %}
                         <li class="list-group-item">
-                            groupe {{i}} : <a class="btn btn-warning my-2" href="{{path('removeGroupeSecondaire', {id: groupe.id})}}" >&#128465;&#65039;</a>
+
+                            <strong> groupe {{loop.index}} : </strong><a class="btn btn-danger my-2" href="" >&#128465;&#65039;</a>
                             </br>
-                            <b>&nbsp;&nbsp;&nbsp;{{groupe.nom}}</b>
+
+                            {{ form_start(groupe, {'action': path('modifier', {'index': loop.index0})}) }}
+                            {{ form_widget(groupe) }}
+                            {{ form_end(groupe) }}
                         </li>
-                        {% set i = i + 1 %}
                     {% endfor %}
                     <li class="list-group-item">
                         {{form(formGroupesSecondaires)}}
