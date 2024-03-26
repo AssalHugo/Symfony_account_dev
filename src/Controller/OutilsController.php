@@ -25,7 +25,7 @@ class OutilsController extends AbstractController
      * @return Response
      */
     #[Route('/outils/trombinoscope', name: 'trombinoscope')]
-    public function index(Request $request, EntityManagerInterface $entityManager): Response
+    public function trombinoscope(Request $request, EntityManagerInterface $entityManager): Response
     {
 
         $employeRepository = $entityManager->getRepository(Employe::class);
@@ -177,40 +177,45 @@ class OutilsController extends AbstractController
         //On récupère les requetes coreespondantes
         $tabDemandes = $requeteRepository->findBy(['etat_requete' => $etatRequete, 'referent' => $this->getUser()->getEmploye()]);
 
-        //on crée un formulaire pour chaque demande
-        $tabFormDemande = [];
-        foreach ($tabDemandes as $index => $demande) {
-            $formDemande = $this->createForm(RequeteType::class, $demande);
-            $formDemande->add('etat_requete', EntityType::class, [
-                'class' => EtatsRequetes::class,
-                'choice_label' => 'etat',
-                'label' => 'Etat de la demande : ',
-                'disabled' => true
-            ]);
-            $formDemande->add('id', HiddenType::class, ['mapped' => false, 'data' => $demande->getId()]);
-            $formDemande->add('modifier', SubmitType::class, ['label' => 'Modifier', 'attr' => ['data-index' => $index]]);
-
-            if ($index == $indexRequete) {
-                $formDemande->handleRequest($request);
-
-                if ($formDemande->isSubmitted() && $formDemande->isValid() && $formDemande->get('modifier')->isClicked() && $formDemande->get('id')->getData() == $demande->getId()) {
-                    $entityManager->persist($demande);
-                    $entityManager->flush();
-
-                    $session = $request->getSession();
-                    $session->getFlashBag()->add('message', 'La demande a bien été modifiée.');
-                    $session->set('statut', 'success');
-
-                    return $this->redirectToRoute('formulaireDemandeCompte');
-                }
-            }
-
-            $tabFormDemande[] = $formDemande->createView();
-        }
-
         return $this->render('outils/formulaireDemandeCompte.html.twig', [
             'formDemandeCompte' => $formDemandeCompte->createView(),
-            'demandes' => $tabFormDemande
+            'demandes' => $tabDemandes
+        ]);
+    }
+
+    #[Route('/outils/modifierDemandeCompteUser/{id}', name: 'modifierDemandeCompteUser')]
+    public function modifierDemandeCompteUser($id, EntityManagerInterface $entityManager, Request $request): Response
+    {
+        //On récupère la demande de compte
+        $requetesRepo = $entityManager->getRepository(Requetes::class);
+
+        $demandeCompte = $requetesRepo->find($id);
+
+        //On crée un formulaire pour modifier la demande de compte
+        $form = $this->createForm(RequeteType::class, $demandeCompte);
+
+        $form->add('valider', SubmitType::class, ['label' => 'Valider']);
+        $form->add('annuler', SubmitType::class, ['label' => 'Annuler', 'attr' => ['class' => 'btn-secondary']]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() && $form->get('valider')->isClicked()) {
+            $entityManager->persist($demandeCompte);
+            $entityManager->flush();
+
+            //On crée un message flash pour informer l'utilisateur que la demande a bien été modifiée
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "La demande a bien été modifiée.");
+            $session->set('statut', 'success');
+
+            return $this->redirectToRoute('formulaireDemandeCompte');
+        }
+        else if ($form->get('annuler')->isClicked()) {
+            return $this->redirectToRoute('formulaireDemandeCompte');
+        }
+
+        return $this->render('rh/modifierDemandeCompte.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
 }

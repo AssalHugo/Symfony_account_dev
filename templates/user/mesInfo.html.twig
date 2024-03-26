@@ -77,7 +77,7 @@
                     {% set i = 1 %}
                     {% for localisation in localisations %}
                         <li class="list-group-item">
-                            Localisation {{i}} : <a class="btn btn-danger my-2" href="{{path('removeLocalisation', {id: localisation.id})}}" >&#128465;&#65039;</a>
+                            <strong>Localisation {{i}} : </strong><a class="btn btn-danger my-2" href="{{path('removeLocalisation', {id: localisation.id})}}" >&#128465;&#65039;</a>
                             </br>
                                 {{ form_start(formsLocalisations[i-1], {'action': path('mesInfos', {'indexLocalisation': loop.index0})}) }}
                                 {{ form_widget(formsLocalisations[i-1]) }}
@@ -98,7 +98,7 @@
                 <ul class="list-group">
                     {% for telephone in telephones %}
                         <li class="list-group-item">
-                            Telephone {{loop.index}} : <a class="btn btn-danger my-2" href="{{path('removeTelephone', {id: telephone.id})}}" >&#128465;&#65039;</a>
+                            <strong> Telephone {{loop.index}} : </strong><a class="btn btn-danger my-2" href="{{path('removeTelephone', {id: telephone.id})}}" >&#128465;&#65039;</a>
                             </br>
 
                                 {{ form_start(formsTelephones[loop.index0], {'action': path('mesInfos', {'indexTelephone': loop.index0})}) }}
