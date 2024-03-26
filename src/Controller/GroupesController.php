@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Employe;
 use App\Entity\Localisations;
-use App\Form\GroupesType;
 use App\Form\LocalisationType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,6 +55,7 @@ class GroupesController extends AbstractController
             $form = $this->createFormBuilder(['groupeSecondaire' => $groupesSec])
                 ->add('groupeSecondaire', ChoiceType::class, [
                     'choices'  => $groupes,
+                    'label' => 'Nom du groupe : ',
                     'choice_value' => 'id',
                     'choice_label' => function (?Groupes $Groupes): string {
                         return $Groupes ? strtoupper($Groupes->getNom()) : '';

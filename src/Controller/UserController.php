@@ -176,8 +176,9 @@ class UserController extends AbstractController
 
             //On envoie un mail à chaque admin
             foreach ($admins as $admin) {
+
                 $email = (new Email())
-                    ->from('mail@gmail.com')
+                    ->from('you@example.com')
                     ->to($admin->getEmail())
                     ->subject('Contact support')
                     ->text($message);

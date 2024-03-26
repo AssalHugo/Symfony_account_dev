@@ -36,6 +36,14 @@ class RequetesRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findOrderByDate(): array
+    {
+        return $this->createQueryBuilder('r')
+            ->orderBy('r.date_requete', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Requetes[] Returns an array of Requetes objects
     //     */

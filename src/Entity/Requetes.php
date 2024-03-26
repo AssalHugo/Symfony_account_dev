@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\RequetesRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: RequetesRepository::class)]
@@ -43,6 +44,9 @@ class Requetes
 
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $telephone = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $date_requete = null;
 
 
     public function getId(): ?int
@@ -166,6 +170,18 @@ class Requetes
     public function setTelephone(string $telephone): static
     {
         $this->telephone = $telephone;
+
+        return $this;
+    }
+
+    public function getDateRequete(): ?\DateTimeInterface
+    {
+        return $this->date_requete;
+    }
+
+    public function setDateRequete(\DateTimeInterface $date_requete): static
+    {
+        $this->date_requete = $date_requete;
 
         return $this;
     }

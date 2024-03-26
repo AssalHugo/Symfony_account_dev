@@ -14,6 +14,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -25,7 +27,8 @@ class AdminController extends AbstractController
         //On récupère les demandes de comptes ou le statut est 'Demandé'
         $requetesRepo = $entityManager->getRepository(Requetes::class);
 
-        $demandesComptes = $requetesRepo->findAll();
+        //On trie les demandes par date de demande ASC ne peut pas etre utilisé car c'est une date, il faut utiliser orderBy
+        $demandesComptes = $requetesRepo->findOrderByDate();
 
         return $this->render('admin/demandesCompte.html.twig', [
             'demandes' => $demandesComptes,
@@ -33,29 +36,29 @@ class AdminController extends AbstractController
     }
 
     #[Route('/admin/validerDemandeCompte/{id}', name: 'validerDemandeCompteAdmin')]
-    public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher): Response
+    public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
     {
         //On récupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
 
         $demandeCompte = $requetesRepo->find($id);
 
-        //On récupere l'objet EtatsRequetes avec l'état 'Validé par admin'
-        $etatRequeteRepo = $entityManager->getRepository(EtatsRequetes::class);
 
-        $etatRequete = $etatRequeteRepo->findOneBy(['etat' => 'Validé par admin']);
-
-        //On change le statut de la demande de compte
-        $demandeCompte->setEtatRequete($etatRequete);
-
-        $entityManager->persist($demandeCompte);
-        $entityManager->flush();
 
         //On crée un nouvel utilisateur
         $user = new User();
         //On set le nom d'utilisateur de l'utilisateur la premiere lettre du prenom suivie du nom avec un max de 8 caracteres
         $username = substr($demandeCompte->getPrenom(), 0, 1) . $demandeCompte->getNom();
         $username = substr($username, 0, 8);
+
+        //On vérifie si le nom d'utilisateur n'est pas déjà utilisé dans la base de données
+        $userRepo = $entityManager->getRepository(User::class);
+        $userMemeNom = $userRepo->findBy(['username' => $username]);
+        //Si la taille de la liste est supérieure à 0, cela signifie que le nom d'utilisateur est déjà utilisé
+        if (count($userMemeNom) > 0) {
+            //On rajoute un chiffre à la fin du nom d'utilisateur
+            $username = $username . count($userMemeNom);
+        }
         $user->setUsername($username);
 
         //On set le mot de passe de l'utilisateur qui va etre généré automatiquement
@@ -83,13 +86,43 @@ class AdminController extends AbstractController
         $employe->addContrat($demandeCompte->getContrat());
         $employe->setSyncReseda(false);
         $employe->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
-        $employe->setUser($user);
+
+        //On rajoute l'employe à l'utilisateur
+        $user->setEmploye($employe);
 
         $entityManager->persist($employe);
         $entityManager->persist($user);
         $entityManager->persist($tel);
         $entityManager->flush();
 
+        //On envoie un mail à l'utilisateur pour lui communiquer son mot de passe
+        $message = "Bonjour " . $demandeCompte->getPrenom() . " " . $demandeCompte->getNom() . ",\n\n";
+        $message .= "Votre demande de compte a bien été validée, avec les informations suivantes :\n";
+        $message .= "Nom d'utilisateur : " . $username . "\n";
+        $message .= "Mail : " . $demandeCompte->getMail() . "\n";
+        $message .= "Mot de passe : " . $mdp . "\n\n";
+        $message .= "Vous pouvez vous connecter à l'application avec votre adresse mail et ce mot de passe.\n\n";
+        $message .= "Cordialement,\n\n";
+
+        $email = (new Email())
+            ->from('you@example.com')
+            ->to($demandeCompte->getMail())
+            ->subject('Votre demande de compte a été validée' . $demandeCompte->getPrenom() . ' ' . $demandeCompte->getNom())
+            ->text($message);
+
+        $mailer->send($email);
+
+
+        //On récupere l'objet EtatsRequetes avec l'état 'Validé par admin'
+        $etatRequeteRepo = $entityManager->getRepository(EtatsRequetes::class);
+
+        $etatRequete = $etatRequeteRepo->findOneBy(['etat' => 'Validé par admin']);
+
+        //On change le statut de la demande de compte
+        $demandeCompte->setEtatRequete($etatRequete);
+
+        $entityManager->persist($demandeCompte);
+        $entityManager->flush();
 
         //On crée un message flash pour informer l'utilisateur que la demande a bien été validée
         $session = $request->getSession();

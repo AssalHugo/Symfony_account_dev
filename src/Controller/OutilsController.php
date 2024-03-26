@@ -7,6 +7,7 @@ use App\Entity\Employe;
 use App\Entity\EtatsRequetes;
 use App\Entity\Groupes;
 use App\Entity\Requetes;
+use App\Entity\User;
 use App\Form\RequeteType;
 use App\Form\TrombinoscopeType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,6 +17,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 class OutilsController extends AbstractController
@@ -131,7 +135,7 @@ class OutilsController extends AbstractController
 
 
     #[Route('/outils/formulaire/{indexRequete}', name: 'formulaireDemandeCompte', requirements: ['indexRequete' => '\d*'], defaults: ['indexRequete' => null])]
-    public function formulaireDemandeCompte($indexRequete, Request $request, EntityManagerInterface $entityManager): Response
+    public function formulaireDemandeCompte($indexRequete, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
     {
 
         $requete = new Requetes();
@@ -154,9 +158,39 @@ class OutilsController extends AbstractController
             //On donne l'état de la requête qui est en attente
             $etatRequete = $entityManager->getRepository(EtatsRequetes::class)->findOneBy(['etat' => 'Demandé']);
             $requete->setEtatRequete($etatRequete);
+            //On donne la date de la requête à la seconde près
+            $requete->setDateRequete(new \DateTime('now'));
 
             $entityManager->persist($requete);
             $entityManager->flush();
+
+            //On envoie un mail aux RH et aux admins pour les informer de la demande
+            $userRepo = $entityManager->getRepository(User::class);
+            $rh = $userRepo->findByRole('ROLE_RH');
+            $admin = $userRepo->findByRole('ROLE_ADMIN');
+
+            //On merge les deux
+            $recipients = array_merge($rh, $admin);
+
+            foreach ($recipients as $recipient) {
+
+                $text = "Demande de création de compte informatique : \n
+                        L'utilisateur " . $employe->getNom() . " " . $employe->getPrenom() . " a demandé la création du compte informatique, suivant : \n
+                        Nom : " . $requete->getNom() . "\n
+                        Prénom : " . $requete->getPrenom() . "\n
+                        Mail : " . $requete->getMail() . "\n
+                        Téléphone : " . $requete->getTelephone() . "\n
+                        Commentaire : " . $requete->getCommentaire() . "\n
+                        Merci de bien vouloir valider ou refuser la demande.";
+
+                $email = (new Email())
+                    ->from('mail@gmail.com')
+                    ->to($recipient->getEmail())
+                    ->subject('Demande de compte numéro : ' . $requete->getDateRequete()->format('YmdHis'))
+                    ->text($text);
+
+                $mailer->send($email);
+            }
 
             $session = $request->getSession();
             $session->getFlashBag()->add('message', 'La demande a bien été envoyée, aux RH pour validation.');

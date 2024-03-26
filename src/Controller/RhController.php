@@ -7,6 +7,7 @@ use App\Entity\Employe;
 use App\Entity\EtatsRequetes;
 use App\Entity\Groupes;
 use App\Entity\Requetes;
+use App\Entity\User;
 use App\Form\RequeteType;
 use App\Form\ResponsableType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,6 +16,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 class RhController extends AbstractController
@@ -33,7 +37,7 @@ class RhController extends AbstractController
     }
 
     #[Route('/rh/validerDemandeCompte/{id}', name: 'validerDemandeCompte')]
-    public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request): Response
+    public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request, MailerInterface $mailer): Response
     {
         //On récupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
@@ -50,6 +54,35 @@ class RhController extends AbstractController
 
         $entityManager->persist($demandeCompte);
         $entityManager->flush();
+
+        //On envoie un mail aux admins pour les informer de la demande de compte
+        $userRepo = $entityManager->getRepository(User::class);
+        $admins = $userRepo->findByRole('ROLE_ADMIN');
+
+        //On envoie un mail à chaque admin
+        foreach ($admins as $admin) {
+
+            $message = "Bonjour, \n\n";
+            $message .= "L'utilisateur " . $demandeCompte->getPrenom() . " " . $demandeCompte->getNom() . " a été validé par le service RH. \n";
+            $message .= "Vous pouvez maintenant créer son compte. \n\n";
+            $message .= "Cordialement, \n";
+
+            $email = (new Email())
+                ->from('you@example.com')
+                ->to($admin->getEmail())
+                ->subject('Validation de demande de compte numéro : ' . $demandeCompte->getDateRequete()->format('YmdHis'))
+                ->text($message);
+
+            try {
+                $mailer->send($email);
+            } catch (TransportExceptionInterface $e) {
+                $session = $request->getSession();
+                $session->getFlashBag()->add('message', 'Erreur lors de l\'envoi du mail.');
+                $session->set('statut', 'danger');
+                return $this->redirect($this->generateUrl('validerDemandeCompte'));
+            }
+        }
+
 
         //On crée un message flash pour informer l'utilisateur que la demande a bien été validée
         $session = $request->getSession();
@@ -130,6 +163,8 @@ class RhController extends AbstractController
 
         $departements = $departementRepo->findAll();
 
+
+
         return $this->render('rh/listeDepartements.html.twig', [
             'departements' => $departements,
         ]);
@@ -141,7 +176,6 @@ class RhController extends AbstractController
 
         //On récupère le departement
         $groupesRepo = $entityManager->getRepository(Groupes::class);
-
 
         $groupe = $groupesRepo->find($id);
 
