@@ -351,7 +351,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/user/contactSecondaires', name: 'contacts')]
-    public function contactSecondaires(Request $request, EntityManagerInterface $entityManager) : Response{
+    public function contactSecondaires(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer) : Response{
 
         //On récupère l'employe qui est connecté
         $employe = $this->getUser()->getEmploye();
@@ -362,16 +362,22 @@ class UserController extends AbstractController
 
         $formContacts->handleRequest($request);
 
-        if($request->isMethod('POST') && $formContacts->isSubmitted() && $formContacts->isValid()){
+        if($formContacts->isSubmitted() && $formContacts->isValid()){
 
             $entityManager->persist($employe);
             $entityManager->flush();
 
             //On envoie un mail sur son adresse mail secondaire
-            $email = new Email();
+            $email = (new Email())
+                ->from('mail@gmail.com')
+                ->to($employe->getMailSecondaire())
+                ->subject('Modification des contacts secondaires')
+                ->text('Les contacts secondaires ont bien étés modifiés');
+
+            $mailer->send($email);
 
             $session = $request->getSession();
-            $session->getFlashBag()->add('message', 'Les contacts secondaires ont bien étés modifiés');
+            $session->getFlashBag()->add('message', 'Les contacts secondaires ont bien étés modifiés, un mail vous a été envoyé sur votre adresse mail secondaire');
             $session->set('statut', 'success');
 
             return $this->redirect($this->generateUrl('contacts'));

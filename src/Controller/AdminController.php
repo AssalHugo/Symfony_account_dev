@@ -8,6 +8,7 @@ use App\Entity\Requetes;
 use App\Entity\Telephones;
 use App\Entity\User;
 use App\Form\ChangerMDPType;
+use App\Form\ChangerRoleType;
 use App\Form\RequeteType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -251,6 +252,50 @@ class AdminController extends AbstractController
         }
 
         return $this->render('admin/changerMDP.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/admin/changerRole', name: 'changerRoleAdmin')]
+    public function changerRole(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        //On créé un formulaire qui va permettre de changer le role d'un utilisateur
+        $form = $this->createForm(ChangerRoleType::class);
+
+        $form->add('submit', SubmitType::class, [
+            'label' => 'Changer le role',
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            //On récupère les données du formulaire
+            $data = $form->getData();
+
+            //On récupère l'utilisateur
+            $user = $data['user'];
+
+            //On récupère le role
+            $role = $data['role'];
+            //On met le role dans un tableau car la fonction setRoles attend un tableau
+            $role = [$role];
+
+            //On change le role de l'utilisateur
+            $user->setRoles($role);
+
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            //On crée un message flash pour informer l'utilisateur que le role a bien été changé
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "Le role a bien été changé.");
+            $session->set('statut', 'success');
+
+            return $this->redirectToRoute('changerRoleAdmin');
+        }
+
+        return $this->render('admin/changerRole.html.twig', [
             'form' => $form->createView(),
         ]);
     }

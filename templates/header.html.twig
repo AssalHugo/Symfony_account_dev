@@ -29,7 +29,7 @@
             <div class="dropdown"> 
               <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-mdb-toggle="dropdown" aria-expanded="false"> Outils </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <li><a class="dropdown-item" href="#">Redirection mail</a></li>
+                  <li><a class="dropdown-item" href="{{ path('redirectionMail') }}">Redirection mail</a></li>
                   <li><a class="dropdown-item" href="{{ path('trombinoscope') }}">Trombinoscope</a></li>
                   <li><a class="dropdown-item" href="{{ path('formulaireDemandeCompte', ) }}">Demande de compte</a></li>
                   </ul>
@@ -51,7 +51,7 @@
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <li><a class="dropdown-item" href="{{ path('changerMotDePasseAdmin') }}">Changer mot de passe</a></li>
                   <li><a class="dropdown-item" href="{{ path('listeDemandesComptesAdmin') }}">Liste des demandes de compte</a></li>
-                  <li><a class="dropdown-item" href="">Changer le rôle d'un utilisateur</a></li>
+                  <li><a class="dropdown-item" href="{{ path('changerRoleAdmin') }}">Changer le rôle d'un utilisateur</a></li>
               </ul>
           </div>
         </li>

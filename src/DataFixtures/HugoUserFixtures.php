@@ -30,6 +30,7 @@ class HugoUserFixtures extends Fixture
         $employe->setTelephoneSecondaire("0101010101");
         $employe->setAnneeNaissance(2024);
         $employe->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
+        $employe->setRedirectionMail(true);
 
         $employe2 = new Employe();
         $employe2->setNom("Jean");
@@ -42,6 +43,7 @@ class HugoUserFixtures extends Fixture
         $employe2->setTelephoneSecondaire("0101010101");
         $employe2->setAnneeNaissance(2004);
         $employe2->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
+        $employe2->setRedirectionMail(true);
 
         $employe->setReferent($employe2);
 
@@ -171,6 +173,8 @@ class HugoUserFixtures extends Fixture
             $employe->setTelephoneSecondaire("0101010101");
             $employe->setAnneeNaissance(2024);
             $employe->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
+            $employe->setRedirectionMail(true);
+
 
             $user = new User();
             $user->setUsername("user" . $i);

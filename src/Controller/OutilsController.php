@@ -8,6 +8,8 @@ use App\Entity\EtatsRequetes;
 use App\Entity\Groupes;
 use App\Entity\Requetes;
 use App\Entity\User;
+use App\Form\ContactSecondairesType;
+use App\Form\RedirectionMailType;
 use App\Form\RequeteType;
 use App\Form\TrombinoscopeType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -250,6 +252,36 @@ class OutilsController extends AbstractController
 
         return $this->render('rh/modifierDemandeCompte.html.twig', [
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/outils/redirectionMail', name: 'redirectionMail')]
+    public function redirectionMail(Request $request, EntityManagerInterface $entityManager): Response
+    {
+
+        //On récupère l'employe qui est connecté
+        $employe = $this->getUser()->getEmploye();
+
+        $formContacts = $this->createForm(RedirectionMailType::class, $employe);
+
+        $formContacts->add('valider', SubmitType::class, ['label' => 'Valider']);
+
+        $formContacts->handleRequest($request);
+
+        if ($formContacts->isSubmitted() && $formContacts->isValid()) {
+
+            $entityManager->persist($employe);
+            $entityManager->flush();
+
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', 'La redirection a bien été modifiée.');
+            $session->set('statut', 'success');
+
+            return $this->redirectToRoute('redirectionMail');
+        }
+
+        return $this->render('outils/redirectionMail.html.twig', [
+            'formContacts' => $formContacts->createView(),
         ]);
     }
 }

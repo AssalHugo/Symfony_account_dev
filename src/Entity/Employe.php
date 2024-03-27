@@ -83,6 +83,9 @@ class Employe
     #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'referent')]
     private Collection $referent_de_employe;
 
+    #[ORM\Column]
+    private ?bool $redirection_mail = null;
+
 
     public function __construct()
     {
@@ -508,6 +511,18 @@ class Employe
                 $referentDeEmploye->setReferent(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isRedirectionMail(): ?bool
+    {
+        return $this->redirection_mail;
+    }
+
+    public function setRedirectionMail(bool $redirection_mail): static
+    {
+        $this->redirection_mail = $redirection_mail;
 
         return $this;
     }
