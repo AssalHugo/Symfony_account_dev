@@ -43,6 +43,8 @@ class HugoUserFixtures extends Fixture
         $employe2->setAnneeNaissance(2004);
         $employe2->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
 
+        $employe->setReferent($employe2);
+
         $user = new User();
         $user->setUsername("hassal");
         $user->setEmail("hugo@mail.com");

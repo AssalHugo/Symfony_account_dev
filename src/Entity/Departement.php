@@ -22,6 +22,7 @@ class Departement
     private ?string $acronyme = null;
 
     #[ORM\OneToOne(inversedBy: 'responsable_departement', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Employe $responsable = null;
 
     #[ORM\OneToMany(targetEntity: Groupes::class, mappedBy: 'departement')]

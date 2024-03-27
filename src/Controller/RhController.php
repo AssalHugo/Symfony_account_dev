@@ -155,17 +155,16 @@ class RhController extends AbstractController
         ]);
     }
 
-    #[Route('/rh/listeDepartements', name: 'listeDepartements')]
-    public function listeGroupesParDepartements(EntityManagerInterface $entityManager): Response
+    #[Route('/rh/listeDepartements/{index}', name: 'listeDepartements', requirements: ['index' => '\d*'], defaults: ['index' => null])]
+    public function listeGroupesParDepartements(EntityManagerInterface $entityManager, Request $request, $index): Response
     {
         //On récupère les departements
-        global $request;
         $departementRepo = $entityManager->getRepository(Departement::class);
 
         $departements = $departementRepo->findAll();
 
         $formsResponsableDep = [];
-        foreach ($departements as $departement) {
+        foreach ($departements as $i => $departement) {
             //On crée un formulaire pour modifier le responsable du département
             $form = $this->createFormBuilder($departement)
                 ->add('responsable', EntityType::class, [
@@ -177,18 +176,27 @@ class RhController extends AbstractController
                 ])
                 ->getForm();
 
-            $form->add('submit', SubmitType::class, [
+            $form->add('modifier', SubmitType::class, [
                 'label' => 'Modifier',
+                'attr' => ['data-index' => $index],
             ]);
 
-            if ($form->isSubmitted() && $form->isValid()) {
+            if ($index == $i) {
+                $form->handleRequest($request);
+            }
+
+
+            if ($form->isSubmitted() && $form->isValid() && $index == $i && $form->get('modifier')->isClicked()) {
+
                 $entityManager->persist($departement);
                 $entityManager->flush();
 
                 //On crée un message flash pour informer l'utilisateur que le responsable a bien été modifié
                 $session = $request->getSession();
-                $session->getFlashBag()->add('message', "Le responsable a bien été modifié.");
+                $session->getFlashBag()->add('message', "Le responsable du département a bien été modifié.");
                 $session->set('statut', 'success');
+
+                return $this->redirectToRoute('listeDepartements');
             }
 
             $formsResponsableDep[] = $form->createView();

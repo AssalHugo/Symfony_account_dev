@@ -77,6 +77,12 @@ class Employe
     #[ORM\OneToMany(targetEntity: Requetes::class, mappedBy: 'referent')]
     private Collection $referentDe;
 
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'referent_de')]
+    private ?self $referent = null;
+
+    #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'referent')]
+    private Collection $referent_de_employe;
+
 
     public function __construct()
     {
@@ -87,6 +93,7 @@ class Employe
         $this->groupes_secondaires = new ArrayCollection();
         $this->referentDe = new ArrayCollection();
         $this->responsable_de = new ArrayCollection();
+        $this->referent_de_employe = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -455,6 +462,50 @@ class Employe
             // set the owning side to null (unless already changed)
             if ($responsableDe->getResponsable() === $this) {
                 $responsableDe->setResponsable(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getReferent(): ?self
+    {
+        return $this->referent;
+    }
+
+    public function setReferent(?self $referent): static
+    {
+        $this->referent = $referent;
+
+        $referent->addReferentDeEmploye($this);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Employe>
+     */
+    public function getReferentDeEmploye(): Collection
+    {
+        return $this->referent_de_employe;
+    }
+
+    public function addReferentDeEmploye(Employe $referentDeEmploye): static
+    {
+        if (!$this->referent_de_employe->contains($referentDeEmploye)) {
+            $this->referent_de_employe->add($referentDeEmploye);
+            $referentDeEmploye->setReferent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReferentDeEmploye(Employe $referentDeEmploye): static
+    {
+        if ($this->referent_de_employe->removeElement($referentDeEmploye)) {
+            // set the owning side to null (unless already changed)
+            if ($referentDeEmploye->getReferent() === $this) {
+                $referentDeEmploye->setReferent(null);
             }
         }
 
