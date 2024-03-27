@@ -184,7 +184,7 @@ class UserController extends AbstractController
                     ->text($message);
 
                 try {
-                    $mailer->send($email);
+                    //$mailer->send($email);
                 } catch (TransportExceptionInterface $e) {
                     $session = $request->getSession();
                     $session->getFlashBag()->add('message', 'Le message n\'a pas pu être envoyé');
@@ -374,7 +374,7 @@ class UserController extends AbstractController
                 ->subject('Modification des contacts secondaires')
                 ->text('Les contacts secondaires ont bien étés modifiés');
 
-            $mailer->send($email);
+            //$mailer->send($email);
 
             $session = $request->getSession();
             $session->getFlashBag()->add('message', 'Les contacts secondaires ont bien étés modifiés, un mail vous a été envoyé sur votre adresse mail secondaire');

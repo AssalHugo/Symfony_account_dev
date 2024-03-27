@@ -74,7 +74,7 @@ class RhController extends AbstractController
                 ->text($message);
 
             try {
-                $mailer->send($email);
+                //$mailer->send($email);
             } catch (TransportExceptionInterface $e) {
                 $session = $request->getSession();
                 $session->getFlashBag()->add('message', 'Erreur lors de l\'envoi du mail.');

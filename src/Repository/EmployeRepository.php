@@ -57,6 +57,17 @@ class EmployeRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    public function findByPrenomNom($prenom, $nom): array
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.prenom LIKE :prenom')
+            ->andWhere('e.nom LIKE :nom')
+            ->setParameter('prenom', '%'.$prenom.'%')
+            ->setParameter('nom', '%'.$nom.'%')
+            ->getQuery()
+            ->getResult();
+    }
+
 
     /**
      * Fonction qui permet de récupérer les employés en fonction des id des groupes, des id des départements et des id des statuts

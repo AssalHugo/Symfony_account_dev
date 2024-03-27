@@ -191,7 +191,7 @@ class OutilsController extends AbstractController
                     ->subject('Demande de compte numéro : ' . $requete->getDateRequete()->format('YmdHis'))
                     ->text($text);
 
-                $mailer->send($email);
+                //$mailer->send($email);
             }
 
             $session = $request->getSession();
