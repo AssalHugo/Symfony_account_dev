@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container">
+    <h4>Voici la liste des employes qui ont le meme nom, que le nom indiqués sur la demande de compte : {{ demande.prenom }} {{ demande.nom }}</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Prénom</th>
+                <th scope="col">Nom</th>
+                <th scope="col">Date début contrat</th>
+                <th scope="col">Date fin contrat</th>
+                <th scope="col">Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employe in employes %}
+                <tr>
+                    <td>{{ employe.prenom }}</td>
+                    <td>{{ employe.nom }}</td>
+                    <td>{{ employe.contrats| last .datedebut|date('d/m/Y') }}</td>
+                    <td>{{ employe.contrats| last .datefin|date('d/m/Y') }}</td>
+                    <td>{{ employe.contrats| last .status.type }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <h4>Vous pouvez séléctionner un employé, si c'est le même individu que sur la demande de compte</h4>
+    {{ form(form) }}
+    <br>
+    <h4>Si l'employé n'a pas de compte, vous pouvez le créer</h4>
+    <a href="{{ path('validerDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-success">Créer l'employé</a>
+</div>
+{% endblock %}

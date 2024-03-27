@@ -11,6 +11,7 @@ use App\Form\ChangerMDPType;
 use App\Form\ChangerRoleType;
 use App\Form\RequeteType;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,6 +37,81 @@ class AdminController extends AbstractController
         ]);
     }
 
+    #[Route('/admin/verificationDemandeCompte/{id}', name: 'verificationDemandeCompteAdmin')]
+    public function verificationDemandeCompte($id, EntityManagerInterface $entityManager, Request $request): Response
+    {
+        //On Réccupère la demande de compte
+        $requetesRepo = $entityManager->getRepository(Requetes::class);
+
+        $demandeCompte = $requetesRepo->find($id);
+
+        //On récupère les employes qui ont le même nom et prénom que la demande de compte
+        $employeRepo = $entityManager->getRepository(Employe::class);
+
+        $employes = $employeRepo->findBy(['nom' => $demandeCompte->getNom(), 'prenom' => $demandeCompte->getPrenom()]);
+
+        //On crée un formulaire pour séléctionner un des employés pour indiquer que c'est bien la personne dont on veut créer le compte
+        $form = $this->createFormBuilder()
+            ->add('employe', EntityType::class, [
+                'class' => Employe::class,
+                'choice_label' => function ($employe) {
+                    return $employe->getNom() . ' ' . $employe->getPrenom() . ' - ' . $employe->getContrats()[count($employe->getContrats()) - 1]->getDateDebut()->format('d/m/Y') . ' - ' . $employe->getContrats()[count($employe->getContrats()) - 1]->getDateFin()->format('d/m/Y');
+                },
+                'label' => 'La demande de compte correspond à cet employé :',
+            ])
+            ->add('valider', SubmitType::class, ['label' => 'Valider'])
+            ->add('annuler', SubmitType::class, ['label' => 'Annuler', 'attr' => ['class' => 'btn-secondary']])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() && $form->get('valider')->isClicked()) {
+            //On récupère les données du formulaire afin de modifier l'employe séléctionné avec les informations de la demande de compte
+            $data = $form->getData();
+
+            $employe = $data['employe'];
+            $employe->setNom($demandeCompte->getNom());
+            $employe->setPrenom($demandeCompte->getPrenom());
+            $employe->setGroupePrincipal($demandeCompte->getGroupePrincipal());
+            $employe->addLocalisation($demandeCompte->getLocalisation());
+            $employe->addContrat($demandeCompte->getContrat());
+            $employe->setSyncReseda(false);
+            $employe->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
+            $employe->setRedirectionMail(true);
+
+            $entityManager->persist($employe);
+            $entityManager->flush();
+
+            //On récupere l'objet EtatsRequetes avec l'état 'Validé par admin'
+            $etatRequeteRepo = $entityManager->getRepository(EtatsRequetes::class);
+
+            $etatRequete = $etatRequeteRepo->findOneBy(['etat' => 'Validé par admin']);
+
+            //On change le statut de la demande de compte
+            $demandeCompte->setEtatRequete($etatRequete);
+
+            $entityManager->persist($demandeCompte);
+            $entityManager->flush();
+
+            //On crée un message flash pour informer l'utilisateur que la demande a bien été vérifiée
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "L'employé a bien été mis à jour, avec les informations de la demande de compte.");
+            $session->set('statut', 'success');
+
+            return $this->redirectToRoute('listeDemandesComptesAdmin');
+        }
+        else if ($form->get('annuler')->isClicked()) {
+            return $this->redirectToRoute('listeDemandesComptesAdmin');
+        }
+
+        return $this->render('admin/verificationDemandeCompte.html.twig', [
+            'form' => $form->createView(),
+            'employes' => $employes,
+            'demande' => $demandeCompte,
+        ]);
+
+    }
+
     #[Route('/admin/validerDemandeCompte/{id}', name: 'validerDemandeCompteAdmin')]
     public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
     {
@@ -43,7 +119,6 @@ class AdminController extends AbstractController
         $requetesRepo = $entityManager->getRepository(Requetes::class);
 
         $demandeCompte = $requetesRepo->find($id);
-
 
 
         //On crée un nouvel utilisateur
@@ -87,6 +162,7 @@ class AdminController extends AbstractController
         $employe->addContrat($demandeCompte->getContrat());
         $employe->setSyncReseda(false);
         $employe->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
+        $employe->setRedirectionMail(true);
 
         //On rajoute l'employe à l'utilisateur
         $user->setEmploye($employe);

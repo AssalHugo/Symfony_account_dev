@@ -2,7 +2,7 @@
 {% block validerSupprimer %}
     {% if demande.etatRequete.etat == 'Validé par RH'%}
     <td>
-        <a href="{{ path('validerDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-success">Valider</a>
+        <a href="{{ path('verificationDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-success">Formulaire de validation</a>
     </td>
     <td>
         <a href="{{ path('modifierDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-primary">Modifier</a>
