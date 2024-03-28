@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container">
+    <h1 class="text-center">Informations de l'employe : {{ employe.prenom }} {{ employe.nom }}</h1>
+    <br>
+    {{ form(form) }}
+</div>
+{% endblock %}

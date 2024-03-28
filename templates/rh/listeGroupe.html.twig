@@ -35,6 +35,7 @@
                 <th scope="col">Date fin contrat</th>
                 <th scope="col">Statut</th>
                 <th scope="col"></th>
+                <th scope="col"></th>
             </tr>
             </thead>
             <tbody>
@@ -45,6 +46,7 @@
                     <td>{{ employe.contrats| last .datedebut|date('d/m/Y') }}</td>
                     <td>{{ employe.contrats| last .datefin|date('d/m/Y') }}</td>
                     <td>{{ employe.contrats| last .status.type }}</td>
+                    <td><td><a href="{{ path('infoEmploye', {'idEmploye': employe.id, 'idGroupe' : groupe.id}) }}" class="btn btn-info">Infos</a></td>
                     <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
                 </tr>
             {% endfor %}
@@ -55,6 +57,7 @@
                     <td>{{ employeSec.contrats| last .datedebut|date('d/m/Y') }}</td>
                     <td>{{ employeSec.contrats| last .datefin|date('d/m/Y') }}</td>
                     <td>{{ employeSec.contrats| last .status.type }}</td>
+                    <td><td><a href="{{ path('infoEmploye', {'idEmploye': employeSec.id, 'idGroupe' : groupe.id}) }}" class="btn btn-info">Infos</a></td>
                     <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
                 </tr>
             {% endfor %}

@@ -18,7 +18,8 @@ class ChangerRoleType extends AbstractType
             ->add('user', EntityType::class, [
                 'class' => User::class,
                 'choice_label' => 'username',
-                'label' => 'Nom d\'utilisateur : '
+                'label' => 'Nom d\'utilisateur : ',
+                'attr' => ['id' => 'user_select']
             ])
             ->add('role', ChoiceType::class, [
                 'choices' => [
@@ -26,10 +27,9 @@ class ChangerRoleType extends AbstractType
                     'Responsable de Groupe' => 'ROLE_RESPONSABLE_GROUPE',
                     'RH' => 'ROLE_RH',
                     'Administrateur' => 'ROLE_ADMIN',
-
                 ],
-                'label' => 'Rôle : '
-            ])
-        ;
+                'label' => 'Rôle : ',
+                'attr' => ['id' => 'role_select']
+            ]);
     }
 }

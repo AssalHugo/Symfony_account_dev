@@ -11,10 +11,10 @@ use App\Form\ChangerMDPType;
 use App\Form\ChangerRoleType;
 use App\Form\RequeteType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
@@ -123,6 +123,8 @@ class AdminController extends AbstractController
 
         //On change le statut de la demande de compte
         $demandeCompte->setEtatRequete($etatRequete);
+        //On set la date de validation de la demande de compte
+        $demandeCompte->setDateValidation(new \DateTime());
 
         $entityManager->persist($demandeCompte);
         $entityManager->flush();
@@ -141,7 +143,6 @@ class AdminController extends AbstractController
     {
         //On récupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
-
         $demandeCompte = $requetesRepo->find($id);
 
 
@@ -191,9 +192,13 @@ class AdminController extends AbstractController
         //On rajoute l'employe à l'utilisateur
         $user->setEmploye($employe);
 
+        //On set la date de validation de la demande de compte
+        $demandeCompte->setDateValidation(new \DateTime());
+
         $entityManager->persist($employe);
         $entityManager->persist($user);
         $entityManager->persist($tel);
+        $entityManager->persist($demandeCompte);
         $entityManager->flush();
 
         //On envoie un mail à l'utilisateur pour lui communiquer son mot de passe
@@ -398,5 +403,15 @@ class AdminController extends AbstractController
         return $this->render('admin/changerRole.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    #[Route('/admin/{id}/role', name: 'roleAdmin')]
+    public function getRole($id, EntityManagerInterface $entityManager): JsonResponse {
+
+        $userRepo = $entityManager->getRepository(User::class);
+
+        $user = $userRepo->find($id);
+
+        return new JsonResponse($user->getRoles()[0]);
     }
 }

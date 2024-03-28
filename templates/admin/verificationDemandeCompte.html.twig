@@ -33,5 +33,8 @@
 
     <h4>Si l'employé n'a pas de compte, vous pouvez le créer</h4>
     <a href="{{ path('validerDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-success">Créer l'employé</a>
+    <br>
+    <br>
+    <a href="{{ path('listeDemandesComptesAdmin') }}" class="btn btn-primary">Retour</a>
 </div>
 {% endblock %}

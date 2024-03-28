@@ -7,6 +7,8 @@
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th>Date de demande</th>
+                    <th>Date de validation</th>
                     <th>Prénom</th>
                     <th>Nom</th>
                     <th>Date de début</th>
@@ -26,6 +28,8 @@
             <tbody>
                 {% for demande in demandes %}
                     <tr>
+                        <td>{{ demande.dateRequete|date('d/m/Y/H:i:s') }}</td>
+                        <td>{% if demande.dateValidation %}{{ demande.dateValidation|date('d/m/Y/H:i:s') }}{% endif %}</td>
                         <td>{{ demande.prenom }}</td>
                         <td>{{ demande.nom }}</td>
                         <td>{{ demande.contrat.datedebut|date('d/m/Y') }}</td>

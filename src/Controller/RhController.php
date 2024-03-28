@@ -2,14 +2,21 @@
 
 namespace App\Controller;
 
+use App\Entity\Contrats;
 use App\Entity\Departement;
 use App\Entity\Employe;
 use App\Entity\EtatsRequetes;
 use App\Entity\Groupes;
+use App\Entity\Localisations;
 use App\Entity\Requetes;
+use App\Entity\Telephones;
 use App\Entity\User;
+use App\Form\ContactSuppportType;
+use App\Form\EmployeInformationsType;
+use App\Form\LocalisationType;
 use App\Form\RequeteType;
 use App\Form\ResponsableType;
+use App\Form\TelephonesType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -293,6 +300,52 @@ class RhController extends AbstractController
             'groupe' => $groupe,
             'form' => $form->createView(),
             'formAjoutEmploye' => $formAjoutEmploye->createView(),
+        ]);
+    }
+
+    #[Route('/rh/infoEmploye/{idEmploye}/{idGroupe}', name: 'infoEmploye')]
+    public function infoEmploye($idEmploye, $idGroupe, EntityManagerInterface $entityManager, Request $request): Response
+    {
+        //On récupère l'employé
+        $employeRepo = $entityManager->getRepository(Employe::class);
+
+        $employe = $employeRepo->find($idEmploye);
+
+
+        //On récupère le User connecté
+        $user = $employe->getUser();
+
+        //On crée un formulaire pour modifier les informations de l'employé
+        $form = $this->createForm(EmployeInformationsType::class, $employe);
+
+        $form->add('submit', SubmitType::class, [
+            'label' => 'Modifier',
+        ]);
+        $form->add('annuler', SubmitType::class, [
+            'label' => 'Annuler',
+            'attr' => ['class' => 'btn-secondary'],
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() && $form->get('submit')->isClicked()) {
+            $entityManager->persist($employe);
+            $entityManager->flush();
+
+            //On crée un message flash pour informer l'utilisateur que les informations ont bien été modifiées
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "Les informations ont bien été modifiées.");
+            $session->set('statut', 'success');
+
+            return $this->redirectToRoute('infoEmploye', ['idEmploye' => $idEmploye]);
+        }
+        else if ($form->get('annuler')->isClicked()) {
+            return $this->redirectToRoute('listeGroupe', ['id' => $idGroupe]);
+        }
+
+        return $this->render('rh/infoEmploye.html.twig', [
+            'employe' => $employe,
+            'form' => $form->createView(),
         ]);
     }
 }

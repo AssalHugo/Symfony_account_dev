@@ -48,6 +48,9 @@ class Requetes
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $date_requete = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $date_validation = null;
+
 
     public function getId(): ?int
     {
@@ -182,6 +185,18 @@ class Requetes
     public function setDateRequete(\DateTimeInterface $date_requete): static
     {
         $this->date_requete = $date_requete;
+
+        return $this;
+    }
+
+    public function getDateValidation(): ?\DateTimeInterface
+    {
+        return $this->date_validation;
+    }
+
+    public function setDateValidation(?\DateTimeInterface $date_validation): static
+    {
+        $this->date_validation = $date_validation;
 
         return $this;
     }
