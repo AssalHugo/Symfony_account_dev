@@ -4,7 +4,9 @@ namespace App\Repository;
 
 use App\Entity\Employe;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service_locator;
 
 /**
  * @extends ServiceEntityRepository<Employe>
@@ -55,6 +57,13 @@ class EmployeRepository extends ServiceEntityRepository
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    public function findAllEmployes() : Query{
+
+        return $this->createQueryBuilder('e')
+                    ->select('e')
+                    ->getQuery();
     }
 
     public function findByPrenomNom($prenom, $nom): array

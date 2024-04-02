@@ -13,6 +13,7 @@ use App\Form\RedirectionMailType;
 use App\Form\RequeteType;
 use App\Form\TrombinoscopeType;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,6 +27,14 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class OutilsController extends AbstractController
 {
+
+    private PaginatorInterface $paginator;
+
+    public function __construct(PaginatorInterface $paginator)
+    {
+        $this->paginator = $paginator;
+    }
+
     /**
      * Ce controlleur permet d'afficher le trombinoscope qui peut etre filtré par département, par groupe, par statut
      * @return Response
@@ -53,10 +62,25 @@ class OutilsController extends AbstractController
 
             //On récupère les utilisateurs en fonction des filtres
             $employes = $employeRepository->findByFiltre($departement, $groupe, $statut);
-        } //Sinon si le GET est vide
-        else if (empty($request->query->all())) {
-            //On récupère tous les utilisateurs
-            $employes = $employeRepository->findAll();
+        } //Sinon si le GET est vide ou contient la page
+        else if (empty($request->query->all()) || $request->query->get('p') != null) {
+            //On récupère tous les utilisateurs en fonction de la pagination
+            $page = $request->query->getInt('p', 1);
+
+            $query = $employeRepository->findAllEmployes();
+
+            $employes = $this->paginator->paginate(
+                $query,
+                $page,
+                30
+            );
+
+            //On traite si aucun employés
+            if (count($employes) == 0) {
+                $session = $request->getSession();
+                $session->getFlashBag()->add('message', 'Aucun employé trouvé.');
+                $session->set('statut', 'danger');
+            }
         } //Sinon
         else {
             //On récupère les utilisateurs en fonction des filtres
@@ -98,6 +122,7 @@ class OutilsController extends AbstractController
         $nbDepartementsAffiches = 0;
         $departements = [];
         foreach ($employes as $employe) {
+
             $groupePrincipal = $employe->getGroupePrincipal();
             if ($groupePrincipal != null && !in_array($groupePrincipal, $groupes)) {
                 $nbGroupesAffiches++;
@@ -137,8 +162,7 @@ class OutilsController extends AbstractController
 
 
     #[Route('/outils/formulaire/{indexRequete}', name: 'formulaireDemandeCompte', requirements: ['indexRequete' => '\d*'], defaults: ['indexRequete' => null])]
-    public function formulaireDemandeCompte($indexRequete, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
-    {
+    public function formulaireDemandeCompte($indexRequete, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response {
 
         $requete = new Requetes();
 

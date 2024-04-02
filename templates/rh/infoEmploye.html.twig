@@ -6,37 +6,37 @@
         <br>
         {{ form_start(form) }}
 
-        {{ form_label(form.nom) }}
+        <h4>{{ form_label(form.nom) }}</h4>
         {{ form_widget(form.nom) }}
 
-        {{ form_label(form.prenom) }}
+        <h4>{{ form_label(form.prenom) }}</h4>
         {{ form_widget(form.prenom) }}
 
-        {{ form_label(form.photo) }}
+        <h4>{{ form_label(form.photo) }}</h4>
         {{ form_widget(form.photo) }}
 
-        {{ form_label(form.page_pro) }}
+        <h4>{{ form_label(form.page_pro) }}</h4>
         {{ form_widget(form.page_pro) }}
 
-        {{ form_label(form.idhal) }}
+        <h4>{{ form_label(form.idhal) }}</h4>
         {{ form_widget(form.idhal) }}
 
-        {{ form_label(form.orcid) }}
+        <h4>{{ form_label(form.orcid) }}</h4>
         {{ form_widget(form.orcid) }}
 
-        {{ form_label(form.mail_secondaire) }}
+        <h4>{{ form_label(form.mail_secondaire) }}</h4>
         {{ form_widget(form.mail_secondaire) }}
 
-        {{ form_label(form.telephone_secondaire) }}
+        <h4>{{ form_label(form.telephone_secondaire) }}</h4>
         {{ form_widget(form.telephone_secondaire) }}
 
-        {{ form_label(form.annee_naissance) }}
+        <h4>{{ form_label(form.annee_naissance) }}</h4>
         {{ form_widget(form.annee_naissance) }}
 
-        {{ form_label(form.redirection_mail) }}
+        <h4>{{ form_label(form.redirection_mail) }}</h4>
         {{ form_widget(form.redirection_mail) }}
 
-        {{ form_label(form.user) }}
+        <h4>{{ form_label(form.user) }}</h4>
         {{ form_widget(form.user) }}
 
         <div class="localisations-container" data-prototype="{{ form_widget(form.localisation.vars.prototype)|e('html_attr') }}">
@@ -68,6 +68,17 @@
         </div>
 
         <button type="button" class="add-groupe-button btn btn-primary">Ajouter un groupe</button>
+
+        <br>
+        <br>
+
+        <h4>{{ form_label(form.groupe_principal) }}</h4>
+        {{ form_widget(form.groupe_principal) }}
+
+        <h4>{{ form_label(form.referent) }}</h4>
+        {{ form_widget(form.referent) }}
+
+        <br>
 
         {{ form_end(form) }}
     </div>
