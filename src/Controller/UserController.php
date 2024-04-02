@@ -25,6 +25,15 @@ use App\Form\ContactSecondairesType;
 
 class UserController extends AbstractController
 {
+    /**
+     * Fonction qui permet d'afficher les informations de l'employé connecté
+     * @param $indexLocalisation
+     * @param $indexTelephone
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param MailerInterface $mailer
+     * @return Response
+     */
     #[Route('/user/mesInformations/{indexTelephone}/{indexLocalisation}', name: 'mesInfos', requirements: ['indexTelephone' => '\d*', 'indexLocalisation' => '\d*'], defaults: ['indexTelephone' => null, 'indexLocalisation' => null])]
     public function mesInformations($indexLocalisation, $indexTelephone, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response {
 
@@ -47,11 +56,11 @@ class UserController extends AbstractController
         $telephones = $employe->getTelephones();
 
 
-        //Partie localisation
+        //------------Partie localisation--------------
         //Pour chaques localisation de l'employe on crée un formulaire pour les modifier
         $formsLocalisations = [];
         foreach ($localisations as $i => $localisation){
-            // Créez une nouvelle instance de Localisations pour chaque formulaire
+
             $newLocalisation = new Localisations();
             $newLocalisation->setBureau($localisation->getBureau());
             $newLocalisation->setBatiment($localisation->getBatiment());
@@ -61,7 +70,7 @@ class UserController extends AbstractController
             $form->handleRequest($request);
 
             //Si le formulaire est soumis et valide et que ce soit le bon formulaire
-            if($form->isSubmitted() && $form->isValid() && $form->get('modifier')->isClicked() && $i == $indexLocalisation){
+            if($form->isSubmitted() && $form->isValid() && $i == $indexLocalisation){
                 // Mettez à jour l'adresse original avec les nouvelles informations
                 $localisation->setBureau($newLocalisation->getBureau());
                 $localisation->setBatiment($newLocalisation->getBatiment());
@@ -76,10 +85,12 @@ class UserController extends AbstractController
                 return $this->redirect($this->generateUrl('mesInfos'));
             }
 
+            //On crée un formulaire pour chaque localisation
             $formsLocalisations[] = $form->createView();
         }
 
 
+        //Partie pour ajouter une nouvelle localisation
         $localisation = new Localisations();
         $formLocalisation = $this->createForm(LocalisationType::class,$localisation);
 
@@ -87,13 +98,11 @@ class UserController extends AbstractController
 
         $formLocalisation->handleRequest($request);
 
-        if($request->isMethod('POST') && $formLocalisation->isSubmitted() && $formLocalisation->isValid()){
-
+        if($formLocalisation->isSubmitted() && $formLocalisation->isValid()){
 
             $employe->addLocalisation($localisation);
 
             $entityManager->persist($localisation);
-
             $entityManager->flush();
 
             $session = $request->getSession();
@@ -102,6 +111,7 @@ class UserController extends AbstractController
 
             return $this->redirect($this->generateUrl('mesInfos'));
         }
+
 
         //-----Partie Telephone-----
         //Pour chaques numéros de téléphone de l'employe on crée un formulaire pour les modifier
@@ -116,7 +126,7 @@ class UserController extends AbstractController
             $form->handleRequest($request);
 
             //Si le formulaire est soumis et valide et que ce soit le bon formulaire
-            if($request->isMethod('POST') && $form->isSubmitted() && $form->isValid() && $form->get('modifier')->isClicked() && $i == $indexTelephone){
+            if($form->isSubmitted() && $form->isValid() && $i == $indexTelephone){
                 // Mettez à jour le numéro de téléphone original avec les nouvelles informations
                 $telephone->setNumero($newTelephone->getNumero());
 
@@ -130,10 +140,12 @@ class UserController extends AbstractController
                 return $this->redirect($this->generateUrl('mesInfos'));
             }
 
+            //On crée un formulaire pour chaque téléphone
             $formsTelephones[] = $form->createView();
         }
 
 
+        //Partie pour ajouter un nouveau téléphone
         $telephone = new Telephones();
         $formTelephone = $this->createForm(TelephonesType::class,$telephone);
 
@@ -141,13 +153,11 @@ class UserController extends AbstractController
 
         $formTelephone->handleRequest($request);
 
-        if($request->isMethod('POST') && $formTelephone->isSubmitted() && $formTelephone->isValid()){
-
+        if($formTelephone->isSubmitted() && $formTelephone->isValid()){
 
             $employe->addTelephone($telephone);
 
             $entityManager->persist($telephone);
-
             $entityManager->flush();
 
             $session = $request->getSession();
@@ -217,11 +227,20 @@ class UserController extends AbstractController
         ]);
     }
 
+    /**
+     * Fonction qui permet de supprimer une localisation
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param $id
+     * @return Response
+     */
     #[Route('/user/mesInformations/removeLocalisation/{id}', name: 'removeLocalisation')]
     public function removeLocalisation(Request $request, EntityManagerInterface $entityManager, $id): Response{
 
+        //On récupère la localisation à supprimer
         $locaRepo = $entityManager->getRepository(Localisations::class);
         $localisation = $locaRepo->find($id);
+        //On la supprime
         $entityManager->remove($localisation);
         $entityManager->flush();
 
@@ -233,11 +252,20 @@ class UserController extends AbstractController
     }
 
 
+    /**
+     * Fonction qui permet de supprimer un téléphone
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param int $id
+     * @return Response
+     */
     #[Route('/user/mesInformations/removeTelephone/{id}', name: 'removeTelephone')]
     public function removeTelephone(Request $request, EntityManagerInterface $entityManager, int $id): Response{
 
+        //On récupère le téléphone à supprimer
         $teleRepo = $entityManager->getRepository(Telephones::class);
         $telephone = $teleRepo->find($id);
+        //On le supprime
         $entityManager->remove($telephone);
         $entityManager->flush();
 
@@ -249,6 +277,18 @@ class UserController extends AbstractController
     }
 
 
+    /**
+     * Fonction qui permet de modifier les identifiants numériques de l'employé
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param HttpClientInterface $client
+     * @return Response
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
     #[Route('/user/identifiantsNumeriques', name: 'idNum')]
     public function identidiantsNumeriques(Request $request, EntityManagerInterface $entityManager, HttpClientInterface $client): Response{
 
@@ -256,16 +296,15 @@ class UserController extends AbstractController
         $employe = $this->getUser()->getEmploye();
 
 
+        //On crée un formulaire pour modifier les identifiants numériques
         $formIdentifiants = $this->createForm(IdentifiantsType::class, $employe);
-
         $formIdentifiants->add('valider', SubmitType::class, ['label' => 'Valider']);
 
         $formIdentifiants->handleRequest($request);
 
-        if($request->isMethod('POST') && $formIdentifiants->isSubmitted() && $formIdentifiants->isValid()){
+        if($formIdentifiants->isSubmitted() && $formIdentifiants->isValid()){
 
             $entityManager->persist($employe);
-
             $entityManager->flush();
 
             $session = $request->getSession();
@@ -276,16 +315,15 @@ class UserController extends AbstractController
         }
 
 
-        //Partie test publication
+        //---------Partie test publications-----------
         $formTest = $this->createForm(TestPublicationType::class);
-
         $formTest->add('tester', SubmitType::class, ['label' => 'Tester']);
 
         $formTest->handleRequest($request);
 
         $content = "";
 
-        if($request->isMethod('POST') && $formTest->isSubmitted() && $formTest->isValid()){
+        if($formTest->isSubmitted() && $formTest->isValid()){
 
             $content = "<h6> Listes des publications : </h6>";
 
@@ -309,7 +347,7 @@ class UserController extends AbstractController
 
                 $orcid = $employe->getOrcid();
 
-                $q = "authOrcidIdExt_id:" . $orcid;
+                $q = $orcid;
             }
             else {//Si aucune cases n'est cochés on affiche la page
 
@@ -328,7 +366,7 @@ class UserController extends AbstractController
 
             $tabResponse = $response->toArray();
 
-            if (isset($tabResponse["response"]["docs"]))
+            if (isset($tabResponse["response"]["docs"]) && count($tabResponse["response"]["docs"]) > 0)
                 $tabResponse = $tabResponse["response"]["docs"];
             else
                 $tabResponse[0] = ["label_s" => "Aucune publication trouvée", "uri_s" => "https://api.archives-ouvertes.fr/search/?fq=(+{$q}+)" ];

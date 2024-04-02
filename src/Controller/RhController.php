@@ -17,6 +17,7 @@ use App\Form\LocalisationType;
 use App\Form\RequeteType;
 use App\Form\ResponsableType;
 use App\Form\TelephonesType;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -311,9 +312,18 @@ class RhController extends AbstractController
 
         $employe = $employeRepo->find($idEmploye);
 
+        //On récupère les localisations de l'employé
+        $originalLocalisations = new ArrayCollection();
+        foreach ($employe->getLocalisation() as $localisation) {
+            $originalLocalisations->add($localisation);
+        }
 
-        //On récupère le User connecté
-        $user = $employe->getUser();
+        $originalGroupesSecondaires = new ArrayCollection();
+        foreach ($employe->getGroupesSecondaires() as $groupe) {
+            $originalGroupesSecondaires->add($groupe);
+        }
+
+
 
         //On crée un formulaire pour modifier les informations de l'employé
         $form = $this->createForm(EmployeInformationsType::class, $employe);
@@ -326,9 +336,25 @@ class RhController extends AbstractController
             'attr' => ['class' => 'btn-secondary'],
         ]);
 
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid() && $form->get('submit')->isClicked()) {
+
+            //On supprime les localisations qui ne sont plus dans le formulaire
+            foreach ($originalLocalisations as $localisation) {
+                if (false === $employe->getLocalisation()->contains($localisation)) {
+                    $entityManager->remove($localisation);
+                }
+            }
+
+            //On supprime les groupes secondaires qui ne sont plus dans le formulaire
+            foreach ($originalGroupesSecondaires as $groupe) {
+                if (false === $employe->getGroupesSecondaires()->contains($groupe)) {
+                    $entityManager->remove($groupe);
+                }
+            }
+
             $entityManager->persist($employe);
             $entityManager->flush();
 
@@ -337,7 +363,7 @@ class RhController extends AbstractController
             $session->getFlashBag()->add('message', "Les informations ont bien été modifiées.");
             $session->set('statut', 'success');
 
-            return $this->redirectToRoute('infoEmploye', ['idEmploye' => $idEmploye]);
+            return $this->redirectToRoute('infoEmploye', ['idEmploye' => $idEmploye, 'idGroupe' => $idGroupe]);
         }
         else if ($form->get('annuler')->isClicked()) {
             return $this->redirectToRoute('listeGroupe', ['id' => $idGroupe]);

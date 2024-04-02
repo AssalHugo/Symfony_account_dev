@@ -5,6 +5,7 @@
         <title>{% block title %}CNRS INTRANET{% endblock %}</title>
             {{ encore_entry_link_tags('app') }}
             {{ encore_entry_script_tags('app') }}
+            {% block javascripts %}{% endblock %}
     </head>
   <body class="d-flex flex-column h-100">    
         {% include 'header.html.twig' %}

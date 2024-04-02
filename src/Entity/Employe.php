@@ -53,7 +53,7 @@ class Employe
     #[ORM\OneToOne(mappedBy: 'employe', cascade: ['persist', 'remove'])]
     private ?User $user = null;
 
-    #[ORM\ManyToMany(targetEntity: Localisations::class, inversedBy: 'employes')]
+    #[ORM\ManyToMany(targetEntity: Localisations::class, inversedBy: 'employes', cascade: ['persist'])]
     private Collection $localisation;
 
     #[ORM\OneToMany(targetEntity: Telephones::class, mappedBy: 'employe')]
@@ -65,7 +65,7 @@ class Employe
     #[ORM\ManyToMany(targetEntity: Groupes::class, mappedBy: 'adjoints')]
     private Collection $adjoint_de;
 
-    #[ORM\ManyToMany(targetEntity: Groupes::class, inversedBy: 'employe_grp_secondaires')]
+    #[ORM\ManyToMany(targetEntity: Groupes::class, inversedBy: 'employe_grp_secondaires', cascade: ['persist', 'remove'])]
     private Collection $groupes_secondaires;
 
     #[ORM\ManyToOne(inversedBy: 'employes_grp_principaux')]
@@ -77,7 +77,8 @@ class Employe
     #[ORM\OneToMany(targetEntity: Requetes::class, mappedBy: 'referent')]
     private Collection $referentDe;
 
-    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'referent_de')]
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'referent_de_
+    employe')]
     private ?self $referent = null;
 
     #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'referent')]

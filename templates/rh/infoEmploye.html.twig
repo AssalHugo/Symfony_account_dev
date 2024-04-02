@@ -1,9 +1,180 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<div class="container">
-    <h1 class="text-center">Informations de l'employe : {{ employe.prenom }} {{ employe.nom }}</h1>
-    <br>
-    {{ form(form) }}
-</div>
+    <div class="container">
+        <h1 class="text-center">Informations de l'employe : {{ employe.prenom }} {{ employe.nom }}</h1>
+        <br>
+        {{ form_start(form) }}
+
+        {{ form_label(form.nom) }}
+        {{ form_widget(form.nom) }}
+
+        {{ form_label(form.prenom) }}
+        {{ form_widget(form.prenom) }}
+
+        {{ form_label(form.photo) }}
+        {{ form_widget(form.photo) }}
+
+        {{ form_label(form.page_pro) }}
+        {{ form_widget(form.page_pro) }}
+
+        {{ form_label(form.idhal) }}
+        {{ form_widget(form.idhal) }}
+
+        {{ form_label(form.orcid) }}
+        {{ form_widget(form.orcid) }}
+
+        {{ form_label(form.mail_secondaire) }}
+        {{ form_widget(form.mail_secondaire) }}
+
+        {{ form_label(form.telephone_secondaire) }}
+        {{ form_widget(form.telephone_secondaire) }}
+
+        {{ form_label(form.annee_naissance) }}
+        {{ form_widget(form.annee_naissance) }}
+
+        {{ form_label(form.redirection_mail) }}
+        {{ form_widget(form.redirection_mail) }}
+
+        {{ form_label(form.user) }}
+        {{ form_widget(form.user) }}
+
+        <div class="localisations-container" data-prototype="{{ form_widget(form.localisation.vars.prototype)|e('html_attr') }}">
+            <h5>Localisations : </h5>
+
+            {% for localisation in form.localisation %}
+                <div class="localisation">
+                    <h6>Localisation {{ loop.index }} :</h6>
+                    <button type="button" class="remove-localisation-button btn btn-danger">Supprimer la localisation</button>
+                    {{ form_row(localisation.batiment) }}
+                    {{ form_row(localisation.bureau) }}
+                </div>
+            {% endfor %}
+
+        </div>
+
+        <button type="button" class="add-localisation-button btn btn-primary">Ajouter une localisation</button>
+
+
+        <div class="groupes-container" data-prototype="{{ form_widget(form.groupes_secondaires.vars.prototype)|e('html_attr') }}">
+            <h2>Groupes secondaires</h2>
+            {% for groupe in form.groupes_secondaires %}
+                <div class="groupe">
+                    <h6>Groupe {{ loop.index }} :</h6>
+                    <button type="button" class="remove-groupe-button btn btn-danger">Supprimer groupe</button>
+                    {{ form_row(groupe) }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" class="add-groupe-button btn btn-primary">Ajouter un groupe</button>
+
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let localisationsContainer = document.querySelector('.localisations-container');
+            let addLocalisationButton = document.querySelector('.add-localisation-button');
+
+            addLocalisationButton.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                let index = localisationsContainer.querySelectorAll('.localisation').length;
+
+                let h6 = document.createElement('h6');
+                h6.textContent = 'Localisation ' + (index + 1) + ' :';
+
+                let newLocalisationForm = localisationsContainer.getAttribute('data-prototype').replace(/__name__/g, index);
+
+                let removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.textContent = 'Supprimer la localisation';
+                removeButton.classList.add('remove-localisation-button', 'btn', 'btn-danger');
+
+                removeButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let localisation = removeButton.parentElement;
+                    localisation.remove();
+                });
+
+                let newLocalisation = document.createElement('div');
+                newLocalisation.classList.add('localisation');
+                newLocalisation.appendChild(h6);
+                newLocalisation.appendChild(removeButton);
+                newLocalisation.insertAdjacentHTML('beforeend', newLocalisationForm);
+
+                localisationsContainer.appendChild(newLocalisation);
+            });
+
+
+            // Trouvez tous les boutons "Supprimer localisation"
+            let removeLocalisationButtons = document.querySelectorAll('.remove-localisation-button');
+
+            // Pour chaque bouton
+            removeLocalisationButtons.forEach(function(button) {
+                // Lorsque le bouton est cliqué
+                button.addEventListener('click', function(e) {
+                    // Empêchez le comportement par défaut du bouton
+                    e.preventDefault();
+
+                    // Trouvez la localisation associée au bouton
+                    let localisation = button.parentElement;
+
+                    // Supprimez la localisation
+                    localisation.remove();
+                });
+            });
+
+
+
+            //------------Groupes-----------------
+            let groupesContainer = document.querySelector('.groupes-container');
+            let addGroupeButton = document.querySelector('.add-groupe-button');
+
+            addGroupeButton.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                let index = groupesContainer.querySelectorAll('.groupe').length;
+
+                let h6 = document.createElement('h6');
+                h6.textContent = 'Groupe ' + (index + 1) + ' :';
+
+                let newGroupeForm = groupesContainer.getAttribute('data-prototype').replace(/__name__/g, index);
+
+                let removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.textContent = 'Supprimer groupe';
+                removeButton.classList.add('remove-groupe-button', 'btn', 'btn-danger');
+
+                removeButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let groupe = removeButton.parentElement;
+                    groupe.remove();
+                });
+
+                let newLocalisation = document.createElement('div');
+                newLocalisation.classList.add('groupe');
+                newLocalisation.appendChild(h6);
+                newLocalisation.appendChild(removeButton);
+                newLocalisation.insertAdjacentHTML('beforeend', newGroupeForm);
+
+                groupesContainer.appendChild(newLocalisation);
+            });
+
+            let removeGroupeButtons = document.querySelectorAll('.remove-groupe-button');
+
+            removeGroupeButtons.forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    let groupe = button.parentElement;
+
+                    groupe.remove();
+                });
+            });
+        });
+    </script>
 {% endblock %}

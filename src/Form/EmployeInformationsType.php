@@ -10,6 +10,7 @@ use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -30,42 +31,40 @@ class EmployeInformationsType extends AbstractType
             ->add('redirection_mail')
             ->add('user', EntityType::class, [
                 'class' => User::class,
-                'choice_label' => 'id',
+                'choice_label' => 'username',
+                'label' => 'Utilisateur associé : ',
                 'required' => false,
             ])
-            ->add('localisation', EntityType::class, [
-                'class' => Localisations::class,
-                'choice_label' => 'bureau',
-                'required' => false,
-                'multiple' => true,
-            ])
-            ->add('adjoint_de', EntityType::class, [
-                'class' => Groupes::class,
-                'choice_label' => 'nom',
-                'label' => 'Adjoint du groupe : ',
-                'required' => false,
-                'multiple' => true,
-            ])
-            ->add('groupes_secondaires', EntityType::class, [
-                'class' => Groupes::class,
-                'choice_label' => 'nom',
-                'required' => false,
-                'multiple' => true,
+            ->add('localisation', CollectionType::class, [
+                'entry_type' => LocalisationType::class,
+                'entry_options' => ['label' => false],
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
+                'label' => 'Localisations : ',
             ])
             ->add('groupe_principal', EntityType::class, [
                 'class' => Groupes::class,
                 'required' => false,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
             ])
-            ->add('responsable_departement', EntityType::class, [
-                'class' => Departement::class,
-                'required' => false,
-                'choice_label' => 'id',
+            ->add('groupes_secondaires', CollectionType::class, [
+                'entry_type' => EntityType::class,
+                'entry_options' => [
+                    'class' => Groupes::class,
+                    'choice_label' => 'nom',
+                    'label' => false
+                ],
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
             ])
             ->add('referent', EntityType::class, [
                 'class' => Employe::class,
                 'required' => false,
-                'choice_label' => 'id',
+                'choice_label' => function (Employe $employe) {
+                    return $employe->getNom() . ' ' . $employe->getPrenom();
+                },
             ])
         ;
     }
