@@ -40,7 +40,7 @@
         {{ form_widget(form.user) }}
 
         <div class="localisations-container" data-prototype="{{ form_widget(form.localisation.vars.prototype)|e('html_attr') }}">
-            <h5>Localisations : </h5>
+            <h4>Localisations</h4>
 
             {% for localisation in form.localisation %}
                 <div class="localisation">
@@ -57,7 +57,7 @@
 
 
         <div class="groupes-container" data-prototype="{{ form_widget(form.groupes_secondaires.vars.prototype)|e('html_attr') }}">
-            <h2>Groupes secondaires</h2>
+            <h4>Groupes secondaires</h4>
             {% for groupe in form.groupes_secondaires %}
                 <div class="groupe">
                     <h6>Groupe {{ loop.index }} :</h6>

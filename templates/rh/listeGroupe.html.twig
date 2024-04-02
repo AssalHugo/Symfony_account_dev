@@ -10,18 +10,29 @@
         <br>
         {{ form_start(form) }}
         <div class="form-group">
-            {{ form_label(form.responsable, 'Responsable : ') }}
+            <h6>Responsable : </h6>
             {{ form_widget(form.responsable) }}
             {{ form_errors(form.responsable) }}
         </div>
-        <div class="form-group">
-            {{ form_label(form.adjoints, 'Adjoint(s) : ') }}
-            {{ form_widget(form.adjoints, {'attr': {'class': 'overflow-auto scrollable'}}) }}
-            {{ form_errors(form.adjoints) }}
+        <br>
+        <br>
+        <div class="adjoint-container" data-prototype="{{ form_widget(form.adjoints.vars.prototype)|e('html_attr') }}">
+            <h5>Adjoints : </h5>
+            {% for adjoint in form.adjoints %}
+                <div class="adjoint">
+                    <h6>Adjoint {{ loop.index }} : </h6>
+                    <button type="button" class="remove-adjoint-button btn btn-danger">Supprimer l'adjoint</button>
+                    {{ form_widget(adjoint) }}
+                    {{ form_errors(adjoint) }}
+                </div>
+            {% endfor %}
         </div>
         <br>
+        <button type="button" class="add-adjoint-button btn btn-primary">Ajouter un adjoint</button>
+        <br>
+        <br>
         <div class="form-group">
-            {{ form_label(form.submit, 'Ajouter un employé au groupe : ') }}
+            {{ form_label(form.submit) }}
             {{ form_widget(form.submit, {'attr': {'class': 'btn btn-primary'}}) }}
         </div>
         {{ form_end(form) }}
@@ -69,4 +80,55 @@
         </table>
 
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            let adjointContainer = document.querySelector('.adjoint-container');
+            let addAdjointButton = document.querySelector('.add-adjoint-button');
+
+            addAdjointButton.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                let index = adjointContainer.querySelectorAll('.adjoint').length;
+                console.log(adjointContainer.querySelectorAll('.adjoint'));
+
+                let h6 = document.createElement('h6');
+                h6.textContent = 'Adjoint ' + (index + 1) + ' :';
+
+                let newAdjointForm = adjointContainer.getAttribute('data-prototype').replace(/__name__/g, index);
+
+                let removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.textContent = 'Supprimer adjoint';
+                removeButton.classList.add('remove-adjoint-button', 'btn', 'btn-danger');
+
+                removeButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let groupe = removeButton.parentElement;
+                    groupe.remove();
+                });
+
+                let newAdjoint = document.createElement('div');
+                newAdjoint.classList.add('adjoint');
+                newAdjoint.appendChild(h6);
+                newAdjoint.appendChild(removeButton);
+                newAdjoint.insertAdjacentHTML('beforeend', newAdjointForm);
+
+                adjointContainer.appendChild(newAdjoint);
+            });
+
+            let removeAdjointButtons = document.querySelectorAll('.remove-adjoint-button');
+
+            removeAdjointButtons.forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let groupe = button.parentElement;
+                    groupe.remove();
+                });
+            });
+        });
+    </script>
 {% endblock %}
