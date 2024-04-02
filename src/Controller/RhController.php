@@ -241,7 +241,7 @@ class RhController extends AbstractController
 
             //On crée un message flash pour informer l'utilisateur que le responsable a bien été modifié
             $session = $request->getSession();
-            $session->getFlashBag()->add('message', "Le responsable a bien été modifié.");
+            $session->getFlashBag()->add('message', "Le responsable et/ou les adjoints ont bien étés modifiés.");
             $session->set('statut', 'success');
 
             return $this->redirectToRoute('listeGroupe', ['id' => $id]);

@@ -70,7 +70,7 @@ class UserController extends AbstractController
             $form->handleRequest($request);
 
             //Si le formulaire est soumis et valide et que ce soit le bon formulaire
-            if($form->isSubmitted() && $form->isValid() && $i == $indexLocalisation){
+            if($form->isSubmitted() && $form->isValid() && $i == $indexLocalisation && $indexLocalisation != null){
                 // Mettez à jour l'adresse original avec les nouvelles informations
                 $localisation->setBureau($newLocalisation->getBureau());
                 $localisation->setBatiment($newLocalisation->getBatiment());
@@ -91,18 +91,18 @@ class UserController extends AbstractController
 
 
         //Partie pour ajouter une nouvelle localisation
-        $localisation = new Localisations();
-        $formLocalisation = $this->createForm(LocalisationType::class,$localisation);
+        $nouvellelocalisation = new Localisations();
+        $formLocalisation = $this->createForm(LocalisationType::class,$nouvellelocalisation);
 
         $formLocalisation->add('creer', SubmitType::class, ['label' => '+']);
 
         $formLocalisation->handleRequest($request);
 
-        if($formLocalisation->isSubmitted() && $formLocalisation->isValid()){
+        if($formLocalisation->isSubmitted() && $formLocalisation->isValid() && $indexLocalisation == null){
 
-            $employe->addLocalisation($localisation);
+            $employe->addLocalisation($nouvellelocalisation);
 
-            $entityManager->persist($localisation);
+            $entityManager->persist($nouvellelocalisation);
             $entityManager->flush();
 
             $session = $request->getSession();
@@ -126,7 +126,7 @@ class UserController extends AbstractController
             $form->handleRequest($request);
 
             //Si le formulaire est soumis et valide et que ce soit le bon formulaire
-            if($form->isSubmitted() && $form->isValid() && $i == $indexTelephone){
+            if($form->isSubmitted() && $form->isValid() && $i == $indexTelephone && $indexTelephone != null){
                 // Mettez à jour le numéro de téléphone original avec les nouvelles informations
                 $telephone->setNumero($newTelephone->getNumero());
 
