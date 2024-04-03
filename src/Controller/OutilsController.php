@@ -70,7 +70,7 @@ class OutilsController extends AbstractController
             $session = $request->getSession();
             $session->set('departement', $departement);
             $session->set('groupe', $groupe);
-            $session->set('statut', $statut);
+            $session->set('statutEmploye', $statut);
         } //Sinon si le GET contient des filtres
         else if ($request->query->get('departement') != null || $request->query->get('groupe') != null || $request->query->get('statut') != null) {
 
@@ -102,7 +102,7 @@ class OutilsController extends AbstractController
             //On récupère les utilisateurs en fonction des filtres
             $departement = $request->getSession()->get('departement');
             $groupe = $request->getSession()->get('groupe');
-            $statut = $request->getSession()->get('statut');
+            $statut = $request->getSession()->get('statutEmploye');
 
             $query = $employeRepository->findByFiltre($departement, $groupe, $statut);
         } //Sinon on récupère tous les utilisateurs

@@ -21,9 +21,6 @@ class Groupes
     #[ORM\Column(length: 8, nullable: true)]
     private ?string $acronyme = null;
 
-    #[ORM\Column(length: 34)]
-    private ?string $statut = null;
-
     #[ORM\ManyToOne(targetEntity: Employe::class, inversedBy: 'responsable_de')]
     private ?Employe $responsable = null;
 
@@ -79,17 +76,6 @@ class Groupes
         return $this;
     }
 
-    public function getStatut(): ?string
-    {
-        return $this->statut;
-    }
-
-    public function setStatut(string $statut): static
-    {
-        $this->statut = $statut;
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Employe>

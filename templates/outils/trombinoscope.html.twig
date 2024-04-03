@@ -22,7 +22,7 @@
         {% endif %}
         <div class="col-sm">
         <div class="card" style="width: 15rem;">
-            <img class="card-img-top" src="{{ employe.photo }}" alt="{{ employe.nom }} image non trouvé">
+            <img class="card-img-top" src="{{ vich_uploader_asset(employe, 'imageFile') }}" alt="{{ employe.nom }} image non trouvé">
             <div class="card-body">
                 <h5 class="card-title">{{ employe.nom }} {{ employe.prenom }}</h5>
                 <p class="card-text">Statut :  <a class="link-info" href="?statut={{ employe.contrats| last .status.id }}">{{ employe.contrats| last .status.type }}</a></p>

@@ -11,7 +11,9 @@ use App\Entity\Localisations;
 use App\Entity\Requetes;
 use App\Entity\Telephones;
 use App\Entity\User;
+use App\Form\AjouterGroupeType;
 use App\Form\ContactSuppportType;
+use App\Form\DepartementType;
 use App\Form\EmployeInformationsType;
 use App\Form\LocalisationType;
 use App\Form\RequeteType;
@@ -172,17 +174,10 @@ class RhController extends AbstractController
         $departements = $departementRepo->findAll();
 
         $formsResponsableDep = [];
+        $formGroupes = [];
         foreach ($departements as $i => $departement) {
             //On crée un formulaire pour modifier le responsable du département
-            $form = $this->createFormBuilder($departement)
-                ->add('responsable', EntityType::class, [
-                    'class' => Employe::class,
-                    'choice_label' => function ($employe) {
-                        return $employe->getPrenom() . ' ' . $employe->getNom();
-                    },
-                    'label' => 'Responsable :',
-                ])
-                ->getForm();
+            $form = $this->createForm(DepartementType::class, $departement);
 
             $form->add('modifier', SubmitType::class, [
                 'label' => 'Modifier',
@@ -207,12 +202,41 @@ class RhController extends AbstractController
                 return $this->redirectToRoute('listeDepartements');
             }
 
+            //On crée un formulaire pour ajouter un groupe au département
+            $groupe = new Groupes();
+            $formAjoutGroupe = $this->createForm(AjouterGroupeType::class, $groupe);
+
+            $formAjoutGroupe->add('ajouter', SubmitType::class, [
+                'label' => 'Ajouter',
+                'attr' => ['data-index' => $i],
+            ]);
+
+            if ($index == $i) {
+                $formAjoutGroupe->handleRequest($request);
+            }
+
+            if ($formAjoutGroupe->isSubmitted() && $formAjoutGroupe->isValid() && $index == $i && $formAjoutGroupe->get('ajouter')->isClicked()) {
+                $groupe->setDepartement($departement);
+
+                $entityManager->persist($groupe);
+                $entityManager->flush();
+
+                //On crée un message flash pour informer l'utilisateur que le groupe a bien été ajouté
+                $session = $request->getSession();
+                $session->getFlashBag()->add('message', "Le groupe a bien été ajouté.");
+                $session->set('statut', 'success');
+
+                return $this->redirectToRoute('listeDepartements');
+            }
+
             $formsResponsableDep[] = $form->createView();
+            $formGroupes[] = $formAjoutGroupe->createView();
         }
 
         return $this->render('rh/listeDepartements.html.twig', [
             'departements' => $departements,
             'formsResponsableDep' => $formsResponsableDep,
+            'formGroupes' => $formGroupes,
         ]);
     }
 

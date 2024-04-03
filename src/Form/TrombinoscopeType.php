@@ -22,7 +22,7 @@ class TrombinoscopeType extends AbstractType
 
         $departement = $session->get('departement');
         $groupe = $session->get('groupe');
-        $statut = $session->get('statut');
+        $statut = $session->get('statutEmploye');
 
         //Aucun des champs n'est obligatoire on initialise les valeurs aux valeurs des filtres en sessions si elles existent
         $builder

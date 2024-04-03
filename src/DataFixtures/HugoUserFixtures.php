@@ -29,7 +29,7 @@ class HugoUserFixtures extends Fixture
         $employe->setMailSecondaire("hugo2@mail.com");
         $employe->setTelephoneSecondaire("0101010101");
         $employe->setAnneeNaissance(2024);
-        $employe->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
+        $employe->setPhoto("user.png");
         $employe->setRedirectionMail(true);
 
         $employe2 = new Employe();
@@ -42,7 +42,7 @@ class HugoUserFixtures extends Fixture
         $employe2->setMailSecondaire("jean@jean");
         $employe2->setTelephoneSecondaire("0101010101");
         $employe2->setAnneeNaissance(2004);
-        $employe2->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
+        $employe2->setPhoto("user.png");
         $employe2->setRedirectionMail(true);
 
         $employe->setReferent($employe2);
@@ -115,14 +115,12 @@ class HugoUserFixtures extends Fixture
         $groupe = new Groupes();
         $groupe->setNom("groupe 1");
         $groupe->setAcronyme("Grp1");
-        $groupe->setStatut("statut");
         $groupe->setResponsable($employe);
 
 
         $groupe2 = new Groupes();
         $groupe2->setNom("groupe 2");
         $groupe2->setAcronyme("Grp2");
-        $groupe2->setStatut("statut");
         $groupe2->setResponsable($employe2);
         $groupe2->addAdjoint($employe);
 
@@ -172,7 +170,7 @@ class HugoUserFixtures extends Fixture
             $employe->setMailSecondaire("mail secondaire" . $i);
             $employe->setTelephoneSecondaire("0101010101");
             $employe->setAnneeNaissance(2024);
-            $employe->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
+            $employe->setPhoto("user.png");
             $employe->setRedirectionMail(true);
 
 
@@ -228,7 +226,6 @@ class HugoUserFixtures extends Fixture
                 $groupe = new Groupes();
                 $groupe->setNom("groupe" . $i);
                 $groupe->setAcronyme("Grp" . $i);
-                $groupe->setStatut("statut");
                 $groupe->setResponsable($employe);
 
                 if ($i % 5 == 0) {

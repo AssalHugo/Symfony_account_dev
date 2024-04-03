@@ -22,7 +22,7 @@
                 <div class="adjoint" style="display: flex; flex-direction: row;">
                     <h6>Adjoint {{ loop.index }} : </h6>
                     {{ form_widget(adjoint) }}
-                    <button type="button" class="remove-adjoint-button btn btn-danger">Supprimer l'adjoint</button>
+                    <button type="button" class="remove-adjoint-button btn btn-danger">Supprimer</button>
                     {{ form_errors(adjoint) }}
                 </div>
             {% endfor %}
@@ -58,7 +58,7 @@
                     <td>{{ employe.contrats| last .datefin|date('d/m/Y') }}</td>
                     <td>{{ employe.contrats| last .status.type }}</td>
                     <td><td><a href="{{ path('infoEmploye', {'idEmploye': employe.id, 'idGroupe' : groupe.id}) }}" class="btn btn-info">Infos</a></td>
-                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
+                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer</a></td>
                 </tr>
             {% endfor %}
             {% for employeSec in groupe.employegrpsecondaires %}
@@ -69,7 +69,7 @@
                     <td>{{ employeSec.contrats| last .datefin|date('d/m/Y') }}</td>
                     <td>{{ employeSec.contrats| last .status.type }}</td>
                     <td><td><a href="{{ path('infoEmploye', {'idEmploye': employeSec.id, 'idGroupe' : groupe.id}) }}" class="btn btn-info">Infos</a></td>
-                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
+                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer</a></td>
                 </tr>
             {% endfor %}
                 <tr>
@@ -102,7 +102,7 @@
 
                 let removeButton = document.createElement('button');
                 removeButton.type = 'button';
-                removeButton.textContent = 'Supprimer adjoint';
+                removeButton.textContent = 'Supprimer';
                 removeButton.classList.add('remove-adjoint-button', 'btn', 'btn-danger');
 
                 removeButton.addEventListener('click', function(e) {

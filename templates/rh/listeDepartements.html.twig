@@ -22,6 +22,11 @@
                             </div>
                         </a>
                     {% endfor %}
+                    <br>
+                    <h5>Ajouter un groupe : </h5>
+                    {{ form_start(formGroupes[loop.index0], {'action': path('listeDepartements', {'index': loop.index0})}) }}
+                    {{ form_widget(formGroupes[loop.index0]) }}
+                    {{ form_end(formGroupes[loop.index0]) }}
                 </div>
             </div>
             <br>
