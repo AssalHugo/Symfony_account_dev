@@ -22,7 +22,6 @@ class EmployeInformationsType extends AbstractType
         $builder
             ->add('nom')
             ->add('prenom')
-            ->add('photo')
             ->add('page_pro')
             ->add('idhal')
             ->add('orcid')
@@ -35,6 +34,7 @@ class EmployeInformationsType extends AbstractType
                 'label_attr' => [
                     'class' => 'form-label mt-4',
                 ],
+                'required' => false,
             ])
             ->add('localisation', CollectionType::class, [
                 'entry_type' => LocalisationType::class,

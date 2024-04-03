@@ -19,10 +19,10 @@
         <div class="adjoint-container" data-prototype="{{ form_widget(form.adjoints.vars.prototype)|e('html_attr') }}">
             <h5>Adjoints : </h5>
             {% for adjoint in form.adjoints %}
-                <div class="adjoint">
+                <div class="adjoint" style="display: flex; flex-direction: row;">
                     <h6>Adjoint {{ loop.index }} : </h6>
-                    <button type="button" class="remove-adjoint-button btn btn-danger">Supprimer l'adjoint</button>
                     {{ form_widget(adjoint) }}
+                    <button type="button" class="remove-adjoint-button btn btn-danger">Supprimer l'adjoint</button>
                     {{ form_errors(adjoint) }}
                 </div>
             {% endfor %}
@@ -112,10 +112,10 @@
                 });
 
                 let newAdjoint = document.createElement('div');
-                newAdjoint.classList.add('adjoint');
+                newAdjoint.classList.add('adjoint', 'd-flex', 'flex-row');
                 newAdjoint.appendChild(h6);
-                newAdjoint.appendChild(removeButton);
                 newAdjoint.insertAdjacentHTML('beforeend', newAdjointForm);
+                newAdjoint.appendChild(removeButton);
 
                 adjointContainer.appendChild(newAdjoint);
             });
