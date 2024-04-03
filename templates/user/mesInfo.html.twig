@@ -5,8 +5,14 @@
         <h1 class="text-center">Mes informations</h1>
         <br>
         <div class="row">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png" class="img-thumbnail w-25" alt="Photo inconnue">
-        </div>    
+            <div class="col-sm ">
+                <h5 class="text-center">Photo de profil : </h5>
+                <div class="d-flex justify-content-center align-items-center">
+                    <img src="{{ employe.photo }}" class="img-thumbnail w-25" alt="Photo de profil">
+                </div>
+            </div>
+
+        </div>
         <div class="row">
             <div class="col-sm">
                 <h5 class="text-left">Prénom : {{employe.prenom}}</h5>
@@ -124,7 +130,7 @@
             <div class="col-sm">
                 {{form(formContact)}}
             </div>
-        </div>      
+        </div>
     </div>
 
 {% endblock %}

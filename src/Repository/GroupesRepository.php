@@ -21,6 +21,17 @@ class GroupesRepository extends ServiceEntityRepository
         parent::__construct($registry, Groupes::class);
     }
 
+    /**
+     * Fonction qui permet de récupérer le nombre de groupes au total
+     */
+    public function countGroupes(): int{
+
+        return $this->createQueryBuilder('g')
+                    ->select('count(g.id)')
+                    ->getQuery()
+                    ->getSingleScalarResult();
+    }
+
 //    /**
 //     * @return Groupes[] Returns an array of Groupes objects
 //     */

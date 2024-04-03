@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Employe;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service_locator;
 
@@ -26,7 +27,7 @@ class EmployeRepository extends ServiceEntityRepository
     /**
      * Fonction qui permet de récupérer les employés en fonction des filtres
      */
-    public function findByFiltre($departement, $groupe, $statut): array {
+    public function findByFiltre($departement, $groupe, $statut): QueryBuilder {
 
         //ne pas oublier que l'employé peut posséder plusieurs groupes il a les groupes secondaires et sont groupe principal
         $qb = $this->createQueryBuilder('e')
@@ -56,14 +57,13 @@ class EmployeRepository extends ServiceEntityRepository
                 ->setParameter('departement', '%'.$departement.'%');
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb;
     }
 
-    public function findAllEmployes() : Query{
+    public function findAllEmployes() : QueryBuilder{
 
         return $this->createQueryBuilder('e')
-                    ->select('e')
-                    ->getQuery();
+                    ->select('e');
     }
 
     public function findByPrenomNom($prenom, $nom): array
@@ -81,7 +81,7 @@ class EmployeRepository extends ServiceEntityRepository
     /**
      * Fonction qui permet de récupérer les employés en fonction des id des groupes, des id des départements et des id des statuts
      */
-    public function findByFiltreId($departement, $groupe, $statut): array
+    public function findByFiltreId($departement, $groupe, $statut): QueryBuilder
     {
 
         //ne pas oublier que l'employé peut posséder plusieurs groupes il a les groupes secondaires et sont groupe principal
@@ -110,7 +110,18 @@ class EmployeRepository extends ServiceEntityRepository
                 ->setParameter('departement', $departement);
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb;
+    }
+
+    /**
+     * Fonction qui retourne le nombre d'employés
+     */
+    public function countEmployes(): int{
+
+        return $this->createQueryBuilder('e')
+                    ->select('count(e.id)')
+                    ->getQuery()
+                    ->getSingleScalarResult();
     }
 
     //    /**

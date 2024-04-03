@@ -21,6 +21,17 @@ class DepartementRepository extends ServiceEntityRepository
         parent::__construct($registry, Departement::class);
     }
 
+    /**
+     * Fonction qui permet de récupérer le nombre de départements au total
+     */
+    public function countDepartements(): int{
+
+        return $this->createQueryBuilder('d')
+                    ->select('count(d.id)')
+                    ->getQuery()
+                    ->getSingleScalarResult();
+    }
+
     //    /**
     //     * @return Departement[] Returns an array of Departement objects
     //     */

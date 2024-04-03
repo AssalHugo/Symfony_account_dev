@@ -229,7 +229,7 @@ class RhController extends AbstractController
         $form = $this->createForm(ResponsableType::class, $groupe);
 
         $form->add('submit', SubmitType::class, [
-            'label' => 'Modifier',
+            'label' => 'Valider',
         ]);
 
 

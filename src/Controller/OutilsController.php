@@ -42,7 +42,6 @@ class OutilsController extends AbstractController
     #[Route('/outils/trombinoscope', name: 'trombinoscope')]
     public function trombinoscope(Request $request, EntityManagerInterface $entityManager): Response
     {
-
         $employeRepository = $entityManager->getRepository(Employe::class);
 
         //On crée le formulaire de filtre
@@ -53,6 +52,9 @@ class OutilsController extends AbstractController
         $formFiltre->handleRequest($request);
 
         if ($formFiltre->isSubmitted() && $formFiltre->isValid()) {
+            //On vide tout le GET en un appel de fonction
+            $request->query->replace([]);
+
             //On récupère les données du formulaire
             $data = $formFiltre->getData();
             //On récupère le département, le groupe et le statut
@@ -61,28 +63,18 @@ class OutilsController extends AbstractController
             $statut = $data['statut'];
 
             //On récupère les utilisateurs en fonction des filtres
-            $employes = $employeRepository->findByFiltre($departement, $groupe, $statut);
-        } //Sinon si le GET est vide ou contient la page
-        else if (empty($request->query->all()) || $request->query->get('p') != null) {
-            //On récupère tous les utilisateurs en fonction de la pagination
-            $page = $request->query->getInt('p', 1);
+            $query = $employeRepository->findByFiltre($departement, $groupe, $statut);
 
-            $query = $employeRepository->findAllEmployes();
+            //On met les informations dans la session pour les garder en mémoire
+            $session = $request->getSession();
+            $session->set('departement', $departement);
+            $session->set('groupe', $groupe);
+            $session->set('statut', $statut);
+        } //Sinon si le GET contient des filtres
+        else if ($request->query->get('departement') != null || $request->query->get('groupe') != null || $request->query->get('statut') != null) {
+            //On vide la session en un appel de fonction
+            $request->getSession()->clear();
 
-            $employes = $this->paginator->paginate(
-                $query,
-                $page,
-                30
-            );
-
-            //On traite si aucun employés
-            if (count($employes) == 0) {
-                $session = $request->getSession();
-                $session->getFlashBag()->add('message', 'Aucun employé trouvé.');
-                $session->set('statut', 'danger');
-            }
-        } //Sinon
-        else {
             //On récupère les utilisateurs en fonction des filtres
             if ($request->query->get('departement') != null) {
                 $departement = $request->query->get('departement');
@@ -102,26 +94,43 @@ class OutilsController extends AbstractController
                 $statut = "";
             }
 
-            $employes = $employeRepository->findByFiltreId($departement, $groupe, $statut);
+            $query = $employeRepository->findByFiltreId($departement, $groupe, $statut);
+        }//Sinon si les filtre sont dans la session
+        else if ($request->getSession()->get('departement') != null || $request->getSession()->get('groupe') != null || $request->getSession()->get('statut') != null) {
+            //On récupère les utilisateurs en fonction des filtres
+            $departement = $request->getSession()->get('departement');
+            $groupe = $request->getSession()->get('groupe');
+            $statut = $request->getSession()->get('statut');
+
+            $query = $employeRepository->findByFiltre($departement, $groupe, $statut);
+        } //Sinon on récupère tous les utilisateurs
+        else {
+
+            //On récupère tous les utilisateurs
+            $query = $employeRepository->findAllEmployes();
         }
 
+        $page = $request->query->getInt('p', 1);
+
         //On récupère le nombres d'employés, de départements et de groupes au total dans la bd et le nombre affiché
-        $nbEmployes = count($employeRepository->findAll());
+        $nbEmployes = $employeRepository->countEmployes();
 
         $departementRepository = $entityManager->getRepository(Departement::class);
-        $nbDepartements = count($departementRepository->findAll());
+        $nbDepartements = $departementRepository->countDepartements();
 
         $groupeRepository = $entityManager->getRepository(Groupes::class);
-        $nbGroupes = count($groupeRepository->findAll());
+        $nbGroupes = $groupeRepository->countGroupes();
 
-        $nbEmployesAffiches = count($employes);
+        $query2 = $query;
+        $queryResult = $query2->getQuery()->getResult();
+        $nbEmployesAffiches = count($queryResult);
 
         //On récupère le nombres de groupes et de départements affichés
         $nbGroupesAffiches = 0;
         $groupes = [];
         $nbDepartementsAffiches = 0;
         $departements = [];
-        foreach ($employes as $employe) {
+        foreach ($queryResult as $employe) {
 
             $groupePrincipal = $employe->getGroupePrincipal();
             if ($groupePrincipal != null && !in_array($groupePrincipal, $groupes)) {
@@ -148,6 +157,21 @@ class OutilsController extends AbstractController
         }
 
 
+        //On pagine
+        $employes = $this->paginator->paginate(
+            $query->getQuery(),
+            $page,
+            30
+        );
+
+        //On traite si aucun employés
+        if (count($employes) == 0) {
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', 'Aucun employé trouvé.');
+            $session->set('statut', 'danger');
+        }
+
+
         return $this->render('outils/trombinoscope.html.twig', [
             'employes' => $employes,
             'formFiltre' => $formFiltre->createView(),
@@ -160,7 +184,29 @@ class OutilsController extends AbstractController
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    #[Route('/outils/supprimerFiltreSession', name: 'supprimerFiltreSession')]
+    public function supprimerFiltreSession(Request $request): Response
+    {
+        $session = $request->getSession();
+        $session->remove('departement');
+        $session->remove('groupe');
+        $session->remove('statut');
 
+        return $this->redirectToRoute('trombinoscope');
+    }
+
+
+    /**
+     * @param $indexRequete
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param MailerInterface $mailer
+     * @return Response
+     */
     #[Route('/outils/formulaire/{indexRequete}', name: 'formulaireDemandeCompte', requirements: ['indexRequete' => '\d*'], defaults: ['indexRequete' => null])]
     public function formulaireDemandeCompte($indexRequete, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response {
 
@@ -243,6 +289,12 @@ class OutilsController extends AbstractController
         ]);
     }
 
+    /**
+     * @param $id
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
+     * @return Response
+     */
     #[Route('/outils/modifierDemandeCompteUser/{id}', name: 'modifierDemandeCompteUser')]
     public function modifierDemandeCompteUser($id, EntityManagerInterface $entityManager, Request $request): Response
     {
@@ -279,6 +331,11 @@ class OutilsController extends AbstractController
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
     #[Route('/outils/redirectionMail', name: 'redirectionMail')]
     public function redirectionMail(Request $request, EntityManagerInterface $entityManager): Response
     {

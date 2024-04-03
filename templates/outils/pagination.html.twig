@@ -1,7 +1,0 @@
-<div class="custom-pagination">
-    {% if pageCount > 1 %}
-        {% if previous is defined %}
-            <a rel="prev" href="{{ path(route, query|merge({(pageParameter): previous})) }}">&laquo;</a>
-
-    {% endif %}
-</div>
