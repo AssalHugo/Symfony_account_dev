@@ -7,9 +7,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
+use Symfony\Component\HttpFoundation\File\File;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 
 #[ORM\Entity(repositoryClass: EmployeRepository::class)]
+#[Vich\Uploadable]
 class Employe
 {
     #[ORM\Id]
@@ -23,8 +26,14 @@ class Employe
     #[ORM\Column(length: 64)]
     private ?string $prenom = null;
 
+    #[Vich\UploadableField(mapping: 'employe_images', fileNameProperty: 'photo')]
+    private ?File $imageFile = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column]
     private ?bool $syncReseda = null;
@@ -98,6 +107,7 @@ class Employe
         $this->referentDe = new ArrayCollection();
         $this->responsable_de = new ArrayCollection();
         $this->referent_de_employe = new ArrayCollection();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -139,6 +149,22 @@ class Employe
         $this->photo = $photo;
 
         return $this;
+    }
+
+    public function setImageFile(?File $imageFile = null): void
+    {
+        $this->imageFile = $imageFile;
+
+        if (null !== $imageFile) {
+            // It is required that at least one field changes if you are using doctrine
+            // otherwise the event listeners won't be called and the file is lost
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
     }
 
     public function isSyncReseda(): ?bool
@@ -526,6 +552,16 @@ class Employe
         $this->redirection_mail = $redirection_mail;
 
         return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
     }
 
 }

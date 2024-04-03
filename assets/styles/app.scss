@@ -12,3 +12,9 @@ $headings-color: rgb(7,22,73);
 .scrollable {
   max-height: 150px;
 }
+
+//On met du style sur les images de la div form-image
+.form-image img {
+  border-radius: 10%;
+  height: 400px;
+}

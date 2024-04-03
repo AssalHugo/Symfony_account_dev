@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Vich\UploaderBundle\Form\Type\VichImageType;
 
 class EmployeInformationsType extends AbstractType
 {
@@ -29,11 +30,11 @@ class EmployeInformationsType extends AbstractType
             ->add('telephone_secondaire')
             ->add('annee_naissance')
             ->add('redirection_mail')
-            ->add('user', EntityType::class, [
-                'class' => User::class,
-                'choice_label' => 'username',
-                'label' => 'Utilisateur associé : ',
-                'required' => false,
+            ->add('imageFile', VichImageType::class, [
+                'label' => 'Nouvelle photo de profil',
+                'label_attr' => [
+                    'class' => 'form-label mt-4',
+                ],
             ])
             ->add('localisation', CollectionType::class, [
                 'entry_type' => LocalisationType::class,

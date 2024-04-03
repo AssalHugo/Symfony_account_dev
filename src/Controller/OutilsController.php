@@ -51,6 +51,7 @@ class OutilsController extends AbstractController
 
         $formFiltre->handleRequest($request);
 
+        //Si le formulaire est soumis et valide
         if ($formFiltre->isSubmitted() && $formFiltre->isValid()) {
             //On vide tout le GET en un appel de fonction
             $request->query->replace([]);
@@ -72,6 +73,7 @@ class OutilsController extends AbstractController
             $session->set('statut', $statut);
         } //Sinon si le GET contient des filtres
         else if ($request->query->get('departement') != null || $request->query->get('groupe') != null || $request->query->get('statut') != null) {
+
             //On vide la session en un appel de fonction
             $request->getSession()->clear();
 

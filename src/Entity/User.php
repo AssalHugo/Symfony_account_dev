@@ -10,7 +10,7 @@ use App\Entity\Employe;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -145,5 +145,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->employe = $employe;
 
         return $this;
+    }
+
+    public function serialize()
+    {
+        return serialize([
+            $this->id,
+            $this->username,
+            $this->password,
+        ]);
+    }
+
+    public function unserialize(string $data)
+    {
+        [
+            $this->id,
+            $this->username,
+            $this->password,
+        ] = unserialize($data, ['allowed_classes' => false]);
     }
 }

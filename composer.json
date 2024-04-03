@@ -27,7 +27,8 @@
         "symfony/twig-bundle": "7.0.*",
         "symfony/webpack-encore-bundle": "^2.1",
         "symfony/yaml": "7.0.*",
-        "symfonycasts/sass-bundle": "^0.6.0"
+        "symfonycasts/sass-bundle": "^0.6.0",
+        "vich/uploader-bundle": "^2.3"
     },
     "config": {
         "allow-plugins": {

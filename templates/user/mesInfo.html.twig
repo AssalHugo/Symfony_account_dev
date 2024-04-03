@@ -8,7 +8,11 @@
             <div class="col-sm ">
                 <h5 class="text-center">Photo de profil : </h5>
                 <div class="d-flex justify-content-center align-items-center">
-                    <img src="{{ employe.photo }}" class="img-thumbnail w-25" alt="Photo de profil">
+                    {{ form_start(formPhoto) }}
+                    <div class="form-image">
+                        {{ form_row(formPhoto.imageFile) }}
+                    </div>
+                    {{ form_end(formPhoto) }}
                 </div>
             </div>
 
