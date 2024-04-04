@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Employe;
 use App\Entity\Localisations;
 use App\Form\LocalisationType;
+use App\Service\Remove;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -130,7 +131,6 @@ class GroupesController extends AbstractController
     #[Route('/groupes/removeGroupeSecondaire/{id}', name: 'removeGroupeSecondaire')]
     public function removeGroupeSecondaire(Request $request, EntityManagerInterface $entityManager, int $id): Response{
 
-        
         $groupeRepo = $entityManager->getRepository(Groupes::class);
         $employe = $this->getUser()->getEmploye();
 
@@ -166,25 +166,10 @@ class GroupesController extends AbstractController
     }
 
     #[Route('/groupes/supprimerEmpGroupe/{idEmploye}/{idGroupe}', name: 'supprimerEmployeDuGroupe')]
-    public function supprimerEmployeDuGroupe(Request $request, EntityManagerInterface $entityManager, int $idEmploye, int $idGroupe): Response
-    {
+    public function supprimerEmployeDuGroupe(int $idEmploye, int $idGroupe, Remove $remove, Request $request): Response {
 
-        $employeRepo = $entityManager->getRepository(Employe::class);
-        $employe = $employeRepo->find($idEmploye);
+        $remove->supprimerEmployeDuGroupeSecond($idEmploye, $idGroupe, $request);
 
-        $groupeRepo = $entityManager->getRepository(Groupes::class);
-        $groupe = $groupeRepo->find($idGroupe);
-
-        $employe->removeGroupesSecondaire($groupe);
-        $entityManager->persist($employe);
-        $entityManager->flush();
-
-        $session = $request->getSession();
-        $session->getFlashBag()->add('message', "L'employé a été supprimé du groupe");
-        $session->set('statut', 'success');
-
-        return $this->redirect($this->generateUrl('liste'));
+        return $this->redirectToRoute('liste');
     }
-
-
 }

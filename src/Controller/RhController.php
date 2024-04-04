@@ -19,6 +19,7 @@ use App\Form\LocalisationType;
 use App\Form\RequeteType;
 use App\Form\ResponsableType;
 use App\Form\TelephonesType;
+use App\Service\Remove;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -288,13 +289,23 @@ class RhController extends AbstractController
 
         $departement = $departementRepo->find($id);
 
-        $entityManager->remove($departement);
-        $entityManager->flush();
+        //Si le departement contient des groupes
+        if ($departement->getGroupes()->count() > 0) {
+            //On crée un message flash pour informer l'utilisateur que le département ne peut pas être supprimé
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "Le département ne peut pas être supprimé car il contient des groupes.");
+            $session->set('statut', 'danger');
+        }
+        else {
+            //On supprime le département
+            $entityManager->remove($departement);
+            $entityManager->flush();
 
-        //On crée un message flash pour informer l'utilisateur que le département a bien été supprimé
-        $session = $request->getSession();
-        $session->getFlashBag()->add('message', "Le département a bien été supprimé.");
-        $session->set('statut', 'success');
+            //On crée un message flash pour informer l'utilisateur que le département a bien été supprimé
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "Le département a bien été supprimé.");
+            $session->set('statut', 'success');
+        }
 
         return $this->redirectToRoute('listeDepartements');
     }
@@ -307,13 +318,23 @@ class RhController extends AbstractController
 
         $groupe = $groupesRepo->find($id);
 
-        $entityManager->remove($groupe);
-        $entityManager->flush();
+        //Si le groupe contient des employés
+        if ($groupe->getEmployesGrpPrincipaux()->count() > 0) {
+            //On crée un message flash pour informer l'utilisateur que le groupe ne peut pas être supprimé
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "Le groupe ne peut pas être supprimé car il contient des employés.");
+            $session->set('statut', 'danger');
+        }
+        else {
+            //On supprime le groupe
+            $entityManager->remove($groupe);
+            $entityManager->flush();
 
-        //On crée un message flash pour informer l'utilisateur que le groupe a bien été supprimé
-        $session = $request->getSession();
-        $session->getFlashBag()->add('message', "Le groupe a bien été supprimé.");
-        $session->set('statut', 'success');
+            //On crée un message flash pour informer l'utilisateur que le groupe a bien été supprimé
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "Le groupe a bien été supprimé.");
+            $session->set('statut', 'success');
+        }
 
         return $this->redirectToRoute('listeDepartements');
     }
@@ -404,6 +425,14 @@ class RhController extends AbstractController
             'form' => $form->createView(),
             'formAjoutEmploye' => $formAjoutEmploye->createView(),
         ]);
+    }
+
+    #[Route('/rh/supprimerEmpGroupe/{idEmploye}/{idGroupe}', name: 'supprimerEmployeDuGroupeRH')]
+    public function supprimerEmployeDuGroupe(int $idEmploye, int $idGroupe, Remove $remove, Request $request): Response {
+
+        $remove->supprimerEmployeDuGroupeSecond($idEmploye, $idGroupe, $request);
+
+        return $this->redirectToRoute('listeGroupe', ['id' => $idGroupe]);
     }
 
     #[Route('/rh/infoEmploye/{idEmploye}/{idGroupe}', name: 'infoEmploye')]
