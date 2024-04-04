@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -37,6 +39,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
 
     #[ORM\OneToOne(inversedBy: 'user', cascade: ['persist', 'remove'])]
     private ?Employe $employe = null;
+
+    #[ORM\OneToMany(targetEntity: ResStockagesHome::class, mappedBy: 'user')]
+    private Collection $resStockagesHomes;
+
+    public function __construct()
+    {
+        $this->resStockagesHomes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -163,5 +173,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
             $this->username,
             $this->password,
         ] = unserialize($data, ['allowed_classes' => false]);
+    }
+
+    /**
+     * @return Collection<int, ResStockagesHome>
+     */
+    public function getResStockagesHomes(): Collection
+    {
+        return $this->resStockagesHomes;
+    }
+
+    public function addResStockagesHome(ResStockagesHome $resStockagesHome): static
+    {
+        if (!$this->resStockagesHomes->contains($resStockagesHome)) {
+            $this->resStockagesHomes->add($resStockagesHome);
+            $resStockagesHome->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResStockagesHome(ResStockagesHome $resStockagesHome): static
+    {
+        if ($this->resStockagesHomes->removeElement($resStockagesHome)) {
+            // set the owning side to null (unless already changed)
+            if ($resStockagesHome->getUser() === $this) {
+                $resStockagesHome->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }

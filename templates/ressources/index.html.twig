@@ -3,5 +3,28 @@
 <div class="container">
     <h1 class="text-center">Ressources</h1>
     <br>
+    <h2>Type : home</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Capacité utilisée</th>
+                <th>Capacité totale</th>
+                <th>Pourcentage</th>
+                <th>Path</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for resStockage in resStockages %}
+            <tr>
+                <td>{{ resStockage.nom }}</td>
+                <td>{{ mesures[loop.index0].ValeurUse }}</td>
+                <td>{{ mesures[loop.index0].ValeurMax }}</td>
+                <td>{{ pourcentage[loop.index0] }} %</td>
+                <td>{{ resStockage.path }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

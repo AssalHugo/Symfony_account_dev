@@ -4,6 +4,8 @@ namespace App\DataFixtures;
 
 use App\Entity\Departement;
 use App\Entity\EtatsRequetes;
+use App\Entity\ResStockagesHome;
+use App\Entity\StockageMesuresHome;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use App\Entity\Employe;
@@ -174,11 +176,11 @@ class HugoUserFixtures extends Fixture
             $employe->setRedirectionMail(true);
 
 
-            $user = new User();
-            $user->setUsername("user" . $i);
-            $user->setEmail("mail" . $i);
-            $user->setPassword("password" . $i);
-            $user->setEmploye($employe);
+            $user2 = new User();
+            $user2->setUsername("user" . $i);
+            $user2->setEmail("mail" . $i);
+            $user2->setPassword("password" . $i);
+            $user2->setEmploye($employe);
 
             $contrat = new Contrats;
             $contrat->setDateDebut(new \DateTime("2015-09-31"));
@@ -276,6 +278,25 @@ class HugoUserFixtures extends Fixture
 
 
         $manager->flush();
+
+        //On remplit le stockage home de fausses données
+        $resStockageHome = new ResStockagesHome();
+        $resStockageHome->setNom("home general");
+        $resStockageHome->setPath("/home");
+        $resStockageHome->setUser($user);
+
+        for ($i=0; $i < 100; $i++) {
+            $mesure = new StockageMesuresHome();
+            $mesure->setDateMesure(new \DateTime());
+            $mesure->setValeurUse(rand(0, 100));
+            $mesure->setValeurMax(rand(0, 100));
+            $resStockageHome->addMesure($mesure);
+            $manager->persist($mesure);
+        }
+
+        $manager->persist($resStockageHome);
+        $manager->flush();
+
 
     }
 }
