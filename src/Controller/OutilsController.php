@@ -99,7 +99,7 @@ class OutilsController extends AbstractController
 
             $query = $employeRepository->findByFiltreId($departement, $groupe, $statut);
         }//Sinon si les filtre sont dans la session
-        else if ($request->getSession()->get('departement') != null || $request->getSession()->get('groupe') != null || $request->getSession()->get('statut') != null) {
+        else if ($request->getSession()->get('departement') != null || $request->getSession()->get('groupe') != null || $request->getSession()->get('statutEmploye') != null) {
             //On récupère les utilisateurs en fonction des filtres
             $departement = $request->getSession()->get('departement');
             $groupe = $request->getSession()->get('groupe');

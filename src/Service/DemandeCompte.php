@@ -46,5 +46,4 @@ class DemandeCompte {
         $session->getFlashBag()->add('message', "L'utilisateur a bien été refusé.");
         $session->set('statut', 'success');
     }
-
 }
