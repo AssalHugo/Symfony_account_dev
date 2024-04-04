@@ -19,6 +19,7 @@ use App\Form\LocalisationType;
 use App\Form\RequeteType;
 use App\Form\ResponsableType;
 use App\Form\TelephonesType;
+use App\Service\DemandeCompte;
 use App\Service\Remove;
 use App\Service\SenderMail;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -99,28 +100,9 @@ class RhController extends AbstractController
     }
 
     #[Route('/rh/refuserDemandeCompte/{id}', name: 'refuserDemandeCompte')]
-    public function refuserDemandeCompte($id, EntityManagerInterface $entityManager, Request $request): Response
-    {
-        //On récupère la demande de compte
-        $requetesRepo = $entityManager->getRepository(Requetes::class);
+    public function refuserDemandeCompte($id, Request $request, DemandeCompte $demandeCompte): Response {
 
-        $demandeCompte = $requetesRepo->find($id);
-
-        //On récupere l'objet EtatsRequetes avec l'état 'Refusé par admin'
-        $etatRequeteRepo = $entityManager->getRepository(EtatsRequetes::class);
-
-        $etatRequete = $etatRequeteRepo->findOneBy(['etat' => 'Refusé']);
-
-        //On change le statut de la demande de compte
-        $demandeCompte->setEtatRequete($etatRequete);
-
-        $entityManager->persist($demandeCompte);
-        $entityManager->flush();
-
-        //On crée un message flash pour informer l'utilisateur que la demande a bien été refusée
-        $session = $request->getSession();
-        $session->getFlashBag()->add('message', "L'utilisateur a bien été refusé.");
-        $session->set('statut', 'success');
+        $demandeCompte->refuserDemandeCompte($id, $request);
 
         return $this->redirectToRoute('listeDemandesComptes');
     }
@@ -314,7 +296,7 @@ class RhController extends AbstractController
         $groupe = $groupesRepo->find($id);
 
         //Si le groupe contient des employés
-        if ($groupe->getEmployesGrpPrincipaux()->count() > 0) {
+        if ($groupe->getEmployesGrpPrincipaux()->count() > 0 || $groupe->getEmployeGrpSecondaires()->count() > 0){
             //On crée un message flash pour informer l'utilisateur que le groupe ne peut pas être supprimé
             $session = $request->getSession();
             $session->getFlashBag()->add('message', "Le groupe ne peut pas être supprimé car il contient des employés.");

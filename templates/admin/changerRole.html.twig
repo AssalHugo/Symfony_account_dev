@@ -21,10 +21,8 @@
                     role = role.replace(/"/g, '');
                     document.getElementById('changer_role_role').value = role;
                 });
+            document.getElementById('changer_role_user').addEventListener('change', updateRole);
         }
-
-        // Écouteur d'événement pour le changement de l'utilisateur
-        document.getElementById('changer_role_user').addEventListener('change', updateRole);
 
         // Mise à jour du rôle lors du chargement de la page
         window.addEventListener('load', updateRole);

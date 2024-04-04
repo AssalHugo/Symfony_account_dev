@@ -114,7 +114,8 @@ class UserController extends AbstractController
         }
 
 
-        //-----Partie Telephone-----
+
+        //---------------Partie Telephone--------------
         //Pour chaques numéros de téléphone de l'employe on crée un formulaire pour les modifier
         $formsTelephones = [];
         foreach ($telephones as $i => $telephone){
@@ -169,7 +170,8 @@ class UserController extends AbstractController
         }
 
 
-        //----Partie contact support----
+
+        //--------------------Partie contact support--------------
         $formContact = $this->createForm(ContactSuppportType::class);
 
         $formContact->add('envoyer', SubmitType::class, ['label' => 'Envoyer']);
@@ -207,6 +209,7 @@ class UserController extends AbstractController
         }
 
 
+
         //-----------------Partie upload photo profil-----------------
         $formUploadPhoto = $this->createForm(UploadImageType::class, $employe);
         $formUploadPhoto->add('valider', SubmitType::class, ['label' => 'Valider']);
@@ -224,6 +227,7 @@ class UserController extends AbstractController
 
             return $this->redirectToRoute('mesInfos');
         }
+
 
         //On renvoie vers le template accompagné de certaines valeurs
         return $this->render('user/mesInfo.html.twig', [

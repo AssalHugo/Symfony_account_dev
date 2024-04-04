@@ -10,8 +10,11 @@ use App\Entity\User;
 use App\Form\ChangerMDPType;
 use App\Form\ChangerRoleType;
 use App\Form\RequeteType;
+use App\Service\DemandeCompte;
 use App\Service\SenderMail;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -240,6 +243,10 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('listeDemandesComptesAdmin');
     }
 
+    /**
+     * Function qui va générer un mot de passe aléatoire
+     * @return string
+     */
     static function randomPassword() : string{
         $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
         $pass = array(); //remember to declare $pass as an array
@@ -251,29 +258,16 @@ class AdminController extends AbstractController
         return implode($pass); //turn the array into a string
     }
 
+    /**
+     * @param $id
+     * @param Request $request
+     * @param DemandeCompte $demandeCompte
+     * @return Response
+     */
     #[Route('/admin/refuserDemandeCompte/{id}', name: 'refuserDemandeCompteAdmin')]
-    public function refuserDemandeCompte($id, EntityManagerInterface $entityManager, Request $request): Response
+    public function refuserDemandeCompte($id, Request $request, DemandeCompte $demandeCompte): Response
     {
-        //On récupère la demande de compte
-        $requetesRepo = $entityManager->getRepository(Requetes::class);
-
-        $demandeCompte = $requetesRepo->find($id);
-
-        //On récupere l'objet EtatsRequetes avec l'état 'Refusé par admin'
-        $etatRequeteRepo = $entityManager->getRepository(EtatsRequetes::class);
-
-        $etatRequete = $etatRequeteRepo->findOneBy(['etat' => 'Refusé']);
-
-        //On change le statut de la demande de compte
-        $demandeCompte->setEtatRequete($etatRequete);
-
-        $entityManager->persist($demandeCompte);
-        $entityManager->flush();
-
-        //On crée un message flash pour informer l'utilisateur que la demande a bien été refusée
-        $session = $request->getSession();
-        $session->getFlashBag()->add('message', "L'utilisateur a bien été refusé.");
-        $session->set('statut', 'success');
+        $demandeCompte->refuserDemandeCompte($id, $request);
 
         return $this->redirectToRoute('listeDemandesComptesAdmin');
     }
