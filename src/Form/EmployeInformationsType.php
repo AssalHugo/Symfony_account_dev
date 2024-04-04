@@ -30,11 +30,14 @@ class EmployeInformationsType extends AbstractType
             ->add('annee_naissance')
             ->add('redirection_mail')
             ->add('imageFile', VichImageType::class, [
-                'label' => 'Nouvelle photo de profil',
+                'label' => 'Photo de profil',
                 'label_attr' => [
                     'class' => 'form-label mt-4',
                 ],
                 'required' => false,
+                'download_label' => false,
+                'delete_label' => false,
+                'allow_delete' => false,
             ])
             ->add('localisation', CollectionType::class, [
                 'entry_type' => LocalisationType::class,

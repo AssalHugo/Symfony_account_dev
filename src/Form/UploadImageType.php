@@ -23,7 +23,6 @@ class UploadImageType extends AbstractType
                 'download_label' => false,
                 'delete_label' => false,
                 'allow_delete' => false,
-                //On inverse le choisir un fichier et l'image
             ])
         ;
     }

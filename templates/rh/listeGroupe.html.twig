@@ -5,10 +5,13 @@
         <h1 class="text-center">Liste des utilisateurs du groupe : {{ groupe.nom }}</h1>
         <br>
         <br>
-
-        <h3>Groupe : {{ groupe.nom }}</h3>
-        <br>
         {{ form_start(form) }}
+        <div class="form-group">
+            <h5>Nom : </h5>
+            {{ form_widget(form.nom) }}
+            {{ form_errors(form.nom) }}
+        </div>
+        <br>
         <div class="form-group">
             <h5>Responsable : </h5>
             {{ form_widget(form.responsable) }}
@@ -68,7 +71,7 @@
                     <td>{{ employeSec.contrats| last .datedebut|date('d/m/Y') }}</td>
                     <td>{{ employeSec.contrats| last .datefin|date('d/m/Y') }}</td>
                     <td>{{ employeSec.contrats| last .status.type }}</td>
-                    <td><td><a href="{{ path('infoEmploye', {'idEmploye': employeSec.id, 'idGroupe' : groupe.id}) }}" class="btn btn-info">Infos</a></td>
+                    <td><a href="{{ path('infoEmploye', {'idEmploye': employeSec.id, 'idGroupe' : groupe.id}) }}" class="btn btn-info">Infos</a></td>
                     <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer</a></td>
                 </tr>
             {% endfor %}

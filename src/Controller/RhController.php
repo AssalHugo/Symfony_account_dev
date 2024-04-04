@@ -189,6 +189,7 @@ class RhController extends AbstractController
             }
 
 
+            //Si le formulaire est soumis, valide, que le bouton modifier est cliqué et que ce n'est pas le formulaire d'ajout d'un département
             if ($form->isSubmitted() && $form->isValid() && $index == $i && $form->get('modifier')->isClicked()) {
 
                 $entityManager->persist($departement);
@@ -233,11 +234,88 @@ class RhController extends AbstractController
             $formGroupes[] = $formAjoutGroupe->createView();
         }
 
+
+        //-------Formulaire ajout d'un département-------
+        $departement = new Departement();
+        //On crée un autre formulaire car sinon le formulaire de modification du responsable du département est soumis
+        $formAjoutDepartement = $this->createFormBuilder($departement)
+            ->add('nom')
+            ->add('acronyme')
+            ->add('responsable', EntityType::class, [
+                'class' => Employe::class,
+                'choice_label' => function ($employe) {
+                    return $employe->getPrenom() . ' ' . $employe->getNom();
+                },
+                'label' => 'Responsable :',
+            ]
+        );
+
+        $formAjoutDepartement->add('ajouter', SubmitType::class, [
+            'label' => 'Ajouter',
+        ]);
+
+        $formAjoutDepartement = $formAjoutDepartement->getForm();
+
+        $formAjoutDepartement->handleRequest($request);
+
+        if ($formAjoutDepartement->isSubmitted() && $formAjoutDepartement->isValid() && $formAjoutDepartement->get('ajouter')->isClicked()) {
+
+            $entityManager->persist($departement);
+            $entityManager->flush();
+
+            //On crée un message flash pour informer l'utilisateur que le département a bien été ajouté
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "Le département a bien été ajouté.");
+            $session->set('statut', 'success');
+
+            return $this->redirectToRoute('listeDepartements');
+        }
+
+
         return $this->render('rh/listeDepartements.html.twig', [
             'departements' => $departements,
             'formsResponsableDep' => $formsResponsableDep,
             'formGroupes' => $formGroupes,
+            'formAjoutDepartement' => $formAjoutDepartement->createView(),
         ]);
+    }
+
+    #[Route('/rh/removeDepartement/{id}', name: 'removeDepartement')]
+    public function removeDepartement($id, EntityManagerInterface $entityManager, Request $request): Response
+    {
+        //On récupère le departement
+        $departementRepo = $entityManager->getRepository(Departement::class);
+
+        $departement = $departementRepo->find($id);
+
+        $entityManager->remove($departement);
+        $entityManager->flush();
+
+        //On crée un message flash pour informer l'utilisateur que le département a bien été supprimé
+        $session = $request->getSession();
+        $session->getFlashBag()->add('message', "Le département a bien été supprimé.");
+        $session->set('statut', 'success');
+
+        return $this->redirectToRoute('listeDepartements');
+    }
+
+    #[Route('/rh/removeGroupe/{id}', name: 'removeGroupe')]
+    public function removeGroupe($id, EntityManagerInterface $entityManager, Request $request): Response
+    {
+        //On récupère le groupe
+        $groupesRepo = $entityManager->getRepository(Groupes::class);
+
+        $groupe = $groupesRepo->find($id);
+
+        $entityManager->remove($groupe);
+        $entityManager->flush();
+
+        //On crée un message flash pour informer l'utilisateur que le groupe a bien été supprimé
+        $session = $request->getSession();
+        $session->getFlashBag()->add('message', "Le groupe a bien été supprimé.");
+        $session->set('statut', 'success');
+
+        return $this->redirectToRoute('listeDepartements');
     }
 
     #[Route('/rh/listeGroupe/{id}', name: 'listeGroupe')]

@@ -80,8 +80,8 @@ class Employe
     #[ORM\ManyToOne(inversedBy: 'employes_grp_principaux')]
     private ?Groupes $groupe_principal = null;
 
-    #[ORM\OneToOne(mappedBy: 'responsable', cascade: ['persist', 'remove'])]
-    private ?Departement $responsable_departement = null;
+    //#[ORM\OneToMany(targetEntity: Requetes::class, mappedBy: 'responsable')]
+    //private ?Departement $responsable_departement = null;
 
     #[ORM\OneToMany(targetEntity: Requetes::class, mappedBy: 'referent')]
     private Collection $referentDe;
@@ -96,6 +96,9 @@ class Employe
     #[ORM\Column]
     private ?bool $redirection_mail = null;
 
+    #[ORM\OneToMany(targetEntity: Departement::class, mappedBy: 'responsable')]
+    private Collection $responsable_des_departements;
+
 
     public function __construct()
     {
@@ -108,6 +111,7 @@ class Employe
         $this->responsable_de = new ArrayCollection();
         $this->referent_de_employe = new ArrayCollection();
         $this->updatedAt = new \DateTimeImmutable();
+        $this->responsable_des_departements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -562,6 +566,36 @@ class Employe
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return Collection<int, Departement>
+     */
+    public function getResponsableDesDepartements(): Collection
+    {
+        return $this->responsable_des_departements;
+    }
+
+    public function addResponsableDesDepartement(Departement $responsableDesDepartement): static
+    {
+        if (!$this->responsable_des_departements->contains($responsableDesDepartement)) {
+            $this->responsable_des_departements->add($responsableDesDepartement);
+            $responsableDesDepartement->setResponsable($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResponsableDesDepartement(Departement $responsableDesDepartement): static
+    {
+        if ($this->responsable_des_departements->removeElement($responsableDesDepartement)) {
+            // set the owning side to null (unless already changed)
+            if ($responsableDesDepartement->getResponsable() === $this) {
+                $responsableDesDepartement->setResponsable(null);
+            }
+        }
+
+        return $this;
     }
 
 }

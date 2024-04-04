@@ -210,7 +210,7 @@ class UserController extends AbstractController
             $session->getFlashBag()->add('message', 'Le message a bien été envoyé');
             $session->set('statut', 'success');
 
-            return $this->redirect($this->generateUrl('mesInfos'));
+            return $this->redirectToRoute('mesInfos');
         }
 
 
@@ -222,10 +222,15 @@ class UserController extends AbstractController
 
         if($formUploadPhoto->isSubmitted() && $formUploadPhoto->isValid()){
 
+
             $entityManager->persist($employe);
             $entityManager->flush();
 
-            return $this->redirect($this->generateUrl('mesInfos'));
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', 'La photo de profil a bien été modifiée');
+            $session->set('statut', 'success');
+
+            return $this->redirectToRoute('mesInfos');
         }
 
         //On renvoie vers le template accompagné de certaines valeurs

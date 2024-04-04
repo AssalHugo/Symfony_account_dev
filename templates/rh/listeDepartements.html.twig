@@ -7,21 +7,36 @@
         {% for departement in departements %}
             <div class="card">
                 <div class="card-header">
-                    <h2>{{ departement.nom }} ({{ departement.acronyme }})</h2>
+                    <div class="d-flex justify-content-between">
+                        <h2>{{ departement.nom }} ({{ departement.acronyme }})</h2>
+                        <a href="{{ path('removeDepartement', {'id': departement.id}) }}" class="btn btn-danger">Supprimer</a>
+                    </div>
                     {{ form_start(formsResponsableDep[loop.index0], {'action': path('listeDepartements', {'index': loop.index0})}) }}
                     {{ form_widget(formsResponsableDep[loop.index0]) }}
                     {{ form_end(formsResponsableDep[loop.index0]) }}
                 </div>
                 <div class="card-body">
-                    {% for groupe in departement.groupes %}
-                        <a href="{{ path('listeGroupe', {'id': groupe.id}) }}">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4 class="text-center">{{ groupe.nom }}</h4>
-                                </div>
-                            </div>
-                        </a>
-                    {% endfor %}
+                    <h4>Groupes : </h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Nom</th>
+                                <th scope="col">Acronyme</th>
+                                <th scope="col">Responsable</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for groupe in departement.groupes %}
+                                <tr>
+                                    <td><a href="{{ path('listeGroupe', {'id': groupe.id}) }}" class="link-offset-2 link-underline link-underline-opacity-0">{{ groupe.nom }}</a></td>
+                                    <td><a href="{{ path('listeGroupe', {'id': groupe.id}) }}" class="link-offset-2 link-underline link-underline-opacity-0">{{ groupe.acronyme }}</a></td>
+                                    <td><a href="{{ path('infoEmploye', {'idEmploye': groupe.responsable.id, 'idGroupe' : groupe.id}) }}" class="link-offset-2 link-underline link-underline-opacity-0">{{ groupe.responsable.nom }} {{ groupe.responsable.prenom }}</a></td>
+                                    <td><a href="{{ path('removeGroupe', {'id': groupe.id}) }}" class="btn btn-danger">Supprimer</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                     <br>
                     <h5>Ajouter un groupe : </h5>
                     {{ form_start(formGroupes[loop.index0], {'action': path('listeDepartements', {'index': loop.index0})}) }}
@@ -31,5 +46,8 @@
             </div>
             <br>
         {% endfor %}
+        <br>
+        <h2>Ajouter un département</h2>
+        {{ form(formAjoutDepartement) }}
     </div>
 {% endblock %}

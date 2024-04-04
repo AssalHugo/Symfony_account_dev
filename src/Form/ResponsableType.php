@@ -18,6 +18,7 @@ class ResponsableType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('nom')
             ->add('responsable', EntityType::class, [
                 'class' => Employe::class,
                 'choice_label' => function(Employe $employe) {

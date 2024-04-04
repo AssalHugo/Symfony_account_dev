@@ -21,12 +21,16 @@ class Departement
     #[ORM\Column(length: 8)]
     private ?string $acronyme = null;
 
-    #[ORM\OneToOne(inversedBy: 'responsable_departement', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?Employe $responsable = null;
+    //#[ORM\ManyToOne(targetEntity: Employe::class)]
+    //#[ORM\JoinColumn(nullable: true)]
+    //private ?Employe $responsable = null;
 
     #[ORM\OneToMany(targetEntity: Groupes::class, mappedBy: 'departement')]
     private Collection $groupes;
+
+    #[ORM\ManyToOne(inversedBy: 'responsable_des_departements')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Employe $responsable = null;
 
     public function __construct()
     {
