@@ -197,7 +197,7 @@ class OutilsController extends AbstractController
         $session = $request->getSession();
         $session->remove('departement');
         $session->remove('groupe');
-        $session->remove('statut');
+        $session->remove('statutEmploye');
 
         return $this->redirectToRoute('trombinoscope');
     }
