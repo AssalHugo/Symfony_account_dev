@@ -12,6 +12,7 @@ use App\Form\ContactSecondairesType;
 use App\Form\RedirectionMailType;
 use App\Form\RequeteType;
 use App\Form\TrombinoscopeType;
+use App\Service\SenderMail;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -210,7 +211,7 @@ class OutilsController extends AbstractController
      * @return Response
      */
     #[Route('/outils/formulaire/{indexRequete}', name: 'formulaireDemandeCompte', requirements: ['indexRequete' => '\d*'], defaults: ['indexRequete' => null])]
-    public function formulaireDemandeCompte($indexRequete, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response {
+    public function formulaireDemandeCompte($indexRequete, Request $request, EntityManagerInterface $entityManager, SenderMail $senderMail): Response {
 
         $requete = new Requetes();
 
@@ -257,13 +258,14 @@ class OutilsController extends AbstractController
                         Commentaire : " . $requete->getCommentaire() . "\n
                         Merci de bien vouloir valider ou refuser la demande.";
 
-                $email = (new Email())
-                    ->from('mail@gmail.com')
-                    ->to($recipient->getEmail())
-                    ->subject('Demande de compte numéro : ' . $requete->getDateRequete()->format('YmdHis'))
-                    ->text($text);
-
-                //$mailer->send($email);
+                try {
+                    $senderMail->sendMail('mail@mail.com', $recipient->getEmail(), 'Demande de compte', $text);
+                } catch (TransportExceptionInterface $e) {
+                    $session = $request->getSession();
+                    $session->getFlashBag()->add('message', 'Erreur lors de l\'envoi du mail.');
+                    $session->set('statut', 'danger');
+                    return $this->redirectToRoute('formulaireDemandeCompte');
+                }
             }
 
             $session = $request->getSession();

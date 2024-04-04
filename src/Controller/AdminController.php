@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Form\ChangerMDPType;
 use App\Form\ChangerRoleType;
 use App\Form\RequeteType;
+use App\Service\SenderMail;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -17,6 +18,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -139,8 +141,7 @@ class AdminController extends AbstractController
 
 
     #[Route('/admin/validerDemandeCompte/{id}', name: 'validerDemandeCompteAdmin')]
-    public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
-    {
+    public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher, SenderMail $senderMail): Response {
         //On récupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
         $demandeCompte = $requetesRepo->find($id);
@@ -210,13 +211,14 @@ class AdminController extends AbstractController
         $message .= "Vous pouvez vous connecter à l'application avec votre adresse mail et ce mot de passe.\n\n";
         $message .= "Cordialement,\n\n";
 
-        $email = (new Email())
-            ->from('you@example.com')
-            ->to($demandeCompte->getMail())
-            ->subject('Votre demande de compte a été validée' . $demandeCompte->getPrenom() . ' ' . $demandeCompte->getNom())
-            ->text($message);
-
-        //$mailer->send($email);
+        try {
+            $senderMail->sendMail('mail@mail.com', $demandeCompte->getMail(), 'Votre demande de compte a été validée ' . $demandeCompte->getPrenom() . ' ' . $demandeCompte->getNom(), $message);
+        } catch (TransportExceptionInterface $e) {
+            //On crée un message flash pour informer l'utilisateur que le mail n'a pas pu être envoyé
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "Le mail n'a pas pu être envoyé.");
+            $session->set('statut', 'danger');
+        }
 
 
         //On récupere l'objet EtatsRequetes avec l'état 'Validé par admin'

@@ -20,6 +20,7 @@ use App\Form\RequeteType;
 use App\Form\ResponsableType;
 use App\Form\TelephonesType;
 use App\Service\Remove;
+use App\Service\SenderMail;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -48,7 +49,7 @@ class RhController extends AbstractController
     }
 
     #[Route('/rh/validerDemandeCompte/{id}', name: 'validerDemandeCompte')]
-    public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request, MailerInterface $mailer): Response
+    public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request, SenderMail $senderMail): Response
     {
         //On récupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
@@ -78,14 +79,8 @@ class RhController extends AbstractController
             $message .= "Vous pouvez maintenant créer son compte. \n\n";
             $message .= "Cordialement, \n";
 
-            $email = (new Email())
-                ->from('you@example.com')
-                ->to($admin->getEmail())
-                ->subject('Validation de demande de compte numéro : ' . $demandeCompte->getDateRequete()->format('YmdHis'))
-                ->text($message);
-
             try {
-                //$mailer->send($email);
+                $senderMail->sendMail('mail@mail.com', $admin->getEmail(), 'Validation de demande de compte numéro : ' . $demandeCompte->getDateRequete()->format('YmdHis'), $message);
             } catch (TransportExceptionInterface $e) {
                 $session = $request->getSession();
                 $session->getFlashBag()->add('message', 'Erreur lors de l\'envoi du mail.');

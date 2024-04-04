@@ -38,7 +38,6 @@
                     <td>{{ employe.contrats| last .datedebut|date('d/m/Y') }}</td>
                     <td>{{ employe.contrats| last .datefin|date('d/m/Y') }}</td>
                     <td>{{ employe.contrats| last .status.type }}</td>
-                    <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': app.user.employe.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
                 </tr>
             {% endfor %}
             {% for employeSec in groupe.employegrpsecondaires %}

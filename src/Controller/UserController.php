@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\UploadImageType;
+use App\Service\SenderMail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -32,19 +33,16 @@ class UserController extends AbstractController
      * @param $indexTelephone
      * @param Request $request
      * @param EntityManagerInterface $entityManager
-     * @param MailerInterface $mailer
      * @return Response
      */
     #[Route('/user/mesInformations/{indexTelephone}/{indexLocalisation}', name: 'mesInfos', requirements: ['indexTelephone' => '\d*', 'indexLocalisation' => '\d*'], defaults: ['indexTelephone' => null, 'indexLocalisation' => null])]
-    public function mesInformations($indexLocalisation, $indexTelephone, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response {
+    public function mesInformations($indexLocalisation, $indexTelephone, Request $request, EntityManagerInterface $entityManager, SenderMail $senderMail): Response {
 
         //On récupère le User connecté
         $user = $this->getUser();
 
         //On récupère l'employe qui est connecté
         $employe = $user->getEmploye();
-
-
 
         //On récupere le dernier contrat de l'employé 
         $contrat = $entityManager->getRepository(Contrats::class)->findLastContrat($employe->getId());
@@ -190,15 +188,10 @@ class UserController extends AbstractController
             //On envoie un mail à chaque admin
             foreach ($admins as $admin) {
 
-                $email = (new Email())
-                    ->from('you@example.com')
-                    ->to($admin->getEmail())
-                    ->subject('Contact support')
-                    ->text($message);
-
                 try {
-                    //$mailer->send($email);
-                } catch (TransportExceptionInterface $e) {
+                    $senderMail->sendMail('you@example.com', $admin->getEmail(), 'Contact support', $message);
+                }
+                catch (TransportExceptionInterface $e) {
                     $session = $request->getSession();
                     $session->getFlashBag()->add('message', 'Le message n\'a pas pu être envoyé');
                     $session->set('statut', 'danger');
@@ -221,7 +214,6 @@ class UserController extends AbstractController
         $formUploadPhoto->handleRequest($request);
 
         if($formUploadPhoto->isSubmitted() && $formUploadPhoto->isValid()){
-
 
             $entityManager->persist($employe);
             $entityManager->flush();
@@ -426,7 +418,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/user/contactSecondaires', name: 'contacts')]
-    public function contactSecondaires(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer) : Response{
+    public function contactSecondaires(Request $request, EntityManagerInterface $entityManager, SenderMail $senderMail) : Response{
 
         //On récupère l'employe qui est connecté
         $employe = $this->getUser()->getEmploye();
@@ -443,13 +435,14 @@ class UserController extends AbstractController
             $entityManager->flush();
 
             //On envoie un mail sur son adresse mail secondaire
-            $email = (new Email())
-                ->from('mail@gmail.com')
-                ->to($employe->getMailSecondaire())
-                ->subject('Modification des contacts secondaires')
-                ->text('Les contacts secondaires ont bien étés modifiés');
-
-            //$mailer->send($email);
+            try {
+                $senderMail->sendMail('mail@mail.com', $employe->getMailSecondaire(), 'Modification des contacts secondaires', 'Les contacts secondaires ont bien étés modifiés');
+            } catch (TransportExceptionInterface $e) {
+                $session = $request->getSession();
+                $session->getFlashBag()->add('message', 'Le mail n\'a pas pu être envoyé');
+                $session->set('statut', 'danger');
+                return $this->redirect($this->generateUrl('contacts'));
+            }
 
             $session = $request->getSession();
             $session->getFlashBag()->add('message', 'Les contacts secondaires ont bien étés modifiés, un mail vous a été envoyé sur votre adresse mail secondaire');
