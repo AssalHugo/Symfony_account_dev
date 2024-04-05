@@ -33,7 +33,7 @@ class SenderMail
             ->subject($subject)
             ->text($body);
 
-        //$this->mailer->send($email);
+        $this->mailer->send($email);
     }
 
 }

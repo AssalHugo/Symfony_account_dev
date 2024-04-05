@@ -96,12 +96,14 @@ class AdminController extends AbstractController
     }
 
     #[Route('/admin/syncEmploye/{idEmploye}/{idRequete}', name: 'syncEmployeAdmin')]
-    public function syncEmploye($idEmploye, $idRequete, EntityManagerInterface $entityManager, Request $request): Response
+    public function syncEmploye($idEmploye, $idRequete, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher, SenderMail $senderMail): Response
     {
         //On récupère l'employé
         $employeRepo = $entityManager->getRepository(Employe::class);
 
         $employe = $employeRepo->find($idEmploye);
+
+        $user = $employe->getUser();
 
         //On récupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
@@ -114,12 +116,35 @@ class AdminController extends AbstractController
         $employe->setGroupePrincipal($demandeCompte->getGroupePrincipal());
         $employe->addLocalisation($demandeCompte->getLocalisation());
         $employe->addContrat($demandeCompte->getContrat());
-        $employe->setSyncReseda(false);
-        $employe->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
-        $employe->setRedirectionMail(true);
+        $employe->setReferent($demandeCompte->getReferent());
+
+        //On set le mot de passe de l'utilisateur qui va etre généré automatiquement
+        $mdp = self::randomPassword();
+
+        //On hashe le mot de passe
+        $hashedPassword = $passwordHasher->hashPassword($user, $mdp);
+        $user->setPassword($hashedPassword);
 
         $entityManager->persist($employe);
         $entityManager->flush();
+
+        //On envoie un mail à l'utilisateur pour lui communiquer son mot de passe
+        $message = "Bonjour " . $demandeCompte->getPrenom() . " " . $demandeCompte->getNom() . ",\n\n";
+        $message .= "Votre demande de compte a bien été validée, avec les informations suivantes :\n";
+        $message .= "Nom d'utilisateur : " . $user->getUsername() . "\n";
+        $message .= "Mail : " . $demandeCompte->getMail() . "\n";
+        $message .= "Mot de passe : " . $mdp . "\n\n";
+        $message .= "Vous pouvez vous connecter à l'application avec votre adresse mail et ce mot de passe.\n\n";
+        $message .= "Cordialement,\n\n";
+
+        try {
+            $senderMail->sendMail('mail@mail.com', $demandeCompte->getMail(), 'Votre demande de compte a été validée ' . $demandeCompte->getPrenom() . ' ' . $demandeCompte->getNom(), $message);
+        } catch (TransportExceptionInterface $e) {
+            //On crée un message flash pour informer l'utilisateur que le mail n'a pas pu être envoyé
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "Le mail n'a pas pu être envoyé.");
+            $session->set('statut', 'danger');
+        }
 
         //On récupere l'objet EtatsRequetes avec l'état 'Validé par admin'
         $etatRequeteRepo = $entityManager->getRepository(EtatsRequetes::class);
@@ -190,8 +215,9 @@ class AdminController extends AbstractController
         $employe->addLocalisation($demandeCompte->getLocalisation());
         $employe->addContrat($demandeCompte->getContrat());
         $employe->setSyncReseda(false);
-        $employe->setPhoto("https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png");
+        $employe->setPhoto("user.png");
         $employe->setRedirectionMail(true);
+        $employe->setReferent($demandeCompte->getReferent());
 
         //On rajoute l'employe à l'utilisateur
         $user->setEmploye($employe);
