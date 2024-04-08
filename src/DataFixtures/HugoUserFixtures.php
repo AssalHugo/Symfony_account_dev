@@ -4,8 +4,11 @@ namespace App\DataFixtures;
 
 use App\Entity\Departement;
 use App\Entity\EtatsRequetes;
+use App\Entity\GroupesSys;
 use App\Entity\ResStockagesHome;
+use App\Entity\ResStockageWork;
 use App\Entity\StockageMesuresHome;
+use App\Entity\StockagesMesuresWork;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use App\Entity\Employe;
@@ -119,6 +122,11 @@ class HugoUserFixtures extends Fixture
         $groupe->setAcronyme("Grp1");
         $groupe->setResponsable($employe);
 
+        $groupeSys = new GroupesSys();
+        $groupeSys->setNom("groupeSys 1");
+        $groupeSys->setGroupe($groupe);
+        $manager->persist($groupeSys);
+
 
         $groupe2 = new Groupes();
         $groupe2->setNom("groupe 2");
@@ -126,6 +134,9 @@ class HugoUserFixtures extends Fixture
         $groupe2->setResponsable($employe2);
         $groupe2->addAdjoint($employe);
 
+        $groupeSys2 = new GroupesSys();
+        $groupeSys2->setNom("groupeSys 2");
+        $groupeSys2->setGroupe($groupe2);
 
         $departement = new Departement();
         $departement->setNom("Informatique");
@@ -230,6 +241,12 @@ class HugoUserFixtures extends Fixture
                 $groupe->setAcronyme("Grp" . $i);
                 $groupe->setResponsable($employe);
 
+                //Groupe Sys
+                $groupeSys = new GroupesSys();
+                $groupeSys->setNom("groupeSys" . $i);
+                $groupeSys->setGroupe($groupe);
+                $manager->persist($groupeSys);
+
                 if ($i % 5 == 0) {
                     $departement = new Departement();
                     $departement->setNom("Departement" . $i);
@@ -311,6 +328,38 @@ class HugoUserFixtures extends Fixture
 
         $manager->persist($resStockageHome);
         $manager->persist($resStockageHome2);
+
+        //Stockage work
+        $resStockageWork = new ResStockageWork();
+        $resStockageWork->setNom("apex");
+        $resStockageWork->setGroupeSys($groupeSys);
+
+        for ($i=0; $i < 100; $i++) {
+            $mesure = new StockagesMesuresWork();
+            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
+            $mesure->setValeurUse(rand(0, 10));
+            $mesure->setValeurMax(10);
+            $resStockageWork->addMesure($mesure);
+            $manager->persist($mesure);
+        }
+
+        $resStockageWork2 = new ResStockageWork();
+        $resStockageWork2->setNom("uc");
+        $resStockageWork2->setGroupeSys($groupeSys2);
+
+        for ($i=0; $i < 100; $i++) {
+            $mesure = new StockagesMesuresWork();
+            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
+            $mesure->setValeurUse(rand(0, 20));
+            $mesure->setValeurMax(20);
+            $resStockageWork2->addMesure($mesure);
+            $manager->persist($mesure);
+        }
+
+        $manager->persist($resStockageWork);
+        $manager->persist($resStockageWork2);
+
+
         $manager->flush();
     }
 }

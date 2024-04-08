@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\GroupesSys;
 use App\Entity\ResStockagesHome;
+use App\Entity\ResStockageWork;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,8 +36,16 @@ class RessourcesController extends AbstractController
             $mesureDeChaqueRes[] = $mesure;
         }
 
-        //---------------------------------Graphique---------------------------------
+        //Partie Work
+        //On récupère les ressources de l'utilisateur connecté
+        $resStockagesRepo = $em->getRepository(ResStockageWork::class);
 
+        $GroupesSysRepo = $em->getRepository(GroupesSys::class);
+
+        //On récupère tous les ResStockageWork ou l'utilisateur connecté appartient au groupeSys
+        $groupesSys = $GroupesSysRepo->findBy(['groupe' => $user->getGroupeSec
+
+        //---------------------------------Graphique---------------------------------
         $dataSet = [];
         $labels = [];
         //On crée un graphique contenant les mesures de chaque ressource de l'utilisateur connecté ces 30 derniers jours
@@ -48,8 +58,8 @@ class RessourcesController extends AbstractController
                 $data[] = $mesure->getValeurUse();
 
                 //On stocke les dates des mesures dans un tableau si elles ne sont pas déjà stockées
-                if(!in_array($mesure->getDateMesure()->format('d/m/Y'), $labels)){
-                    $labels[] = $mesure->getDateMesure()->format('d/m/Y');
+                if(!in_array($mesure->getDateMesure()->format('d/m/Y H:i:s'), $labels)){
+                    $labels[] = $mesure->getDateMesure()->format('d/m/Y H:i:s');
                 }
             }
 

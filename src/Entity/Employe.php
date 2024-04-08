@@ -99,6 +99,12 @@ class Employe
     #[ORM\OneToMany(targetEntity: Departement::class, mappedBy: 'responsable')]
     private Collection $responsable_des_departements;
 
+    /**
+     * @var Collection<int, ResStockageWork>
+     */
+    #[ORM\ManyToMany(targetEntity: ResStockageWork::class, mappedBy: 'responsables')]
+    private Collection $resStockageWorks;
+
 
     public function __construct()
     {
@@ -112,6 +118,7 @@ class Employe
         $this->referent_de_employe = new ArrayCollection();
         $this->updatedAt = new \DateTimeImmutable();
         $this->responsable_des_departements = new ArrayCollection();
+        $this->resStockageWorks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -593,6 +600,33 @@ class Employe
             if ($responsableDesDepartement->getResponsable() === $this) {
                 $responsableDesDepartement->setResponsable(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ResStockageWork>
+     */
+    public function getResStockageWorks(): Collection
+    {
+        return $this->resStockageWorks;
+    }
+
+    public function addResStockageWork(ResStockageWork $resStockageWork): static
+    {
+        if (!$this->resStockageWorks->contains($resStockageWork)) {
+            $this->resStockageWorks->add($resStockageWork);
+            $resStockageWork->addResponsable($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResStockageWork(ResStockageWork $resStockageWork): static
+    {
+        if ($this->resStockageWorks->removeElement($resStockageWork)) {
+            $resStockageWork->removeResponsable($this);
         }
 
         return $this;
