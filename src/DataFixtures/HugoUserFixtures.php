@@ -58,11 +58,21 @@ class HugoUserFixtures extends Fixture
         $user->setPassword("hugo26**");
         $user->setEmploye($employe);
 
+        $groupeSysH = new GroupesSys();
+        $groupeSysH->setNom("groupeSys 1");
+        $groupeSysH->setUser($user);
+        $manager->persist($groupeSysH);
+
         $user2 = new User();
         $user2->setUsername("jean");
         $user2->setEmail("jean@mail.com");
         $user2->setPassword("jean26**");
         $user2->setEmploye($employe2);
+
+        $groupeSys = new GroupesSys();
+        $groupeSys->setNom("groupeSys 2");
+        $groupeSys->setUser($user2);
+        $manager->persist($groupeSys);
 
         $status = new Status();
         $status->setType("Stagiaire");
@@ -122,21 +132,12 @@ class HugoUserFixtures extends Fixture
         $groupe->setAcronyme("Grp1");
         $groupe->setResponsable($employe);
 
-        $groupeSys = new GroupesSys();
-        $groupeSys->setNom("groupeSys 1");
-        $groupeSys->setGroupe($groupe);
-        $manager->persist($groupeSys);
-
 
         $groupe2 = new Groupes();
         $groupe2->setNom("groupe 2");
         $groupe2->setAcronyme("Grp2");
         $groupe2->setResponsable($employe2);
         $groupe2->addAdjoint($employe);
-
-        $groupeSys2 = new GroupesSys();
-        $groupeSys2->setNom("groupeSys 2");
-        $groupeSys2->setGroupe($groupe2);
 
         $departement = new Departement();
         $departement->setNom("Informatique");
@@ -193,6 +194,12 @@ class HugoUserFixtures extends Fixture
             $user2->setPassword("password" . $i);
             $user2->setEmploye($employe);
 
+            //Groupe Sys
+            $groupeSys = new GroupesSys();
+            $groupeSys->setNom("groupeSys" . $i);
+            $groupeSys->setUser($user2);
+            $manager->persist($groupeSys);
+
             $contrat = new Contrats;
             $contrat->setDateDebut(new \DateTime("2015-09-31"));
             $contrat->setDateFin(new \DateTime("2016-09-31"));
@@ -241,11 +248,7 @@ class HugoUserFixtures extends Fixture
                 $groupe->setAcronyme("Grp" . $i);
                 $groupe->setResponsable($employe);
 
-                //Groupe Sys
-                $groupeSys = new GroupesSys();
-                $groupeSys->setNom("groupeSys" . $i);
-                $groupeSys->setGroupe($groupe);
-                $manager->persist($groupeSys);
+
 
                 if ($i % 5 == 0) {
                     $departement = new Departement();
@@ -332,7 +335,7 @@ class HugoUserFixtures extends Fixture
         //Stockage work
         $resStockageWork = new ResStockageWork();
         $resStockageWork->setNom("apex");
-        $resStockageWork->setGroupeSys($groupeSys);
+        $resStockageWork->setGroupeSys($groupeSysH);
 
         for ($i=0; $i < 100; $i++) {
             $mesure = new StockagesMesuresWork();
@@ -345,7 +348,7 @@ class HugoUserFixtures extends Fixture
 
         $resStockageWork2 = new ResStockageWork();
         $resStockageWork2->setNom("uc");
-        $resStockageWork2->setGroupeSys($groupeSys2);
+        $resStockageWork2->setGroupeSys($groupeSys);
 
         for ($i=0; $i < 100; $i++) {
             $mesure = new StockagesMesuresWork();

@@ -38,12 +38,15 @@ class RessourcesController extends AbstractController
 
         //Partie Work
         //On récupère les ressources de l'utilisateur connecté
-        $resStockagesRepo = $em->getRepository(ResStockageWork::class);
+        $resStockagesWorkRepo = $em->getRepository(ResStockageWork::class);
 
         $GroupesSysRepo = $em->getRepository(GroupesSys::class);
 
-        //On récupère tous les ResStockageWork ou l'utilisateur connecté appartient au groupeSys
-        $groupesSys = $GroupesSysRepo->findBy(['groupe' => $user->getGroupeSec
+        //On récupère tous les groupesSys de l'utilisateur connecté
+        $groupesSys = $GroupesSysRepo->findBy(['user' => $user]);
+
+        //On récupère les ressources de chaque groupeSys
+        $resStockageWork = $resStockagesWorkRepo->findBy(['groupesSys' => $groupesSys]);
 
         //---------------------------------Graphique---------------------------------
         $dataSet = [];

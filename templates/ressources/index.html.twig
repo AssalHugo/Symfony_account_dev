@@ -29,6 +29,32 @@
         </tbody>
     </table>
     <br>
+    <h2>Type : Work</h2>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Nom</th>
+            <th>Capacité utilisée</th>
+            <th>Capacité totale</th>
+            <th>Pourcentage</th>
+            <th>Path</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for resStockage in resStockages %}
+            <tr>
+                <td>{{ mesures[loop.index0].DateMesure | date('Y-m-d H:i:s') }}</td>
+                <td>{{ resStockage.nom }}</td>
+                <td>{{ mesures[loop.index0].ValeurUse }}</td>
+                <td>{{ mesures[loop.index0].ValeurMax }}</td>
+                <td>{{ pourcentage[loop.index0] }} %</td>
+                <td>{{ resStockage.path }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <br>
     <h2>Graphique</h2>
     {{ render_chart(chart) }}
 </div>

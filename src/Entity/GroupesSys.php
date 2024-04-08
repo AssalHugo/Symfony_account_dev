@@ -16,9 +16,8 @@ class GroupesSys
     #[ORM\Column(length: 32)]
     private ?string $nom = null;
 
-    #[ORM\ManyToOne(inversedBy: 'groupesSys')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Groupes $groupe = null;
+    #[ORM\ManyToOne(inversedBy: 'groupeSys')]
+    private ?User $user = null;
 
 
     public function getId(): ?int
@@ -46,6 +45,18 @@ class GroupesSys
     public function setGroupe(?Groupes $groupe): static
     {
         $this->groupe = $groupe;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }
