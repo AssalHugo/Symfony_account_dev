@@ -287,16 +287,30 @@ class HugoUserFixtures extends Fixture
 
         for ($i=0; $i < 100; $i++) {
             $mesure = new StockageMesuresHome();
-            $mesure->setDateMesure(new \DateTime());
-            $mesure->setValeurUse(rand(0, 100));
-            $mesure->setValeurMax(rand(0, 100));
+            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
+            $mesure->setValeurUse(rand(0, 10));
+            $mesure->setValeurMax(10);
             $resStockageHome->addMesure($mesure);
             $manager->persist($mesure);
         }
 
+        $resStockageHome2 = new ResStockagesHome();
+        $resStockageHome2->setNom("home uc");
+        $resStockageHome2->setUser($user);
+        $resStockageHome2->setPath("/home" . $user->getUsername());
+
+        for ($i=0; $i < 100; $i++) {
+            $mesure = new StockageMesuresHome();
+            //On sépare la date d'un jour pour chaque mesure
+            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
+            $mesure->setValeurUse(rand(0, 20));
+            $mesure->setValeurMax(20);
+            $resStockageHome2->addMesure($mesure);
+            $manager->persist($mesure);
+        }
+
         $manager->persist($resStockageHome);
+        $manager->persist($resStockageHome2);
         $manager->flush();
-
-
     }
 }
