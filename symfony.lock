@@ -198,6 +198,9 @@
             "templates/base.html.twig"
         ]
     },
+    "symfony/ux-chartjs": {
+        "version": "v2.16.0"
+    },
     "symfony/web-profiler-bundle": {
         "version": "7.0",
         "recipe": {
@@ -229,6 +232,9 @@
     },
     "symfonycasts/sass-bundle": {
         "version": "v0.6.0"
+    },
+    "twig/extra-bundle": {
+        "version": "v3.8.0"
     },
     "vich/uploader-bundle": {
         "version": "2.3",

@@ -22,4 +22,7 @@ return [
     '@symfony/stimulus-bundle' => [
         'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
     ],
+    'chart.js/auto' => [
+        'version' => '3.9.1',
+    ],
 ];

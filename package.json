@@ -2,13 +2,13 @@
     "devDependencies": {
         "@babel/core": "^7.17.0",
         "@babel/preset-env": "^7.16.0",
-        "@hotwired/stimulus": "^3.0.0",
-        "@symfony/stimulus-bridge": "^3.2.0",
+        "@hotwired/stimulus": "^3.2.2",
+        "@symfony/stimulus-bridge": "^3.2.2",
+        "@symfony/ux-chartjs": "file:vendor/symfony/ux-chartjs/assets",
         "@symfony/webpack-encore": "^4.0.0",
-        "bootstrap": "^5.3.3",
         "core-js": "^3.23.0",
         "regenerator-runtime": "^0.13.9",
-        "sass": "^1.72.0",
+        "sass": "^1.74.1",
         "sass-loader": "^14.0.0",
         "webpack": "^5.74.0",
         "webpack-cli": "^4.10.0",
@@ -23,6 +23,6 @@
         "build": "encore production --progress"
     },
     "dependencies": {
-        "boostrap": "^2.0.0"
+        "bootstrap": "^5.3.3"
     }
 }
