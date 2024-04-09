@@ -305,12 +305,22 @@ class HugoUserFixtures extends Fixture
         $resStockageHome->setPath("/home");
         $resStockageHome->setUser($user);
 
+        $valeur = 5;
         for ($i=0; $i < 100; $i++) {
             $mesure = new StockageMesuresHome();
-            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
-            $mesure->setValeurUse(rand(0, 10));
-            $mesure->setValeurMax(10);
             $resStockageHome->addMesure($mesure);
+            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
+            //On fait légèrement varier les valeurs pour chaque mesure pour simuler des données réelles
+            //On récupère la valeur de la mesure précédente et on lui ajoute un nombre aléatoire entre -3 et 3, sans dépasser la valeur max
+            $valeur = $valeur + rand(-2, 2);
+            if ($valeur > 10) {
+                $valeur = 10;
+            }
+            else if ($valeur < 0) {
+                $valeur = 0;
+            }
+            $mesure->setValeurUse($valeur);
+            $mesure->setValeurMax(10);
             $manager->persist($mesure);
         }
 
@@ -319,13 +329,22 @@ class HugoUserFixtures extends Fixture
         $resStockageHome2->setUser($user);
         $resStockageHome2->setPath("/home" . $user->getUsername());
 
+        $valeur = 10;
         for ($i=0; $i < 100; $i++) {
             $mesure = new StockageMesuresHome();
+            $resStockageHome2->addMesure($mesure);
             //On sépare la date d'un jour pour chaque mesure
             $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
-            $mesure->setValeurUse(rand(0, 20));
+            $valeur = $valeur + rand(-2, 2);
+            if ($valeur > 20) {
+                $valeur = 20;
+            }
+            else if ($valeur < 0) {
+                $valeur = 0;
+            }
+            $mesure->setValeurUse($valeur);
             $mesure->setValeurMax(20);
-            $resStockageHome2->addMesure($mesure);
+
             $manager->persist($mesure);
         }
 
@@ -335,27 +354,50 @@ class HugoUserFixtures extends Fixture
         //Stockage work
         $resStockageWork = new ResStockageWork();
         $resStockageWork->setNom("apex");
+        $resStockageWork->setPath("/work/apex");
         $resStockageWork->setGroupeSys($groupeSysH);
 
+        $valeur = 5;
         for ($i=0; $i < 100; $i++) {
             $mesure = new StockagesMesuresWork();
-            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
-            $mesure->setValeurUse(rand(0, 10));
-            $mesure->setValeurMax(10);
             $resStockageWork->addMesure($mesure);
+            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
+            //On fait légèrement varier les valeurs pour chaque mesure pour simuler des données réelles
+            //On récupère la valeur de la mesure précédente et on lui ajoute un nombre aléatoire entre -3 et 3, sans dépasser la valeur max
+            $valeur = $valeur + rand(-2, 2);
+            if ($valeur > 10) {
+                $valeur = 10;
+            }
+            else if ($valeur < 0) {
+                $valeur = 0;
+            }
+            $mesure->setValeurUse($valeur);
+            $mesure->setValeurMax(10);
+
             $manager->persist($mesure);
         }
 
         $resStockageWork2 = new ResStockageWork();
         $resStockageWork2->setNom("uc");
+        $resStockageWork->setPath("/work/uc");
         $resStockageWork2->setGroupeSys($groupeSys);
 
+        $valeur = 10;
         for ($i=0; $i < 100; $i++) {
             $mesure = new StockagesMesuresWork();
-            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
-            $mesure->setValeurUse(rand(0, 20));
-            $mesure->setValeurMax(20);
             $resStockageWork2->addMesure($mesure);
+            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
+            $valeur = $valeur + rand(-2, 2);
+            if ($valeur > 20) {
+                $valeur = 20;
+            }
+            else if ($valeur < 0) {
+                $valeur = 0;
+            }
+            $mesure->setValeurUse($valeur);
+
+            $mesure->setValeurMax(20);
+
             $manager->persist($mesure);
         }
 

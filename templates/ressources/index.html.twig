@@ -16,13 +16,13 @@
             </tr>
         </thead>
         <tbody>
-            {% for resStockage in resStockages %}
+            {% for resStockage in resStockagesHome %}
             <tr>
-                <td>{{ mesures[loop.index0].DateMesure | date('Y-m-d H:i:s') }}</td>
+                <td>{{ mesuresHome[loop.index0].DateMesure | date('Y-m-d H:i:s') }}</td>
                 <td>{{ resStockage.nom }}</td>
-                <td>{{ mesures[loop.index0].ValeurUse }}</td>
-                <td>{{ mesures[loop.index0].ValeurMax }}</td>
-                <td>{{ pourcentage[loop.index0] }} %</td>
+                <td>{{ mesuresHome[loop.index0].ValeurUse }}</td>
+                <td>{{ mesuresHome[loop.index0].ValeurMax }}</td>
+                <td>{{ pourcentageHome[loop.index0] }} %</td>
                 <td>{{ resStockage.path }}</td>
             </tr>
             {% endfor %}
@@ -42,13 +42,13 @@
         </tr>
         </thead>
         <tbody>
-        {% for resStockage in resStockages %}
+        {% for resStockage in resStockagesWork %}
             <tr>
-                <td>{{ mesures[loop.index0].DateMesure | date('Y-m-d H:i:s') }}</td>
+                <td>{{ mesuresWork[loop.index0].DateMesure | date('Y-m-d H:i:s') }}</td>
                 <td>{{ resStockage.nom }}</td>
-                <td>{{ mesures[loop.index0].ValeurUse }}</td>
-                <td>{{ mesures[loop.index0].ValeurMax }}</td>
-                <td>{{ pourcentage[loop.index0] }} %</td>
+                <td>{{ mesuresWork[loop.index0].ValeurUse }}</td>
+                <td>{{ mesuresWork[loop.index0].ValeurMax }}</td>
+                <td>{{ pourcentageWork[loop.index0] }} %</td>
                 <td>{{ resStockage.path }}</td>
             </tr>
         {% endfor %}

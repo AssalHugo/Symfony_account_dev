@@ -23,17 +23,17 @@ class RessourcesController extends AbstractController
 
         $resStockagesRepo = $em->getRepository(ResStockagesHome::class);
 
-        $resStockages = $resStockagesRepo->findBy(['user' => $user]);
+        $resStockagesHome = $resStockagesRepo->findBy(['user' => $user]);
 
-        //On récupere la derniere mesure de chaque ressource
-        $mesureDeChaqueRes = [];
-        $pourcentage = [];
-        foreach($resStockages as $resStockage){
+        //On récupere la derniere mesure de chaque ressource Home
+        $mesureDeChaqueResHome = [];
+        $pourcentageHome = [];
+        foreach($resStockagesHome as $resStockage){
             $mesure = $resStockage->getMesures()->last();
             //On calcule le pourcentage deux chiffres après la virgule entre la valeur actuelle et la valeur max
-            $pourcentage[] = round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
+            $pourcentageHome[] = round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
 
-            $mesureDeChaqueRes[] = $mesure;
+            $mesureDeChaqueResHome[] = $mesure;
         }
 
         //Partie Work
@@ -43,10 +43,25 @@ class RessourcesController extends AbstractController
         $GroupesSysRepo = $em->getRepository(GroupesSys::class);
 
         //On récupère tous les groupesSys de l'utilisateur connecté
-        $groupesSys = $GroupesSysRepo->findBy(['user' => $user]);
+        $groupeSys = $GroupesSysRepo->findBy(['user' => $user]);
 
         //On récupère les ressources de chaque groupeSys
-        $resStockageWork = $resStockagesWorkRepo->findBy(['groupesSys' => $groupesSys]);
+        $resStockageWork = $resStockagesWorkRepo->findBy(['groupeSys' => $groupeSys]);
+
+        //On récupère la dernière mesure de chaque ressource Work
+        $mesureDeChaqueResWork = [];
+        $pourcentageWork = [];
+        foreach($resStockageWork as $resStockage){
+            $mesure = $resStockage->getMesures()->last();
+            //On calcule le pourcentage deux chiffres après la virgule entre la valeur actuelle et la valeur max
+            $pourcentageWork[] = round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
+
+            $mesureDeChaqueResWork[] = $mesure;
+        }
+
+        //On fusionne les deux tableaux de ressources
+        $resStockages = array_merge($resStockagesHome, $resStockageWork);
+
 
         //---------------------------------Graphique---------------------------------
         $dataSet = [];
@@ -96,9 +111,12 @@ class RessourcesController extends AbstractController
 
 
         return $this->render('ressources/index.html.twig', [
-            'resStockages' => $resStockages,
-            'mesures' => $mesureDeChaqueRes,
-            'pourcentage' => $pourcentage,
+            'resStockagesHome' => $resStockagesHome,
+            'resStockagesWork' => $resStockageWork,
+            'mesuresHome' => $mesureDeChaqueResHome,
+            'mesuresWork' => $mesureDeChaqueResWork,
+            'pourcentageHome' => $pourcentageHome,
+            'pourcentageWork' => $pourcentageWork,
             'chart' => $chart,
         ]);
     }

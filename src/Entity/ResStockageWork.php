@@ -33,6 +33,9 @@ class ResStockageWork
     #[ORM\OneToMany(targetEntity: StockagesMesuresWork::class, mappedBy: 'resStockageWork')]
     private Collection $mesure;
 
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $path;
+
     public function __construct()
     {
         $this->responsables = new ArrayCollection();
@@ -95,7 +98,7 @@ class ResStockageWork
     /**
      * @return Collection<int, StockagesMesuresWork>
      */
-    public function getMesure(): Collection
+    public function getMesures(): Collection
     {
         return $this->mesure;
     }
@@ -118,6 +121,18 @@ class ResStockageWork
                 $mesure->setResStockageWork(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPath(): ?string
+    {
+        return $this->path;
+    }
+
+    public function setPath(string $path): static
+    {
+        $this->path = $path;
 
         return $this;
     }
