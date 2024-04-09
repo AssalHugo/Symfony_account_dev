@@ -19,41 +19,40 @@ class RessourcesController extends AbstractController
     #[Route('/ressources', name: 'ressources')]
     public function index(EntityManagerInterface $em, ChartBuilderInterface $chartBuilder, Request $request): Response {
 
+
         //On récupère les ressources de l'utilisateur connecté
         $user = $this->getUser();
 
-        $resStockagesRepo = $em->getRepository(ResStockagesHome::class);
-
-        $resStockagesHome = $resStockagesRepo->findBy(['user' => $user]);
+        $resStockagesHome = $em->getRepository(ResStockagesHome::class)->findBy(['user' => $user]);
 
         //On récupere la derniere mesure de chaque ressource Home
         $mesureDeChaqueResHome = [];
         $pourcentageHome = [];
         foreach($resStockagesHome as $resStockage){
-            $mesure = $resStockage->getMesures()->last();
+            $mesure = $resStockage->getMesures()->first();
+
+
             //On calcule le pourcentage deux chiffres après la virgule entre la valeur actuelle et la valeur max
             $pourcentageHome[] = round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
 
             $mesureDeChaqueResHome[] = $mesure;
         }
 
+
+
         //Partie Work
         //On récupère les ressources de l'utilisateur connecté
-        $resStockagesWorkRepo = $em->getRepository(ResStockageWork::class);
-
-        $GroupesSysRepo = $em->getRepository(GroupesSys::class);
-
         //On récupère tous les groupesSys de l'utilisateur connecté
-        $groupeSys = $GroupesSysRepo->findBy(['user' => $user]);
+        $groupeSys = $em->getRepository(GroupesSys::class)->findBy(['user' => $user]);
 
         //On récupère les ressources de chaque groupeSys
-        $resStockageWork = $resStockagesWorkRepo->findBy(['groupeSys' => $groupeSys]);
+        $resStockageWork = $em->getRepository(ResStockageWork::class)->findBy(['groupeSys' => $groupeSys]);
 
         //On récupère la dernière mesure de chaque ressource Work
         $mesureDeChaqueResWork = [];
         $pourcentageWork = [];
         foreach($resStockageWork as $resStockage){
-            $mesure = $resStockage->getMesures()->last();
+            $mesure = $resStockage->getMesures()->first();
             //On calcule le pourcentage deux chiffres après la virgule entre la valeur actuelle et la valeur max
             $pourcentageWork[] = round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
 
@@ -137,11 +136,11 @@ class RessourcesController extends AbstractController
             $session = $request->getSession();
 
             //Si la couleur liée à la ressource n'existe pas en session, on la génère
-            if(!$session->has('color_'.$resStockage->getId())){
+            if(!$session->has('color_'.$resStockage->getNom().$resStockage->getId())){
                 $color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
-                $session->set('color_'.$resStockage->getId(), $color);
+                $session->set('color_'.$resStockage->getNom().$resStockage->getId(), $color);
             }else{
-                $color = $session->get('color_'.$resStockage->getId());
+                $color = $session->get('color_'.$resStockage->getNom().$resStockage->getId());
             }
 
             //On stocke les données de chaque ressource dans un tableau

@@ -321,16 +321,16 @@ class HugoUserFixtures extends Fixture
 
         $valeur = 5;
         for ($i=0; $i < 4000; $i++) {
-            $this->mesureHome($manager, $resStockageHome, $periodeJour, $valeur, $i, 10);
+            $valeur = $this->mesureHome($manager, $resStockageHome, $periodeJour, $valeur, $i, 10);
 
             //Toutes les semaine on ajoute une mesure
             if ($i % 7 == 0) {
-                $this->mesureHome($manager, $resStockageHome, $periodeSemaine, $valeur, $i, 10);
+                $valeur = $this->mesureHome($manager, $resStockageHome, $periodeSemaine, $valeur, $i, 10);
             }
 
             //Tous les ans on ajoute une mesure
             if ($i % 365 == 0) {
-                $this->mesureHome($manager, $resStockageHome, $periodeAns, $valeur, $i, 10);
+                $valeur = $this->mesureHome($manager, $resStockageHome, $periodeAns, $valeur, $i, 10);
             }
         }
 
@@ -341,16 +341,16 @@ class HugoUserFixtures extends Fixture
 
         $valeur = 10;
         for ($i=0; $i < 4000; $i++) {
-            $this->mesureHome($manager, $resStockageHome2, $periodeJour, $valeur, $i, 20);
+            $valeur = $this->mesureHome($manager, $resStockageHome2, $periodeJour, $valeur, $i, 20);
 
             //Toutes les semaine on ajoute une mesure
             if ($i % 7 == 0) {
-                $this->mesureHome($manager, $resStockageHome2, $periodeSemaine, $valeur, $i, 20);
+                $valeur = $this->mesureHome($manager, $resStockageHome2, $periodeSemaine, $valeur, $i, 20);
             }
 
             //Tous les ans on ajoute une mesure
             if ($i % 365 == 0) {
-                $this->mesureHome($manager, $resStockageHome2, $periodeAns, $valeur, $i, 20);
+                $valeur = $this->mesureHome($manager, $resStockageHome2, $periodeAns, $valeur, $i, 20);
             }
         }
 
@@ -365,16 +365,16 @@ class HugoUserFixtures extends Fixture
 
         $valeur = 5;
         for ($i=0; $i < 4000; $i++) {
-            $this->mesureWork($manager, $resStockageWork, $periodeJour, $valeur, $i, 10);
+            $valeur = $this->mesureWork($manager, $resStockageWork, $periodeJour, $valeur, $i, 10);
 
             //Toutes les semaine on ajoute une mesure
             if ($i % 7 == 0) {
-                $this->mesureWork($manager, $resStockageWork, $periodeSemaine, $valeur, $i, 10);
+                $valeur = $this->mesureWork($manager, $resStockageWork, $periodeSemaine, $valeur, $i, 10);
             }
 
             //Tous les ans on ajoute une mesure
             if ($i % 365 == 0) {
-                $this->mesureWork($manager, $resStockageWork, $periodeAns, $valeur, $i, 10);
+                $valeur = $this->mesureWork($manager, $resStockageWork, $periodeAns, $valeur, $i, 10);
             }
         }
 
@@ -385,16 +385,16 @@ class HugoUserFixtures extends Fixture
 
         $valeur = 10;
         for ($i=0; $i < 4000; $i++) {
-            $this->mesureWork($manager, $resStockageWork2, $periodeJour, $valeur, $i, 20);
+            $valeur = $this->mesureWork($manager, $resStockageWork2, $periodeJour, $valeur, $i, 20);
 
             //Toutes les semaine on ajoute une mesure
             if ($i % 7 == 0) {
-                $this->mesureWork($manager, $resStockageWork2, $periodeSemaine, $valeur, $i, 20);
+                $valeur = $this->mesureWork($manager, $resStockageWork2, $periodeSemaine, $valeur, $i, 20);
             }
 
             //Tous les ans on ajoute une mesure
             if ($i % 365 == 0) {
-                $this->mesureWork($manager, $resStockageWork2, $periodeAns, $valeur, $i, 20);
+                $valeur = $this->mesureWork($manager, $resStockageWork2, $periodeAns, $valeur, $i, 20);
             }
         }
 
@@ -406,13 +406,13 @@ class HugoUserFixtures extends Fixture
     }
 
 
-    public function mesureHome(ObjectManager $manager, $resStockageHome, $periode, $valeur, $i, $max)
+    public function mesureHome(ObjectManager $manager, $resStockageHome, $periode, $valeur, $i, $max) : int
     {
         $mesure2 = new StockagesMesuresHome();
         $mesure2->setPeriode($periode);
         $resStockageHome->addMesure($mesure2);
         $mesure2->setDateMesure(new \DateTime($i . " days ago"));
-        $valeur = $valeur + rand(-2, 2);
+        $valeur += rand(-2, 2);
         if ($valeur > $max) {
             $valeur = $max;
         }
@@ -422,9 +422,11 @@ class HugoUserFixtures extends Fixture
         $mesure2->setValeurUse($valeur);
         $mesure2->setValeurMax($max);
         $manager->persist($mesure2);
+
+        return $valeur;
     }
 
-    public function mesureWork(ObjectManager $manager, $resStockageWork, $periode, $valeur, $i, $max)
+    public function mesureWork(ObjectManager $manager, $resStockageWork, $periode, $valeur, $i, $max) : int
     {
         $mesure = new StockagesMesuresWork();
         $mesure->setPeriode($periode);
@@ -443,5 +445,6 @@ class HugoUserFixtures extends Fixture
         $mesure->setValeurMax($max);
 
         $manager->persist($mesure);
+        return $valeur;
     }
 }
