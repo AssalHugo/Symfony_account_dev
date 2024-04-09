@@ -25,7 +25,7 @@ class ResStockagesHome
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToMany(targetEntity: StockageMesuresHome::class, inversedBy: 'resStockagesHomes')]
+    #[ORM\ManyToMany(targetEntity: StockagesMesuresHome::class, inversedBy: 'resStockagesHomes')]
     private Collection $mesures;
 
     public function __construct()
@@ -75,14 +75,14 @@ class ResStockagesHome
     }
 
     /**
-     * @return Collection<int, StockageMesuresHome>
+     * @return Collection<int, StockagesMesuresHome>
      */
     public function getMesures(): Collection
     {
         return $this->mesures;
     }
 
-    public function addMesure(StockageMesuresHome $mesure): static
+    public function addMesure(StockagesMesuresHome $mesure): static
     {
         if (!$this->mesures->contains($mesure)) {
             $this->mesures->add($mesure);
@@ -91,7 +91,7 @@ class ResStockagesHome
         return $this;
     }
 
-    public function removeMesure(StockageMesuresHome $mesure): static
+    public function removeMesure(StockagesMesuresHome $mesure): static
     {
         $this->mesures->removeElement($mesure);
 

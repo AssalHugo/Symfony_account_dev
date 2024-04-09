@@ -2,27 +2,27 @@
 
 namespace App\Repository;
 
-use App\Entity\StockageMesuresHome;
+use App\Entity\StockagesMesuresHome;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<StockageMesuresHome>
+ * @extends ServiceEntityRepository<StockagesMesuresHome>
  *
- * @method StockageMesuresHome|null find($id, $lockMode = null, $lockVersion = null)
- * @method StockageMesuresHome|null findOneBy(array $criteria, array $orderBy = null)
- * @method StockageMesuresHome[]    findAll()
- * @method StockageMesuresHome[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method StockagesMesuresHome|null find($id, $lockMode = null, $lockVersion = null)
+ * @method StockagesMesuresHome|null findOneBy(array $criteria, array $orderBy = null)
+ * @method StockagesMesuresHome[]    findAll()
+ * @method StockagesMesuresHome[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class StockageMesuresHomeRepository extends ServiceEntityRepository
+class StockagesMesuresHomeRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, StockageMesuresHome::class);
+        parent::__construct($registry, StockagesMesuresHome::class);
     }
 
     //    /**
-    //     * @return StockageMesuresHome[] Returns an array of StockageMesuresHome objects
+    //     * @return StockagesMesuresHome[] Returns an array of StockagesMesuresHome objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -36,7 +36,7 @@ class StockageMesuresHomeRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?StockageMesuresHome
+    //    public function findOneBySomeField($value): ?StockagesMesuresHome
     //    {
     //        return $this->createQueryBuilder('s')
     //            ->andWhere('s.exampleField = :val')

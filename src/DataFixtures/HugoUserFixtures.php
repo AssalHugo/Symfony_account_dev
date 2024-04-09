@@ -5,9 +5,10 @@ namespace App\DataFixtures;
 use App\Entity\Departement;
 use App\Entity\EtatsRequetes;
 use App\Entity\GroupesSys;
+use App\Entity\Periode;
 use App\Entity\ResStockagesHome;
 use App\Entity\ResStockageWork;
-use App\Entity\StockageMesuresHome;
+use App\Entity\StockagesMesuresHome;
 use App\Entity\StockagesMesuresWork;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -299,6 +300,19 @@ class HugoUserFixtures extends Fixture
 
         $manager->flush();
 
+        $periodeJour = new Periode();
+        $periodeJour->setType("30 days");
+        $manager->persist($periodeJour);
+
+        $periodeSemaine = new Periode();
+        $periodeSemaine->setType("1 year");
+        $manager->persist($periodeSemaine);
+
+        $periodeAns = new Periode();
+        $periodeAns->setType("5 years");
+        $manager->persist($periodeAns);
+
+
         //On remplit le stockage home de fausses données
         $resStockageHome = new ResStockagesHome();
         $resStockageHome->setNom("home general");
@@ -306,22 +320,18 @@ class HugoUserFixtures extends Fixture
         $resStockageHome->setUser($user);
 
         $valeur = 5;
-        for ($i=0; $i < 100; $i++) {
-            $mesure = new StockageMesuresHome();
-            $resStockageHome->addMesure($mesure);
-            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
-            //On fait légèrement varier les valeurs pour chaque mesure pour simuler des données réelles
-            //On récupère la valeur de la mesure précédente et on lui ajoute un nombre aléatoire entre -3 et 3, sans dépasser la valeur max
-            $valeur = $valeur + rand(-2, 2);
-            if ($valeur > 10) {
-                $valeur = 10;
+        for ($i=0; $i < 4000; $i++) {
+            $this->mesureHome($manager, $resStockageHome, $periodeJour, $valeur, $i, 10);
+
+            //Toutes les semaine on ajoute une mesure
+            if ($i % 7 == 0) {
+                $this->mesureHome($manager, $resStockageHome, $periodeSemaine, $valeur, $i, 10);
             }
-            else if ($valeur < 0) {
-                $valeur = 0;
+
+            //Tous les ans on ajoute une mesure
+            if ($i % 365 == 0) {
+                $this->mesureHome($manager, $resStockageHome, $periodeAns, $valeur, $i, 10);
             }
-            $mesure->setValeurUse($valeur);
-            $mesure->setValeurMax(10);
-            $manager->persist($mesure);
         }
 
         $resStockageHome2 = new ResStockagesHome();
@@ -330,22 +340,18 @@ class HugoUserFixtures extends Fixture
         $resStockageHome2->setPath("/home" . $user->getUsername());
 
         $valeur = 10;
-        for ($i=0; $i < 100; $i++) {
-            $mesure = new StockageMesuresHome();
-            $resStockageHome2->addMesure($mesure);
-            //On sépare la date d'un jour pour chaque mesure
-            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
-            $valeur = $valeur + rand(-2, 2);
-            if ($valeur > 20) {
-                $valeur = 20;
-            }
-            else if ($valeur < 0) {
-                $valeur = 0;
-            }
-            $mesure->setValeurUse($valeur);
-            $mesure->setValeurMax(20);
+        for ($i=0; $i < 4000; $i++) {
+            $this->mesureHome($manager, $resStockageHome2, $periodeJour, $valeur, $i, 20);
 
-            $manager->persist($mesure);
+            //Toutes les semaine on ajoute une mesure
+            if ($i % 7 == 0) {
+                $this->mesureHome($manager, $resStockageHome2, $periodeSemaine, $valeur, $i, 20);
+            }
+
+            //Tous les ans on ajoute une mesure
+            if ($i % 365 == 0) {
+                $this->mesureHome($manager, $resStockageHome2, $periodeAns, $valeur, $i, 20);
+            }
         }
 
         $manager->persist($resStockageHome);
@@ -358,23 +364,18 @@ class HugoUserFixtures extends Fixture
         $resStockageWork->setGroupeSys($groupeSysH);
 
         $valeur = 5;
-        for ($i=0; $i < 100; $i++) {
-            $mesure = new StockagesMesuresWork();
-            $resStockageWork->addMesure($mesure);
-            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
-            //On fait légèrement varier les valeurs pour chaque mesure pour simuler des données réelles
-            //On récupère la valeur de la mesure précédente et on lui ajoute un nombre aléatoire entre -3 et 3, sans dépasser la valeur max
-            $valeur = $valeur + rand(-2, 2);
-            if ($valeur > 10) {
-                $valeur = 10;
-            }
-            else if ($valeur < 0) {
-                $valeur = 0;
-            }
-            $mesure->setValeurUse($valeur);
-            $mesure->setValeurMax(10);
+        for ($i=0; $i < 4000; $i++) {
+            $this->mesureWork($manager, $resStockageWork, $periodeJour, $valeur, $i, 10);
 
-            $manager->persist($mesure);
+            //Toutes les semaine on ajoute une mesure
+            if ($i % 7 == 0) {
+                $this->mesureWork($manager, $resStockageWork, $periodeSemaine, $valeur, $i, 10);
+            }
+
+            //Tous les ans on ajoute une mesure
+            if ($i % 365 == 0) {
+                $this->mesureWork($manager, $resStockageWork, $periodeAns, $valeur, $i, 10);
+            }
         }
 
         $resStockageWork2 = new ResStockageWork();
@@ -383,22 +384,18 @@ class HugoUserFixtures extends Fixture
         $resStockageWork2->setGroupeSys($groupeSys);
 
         $valeur = 10;
-        for ($i=0; $i < 100; $i++) {
-            $mesure = new StockagesMesuresWork();
-            $resStockageWork2->addMesure($mesure);
-            $mesure->setDateMesure(new \DateTime("2021-09-31 + " . $i . " days"));
-            $valeur = $valeur + rand(-2, 2);
-            if ($valeur > 20) {
-                $valeur = 20;
-            }
-            else if ($valeur < 0) {
-                $valeur = 0;
-            }
-            $mesure->setValeurUse($valeur);
+        for ($i=0; $i < 4000; $i++) {
+            $this->mesureWork($manager, $resStockageWork2, $periodeJour, $valeur, $i, 20);
 
-            $mesure->setValeurMax(20);
+            //Toutes les semaine on ajoute une mesure
+            if ($i % 7 == 0) {
+                $this->mesureWork($manager, $resStockageWork2, $periodeSemaine, $valeur, $i, 20);
+            }
 
-            $manager->persist($mesure);
+            //Tous les ans on ajoute une mesure
+            if ($i % 365 == 0) {
+                $this->mesureWork($manager, $resStockageWork2, $periodeAns, $valeur, $i, 20);
+            }
         }
 
         $manager->persist($resStockageWork);
@@ -406,5 +403,45 @@ class HugoUserFixtures extends Fixture
 
 
         $manager->flush();
+    }
+
+
+    public function mesureHome(ObjectManager $manager, $resStockageHome, $periode, $valeur, $i, $max)
+    {
+        $mesure2 = new StockagesMesuresHome();
+        $mesure2->setPeriode($periode);
+        $resStockageHome->addMesure($mesure2);
+        $mesure2->setDateMesure(new \DateTime($i . " days ago"));
+        $valeur = $valeur + rand(-2, 2);
+        if ($valeur > $max) {
+            $valeur = $max;
+        }
+        else if ($valeur < 0) {
+            $valeur = 0;
+        }
+        $mesure2->setValeurUse($valeur);
+        $mesure2->setValeurMax($max);
+        $manager->persist($mesure2);
+    }
+
+    public function mesureWork(ObjectManager $manager, $resStockageWork, $periode, $valeur, $i, $max)
+    {
+        $mesure = new StockagesMesuresWork();
+        $mesure->setPeriode($periode);
+        $resStockageWork->addMesure($mesure);
+        $mesure->setDateMesure(new \DateTime($i . " days ago"));
+        //On fait légèrement varier les valeurs pour chaque mesure pour simuler des données réelles
+        //On récupère la valeur de la mesure précédente et on lui ajoute un nombre aléatoire entre -3 et 3, sans dépasser la valeur max
+        $valeur = $valeur + rand(-2, 2);
+        if ($valeur > $max) {
+            $valeur = $max;
+        }
+        else if ($valeur < 0) {
+            $valeur = 0;
+        }
+        $mesure->setValeurUse($valeur);
+        $mesure->setValeurMax($max);
+
+        $manager->persist($mesure);
     }
 }

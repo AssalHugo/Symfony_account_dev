@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\StockageMesuresHomeRepository;
+use App\Repository\StockagesMesuresHomeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: StockageMesuresHomeRepository::class)]
-class StockageMesuresHome
+#[ORM\Entity(repositoryClass: StockagesMesuresHomeRepository::class)]
+class StockagesMesuresHome
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -27,6 +27,9 @@ class StockageMesuresHome
 
     #[ORM\ManyToMany(targetEntity: ResStockagesHome::class, mappedBy: 'mesures')]
     private Collection $resStockagesHomes;
+
+    #[ORM\ManyToOne(inversedBy: 'stockageMesuresHome')]
+    private ?Periode $periode = null;
 
     public function __construct()
     {
@@ -97,6 +100,18 @@ class StockageMesuresHome
         if ($this->resStockagesHomes->removeElement($resStockagesHome)) {
             $resStockagesHome->removeMesure($this);
         }
+
+        return $this;
+    }
+
+    public function getPeriode(): ?Periode
+    {
+        return $this->periode;
+    }
+
+    public function setPeriode(?Periode $periode): static
+    {
+        $this->periode = $periode;
 
         return $this;
     }

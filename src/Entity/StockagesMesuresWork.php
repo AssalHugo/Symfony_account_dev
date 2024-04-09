@@ -26,6 +26,9 @@ class StockagesMesuresWork
     #[ORM\ManyToOne(inversedBy: 'mesure')]
     private ?ResStockageWork $resStockageWork = null;
 
+    #[ORM\ManyToOne(inversedBy: 'stockagesMesuresWorks')]
+    private ?Periode $periode = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +78,18 @@ class StockagesMesuresWork
     public function setResStockageWork(?ResStockageWork $resStockageWork): static
     {
         $this->resStockageWork = $resStockageWork;
+
+        return $this;
+    }
+
+    public function getPeriode(): ?Periode
+    {
+        return $this->periode;
+    }
+
+    public function setPeriode(?Periode $periode): static
+    {
+        $this->periode = $periode;
 
         return $this;
     }

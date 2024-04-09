@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20240408135336 extends AbstractMigration
+final class Version20240409092244 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -43,17 +43,18 @@ final class Version20240408135336 extends AbstractMigration
         $this->addSql('CREATE TABLE groupes_employe (groupes_id INTEGER NOT NULL, employe_id INTEGER NOT NULL, PRIMARY KEY(groupes_id, employe_id), CONSTRAINT FK_792B4803305371B FOREIGN KEY (groupes_id) REFERENCES groupes (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_792B48031B65292 FOREIGN KEY (employe_id) REFERENCES employe (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_792B4803305371B ON groupes_employe (groupes_id)');
         $this->addSql('CREATE INDEX IDX_792B48031B65292 ON groupes_employe (employe_id)');
-        $this->addSql('CREATE TABLE groupes_sys (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, groupe_id INTEGER NOT NULL, nom VARCHAR(32) NOT NULL, CONSTRAINT FK_7FB5496A7A45358C FOREIGN KEY (groupe_id) REFERENCES groupes (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
-        $this->addSql('CREATE INDEX IDX_7FB5496A7A45358C ON groupes_sys (groupe_id)');
+        $this->addSql('CREATE TABLE groupes_sys (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, user_id INTEGER DEFAULT NULL, nom VARCHAR(32) NOT NULL, CONSTRAINT FK_7FB5496AA76ED395 FOREIGN KEY (user_id) REFERENCES user (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE INDEX IDX_7FB5496AA76ED395 ON groupes_sys (user_id)');
         $this->addSql('CREATE TABLE localisations (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, batiment_id INTEGER NOT NULL, bureau VARCHAR(64) NOT NULL, CONSTRAINT FK_66B68274D6F6891B FOREIGN KEY (batiment_id) REFERENCES batiments (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_66B68274D6F6891B ON localisations (batiment_id)');
+        $this->addSql('CREATE TABLE periode (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, type VARCHAR(5) NOT NULL)');
         $this->addSql('CREATE TABLE requetes (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, groupe_principal_id INTEGER DEFAULT NULL, localisation_id INTEGER DEFAULT NULL, referent_id INTEGER DEFAULT NULL, etat_requete_id INTEGER DEFAULT NULL, contrat_id INTEGER NOT NULL, nom VARCHAR(128) NOT NULL, prenom VARCHAR(128) NOT NULL, mail VARCHAR(128) NOT NULL, commentaire VARCHAR(255) DEFAULT NULL, telephone VARCHAR(10) DEFAULT NULL, date_requete DATETIME DEFAULT NULL, date_validation DATETIME DEFAULT NULL, CONSTRAINT FK_2D13E3C43B1B422A FOREIGN KEY (groupe_principal_id) REFERENCES groupes (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_2D13E3C4C68BE09C FOREIGN KEY (localisation_id) REFERENCES localisations (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_2D13E3C435E47E35 FOREIGN KEY (referent_id) REFERENCES employe (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_2D13E3C4B1B7685A FOREIGN KEY (etat_requete_id) REFERENCES etats_requetes (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_2D13E3C41823061F FOREIGN KEY (contrat_id) REFERENCES contrats (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_2D13E3C43B1B422A ON requetes (groupe_principal_id)');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_2D13E3C4C68BE09C ON requetes (localisation_id)');
         $this->addSql('CREATE INDEX IDX_2D13E3C435E47E35 ON requetes (referent_id)');
         $this->addSql('CREATE INDEX IDX_2D13E3C4B1B7685A ON requetes (etat_requete_id)');
         $this->addSql('CREATE INDEX IDX_2D13E3C41823061F ON requetes (contrat_id)');
-        $this->addSql('CREATE TABLE res_stockage_work (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, groupe_sys_id INTEGER DEFAULT NULL, nom VARCHAR(40) NOT NULL, CONSTRAINT FK_9959FB324302B318 FOREIGN KEY (groupe_sys_id) REFERENCES groupes_sys (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE TABLE res_stockage_work (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, groupe_sys_id INTEGER DEFAULT NULL, nom VARCHAR(40) NOT NULL, path VARCHAR(64) DEFAULT NULL, CONSTRAINT FK_9959FB324302B318 FOREIGN KEY (groupe_sys_id) REFERENCES groupes_sys (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_9959FB324302B318 ON res_stockage_work (groupe_sys_id)');
         $this->addSql('CREATE TABLE res_stockage_work_employe (res_stockage_work_id INTEGER NOT NULL, employe_id INTEGER NOT NULL, PRIMARY KEY(res_stockage_work_id, employe_id), CONSTRAINT FK_DA4A14B9A4512571 FOREIGN KEY (res_stockage_work_id) REFERENCES res_stockage_work (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_DA4A14B91B65292 FOREIGN KEY (employe_id) REFERENCES employe (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_DA4A14B9A4512571 ON res_stockage_work_employe (res_stockage_work_id)');
@@ -65,8 +66,11 @@ final class Version20240408135336 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_D55B6123D656D371 ON res_stockages_home_stockage_mesures_home (stockage_mesures_home_id)');
         $this->addSql('CREATE TABLE status (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, type VARCHAR(32) NOT NULL)');
         $this->addSql('CREATE TABLE stockage_mesures_home (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, date_mesure DATE NOT NULL, valeur_use INTEGER NOT NULL, valeur_max INTEGER NOT NULL)');
-        $this->addSql('CREATE TABLE stockages_mesures_work (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, res_stockage_work_id INTEGER DEFAULT NULL, date_mesure DATE NOT NULL, valeur_use INTEGER NOT NULL, valeur_max INTEGER NOT NULL, CONSTRAINT FK_7A9852DAA4512571 FOREIGN KEY (res_stockage_work_id) REFERENCES res_stockage_work (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE TABLE stockages_mesures_home (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, periode_id INTEGER DEFAULT NULL, CONSTRAINT FK_5800368AF384C1CF FOREIGN KEY (periode_id) REFERENCES periode (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE INDEX IDX_5800368AF384C1CF ON stockages_mesures_home (periode_id)');
+        $this->addSql('CREATE TABLE stockages_mesures_work (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, res_stockage_work_id INTEGER DEFAULT NULL, periode_id INTEGER DEFAULT NULL, date_mesure DATE NOT NULL, valeur_use INTEGER NOT NULL, valeur_max INTEGER NOT NULL, CONSTRAINT FK_7A9852DAA4512571 FOREIGN KEY (res_stockage_work_id) REFERENCES res_stockage_work (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_7A9852DAF384C1CF FOREIGN KEY (periode_id) REFERENCES periode (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_7A9852DAA4512571 ON stockages_mesures_work (res_stockage_work_id)');
+        $this->addSql('CREATE INDEX IDX_7A9852DAF384C1CF ON stockages_mesures_work (periode_id)');
         $this->addSql('CREATE TABLE telephones (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, employe_id INTEGER DEFAULT NULL, numero VARCHAR(10) NOT NULL, CONSTRAINT FK_6FCD09F1B65292 FOREIGN KEY (employe_id) REFERENCES employe (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_6FCD09F1B65292 ON telephones (employe_id)');
         $this->addSql('CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, employe_id INTEGER DEFAULT NULL, username VARCHAR(180) NOT NULL, roles CLOB NOT NULL --(DC2Type:json)
@@ -89,6 +93,7 @@ final class Version20240408135336 extends AbstractMigration
         $this->addSql('DROP TABLE groupes_employe');
         $this->addSql('DROP TABLE groupes_sys');
         $this->addSql('DROP TABLE localisations');
+        $this->addSql('DROP TABLE periode');
         $this->addSql('DROP TABLE requetes');
         $this->addSql('DROP TABLE res_stockage_work');
         $this->addSql('DROP TABLE res_stockage_work_employe');
@@ -96,6 +101,7 @@ final class Version20240408135336 extends AbstractMigration
         $this->addSql('DROP TABLE res_stockages_home_stockage_mesures_home');
         $this->addSql('DROP TABLE status');
         $this->addSql('DROP TABLE stockage_mesures_home');
+        $this->addSql('DROP TABLE stockages_mesures_home');
         $this->addSql('DROP TABLE stockages_mesures_work');
         $this->addSql('DROP TABLE telephones');
         $this->addSql('DROP TABLE user');

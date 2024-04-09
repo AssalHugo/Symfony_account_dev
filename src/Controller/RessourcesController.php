@@ -7,6 +7,7 @@ use App\Entity\ResStockagesHome;
 use App\Entity\ResStockageWork;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -62,22 +63,73 @@ class RessourcesController extends AbstractController
         //On fusionne les deux tableaux de ressources
         $resStockages = array_merge($resStockagesHome, $resStockageWork);
 
+        //---------------------------------Formulaire---------------------------------
+        //On crée un formulaire pour permettre de modifier la date de début et de fin des mesures affichées (par jour : 30 derniers jours, par semaines : 1 an, par mois : 5 ans)
+        $form = $this->createFormBuilder()
+            ->add('periode', ChoiceType::class, [
+                'choices' => [
+                    '30 derniers jours' => '30 days',
+                    '1 an' => '1 year',
+                    '5 ans' => '5 years',
+                ],
+                'label' => 'Période',
+                'attr' => [
+                    'onchange' => 'this.form.submit()',
+                ],
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+            $periode = $form->getData()['periode'];
+        }else{
+            $periode = '30 days';
+        }
+
 
         //---------------------------------Graphique---------------------------------
         $dataSet = [];
         $labels = [];
+
+        //Le format change en fonction de la période choisie
+        if($periode == '30 days'){
+            $format = 'd/m/Y H:i:s';
+        }else if($periode == '1 year'){
+            $format = 'W/Y';
+        }
+        else {
+            $format = 'Y';
+        }
+
         //On crée un graphique contenant les mesures de chaque ressource de l'utilisateur connecté ces 30 derniers jours
         foreach($resStockages as $resStockage){
 
-            $mesures = $resStockage->getMesures();
-            $data = [];
+            //On récupère les mesures de la ressource qui ont la meme période que celle choisie, et qui sont dans la période choisie
+            $mesures = $resStockage->getMesures()->filter(function($mesure) use ($periode){
 
+                $dateMesure = $mesure->getDateMesure();
+                $dateActuelle = new \DateTime();
+
+                if($periode == '30 days'){
+                    $dateActuelle->modify('-30 days');
+                }elseif($periode == '1 year'){
+                    $dateActuelle->modify('-1 year');
+                }else{
+                    $dateActuelle->modify('-5 years');
+                }
+
+                return $mesure->getPeriode()->getType() == $periode && $dateMesure >= $dateActuelle;
+            });
+
+            $data = [];
             foreach($mesures as $mesure){
                 $data[] = $mesure->getValeurUse();
 
                 //On stocke les dates des mesures dans un tableau si elles ne sont pas déjà stockées
-                if(!in_array($mesure->getDateMesure()->format('d/m/Y H:i:s'), $labels)){
-                    $labels[] = $mesure->getDateMesure()->format('d/m/Y H:i:s');
+                if(!in_array($mesure->getDateMesure()->format($format), $labels)) {
+
+                    $labels[] = $mesure->getDateMesure()->format($format);
                 }
             }
 
@@ -109,6 +161,25 @@ class RessourcesController extends AbstractController
             'datasets' => $dataSet,
         ]);
 
+        //On échange de sens les labels pour les rendre plus lisibles
+        $chart->setOptions([
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+                    'title' => [
+                        'display' => true,
+                        'text' => 'Valeur utilisée',
+                    ],
+                ],
+                'x' => [
+                    'reverse' => true,
+                    'title' => [
+                        'display' => true,
+                        'text' => 'Date',
+                        ],
+                ],
+            ],
+        ]);
 
         return $this->render('ressources/index.html.twig', [
             'resStockagesHome' => $resStockagesHome,
@@ -118,6 +189,8 @@ class RessourcesController extends AbstractController
             'pourcentageHome' => $pourcentageHome,
             'pourcentageWork' => $pourcentageWork,
             'chart' => $chart,
+            'form' => $form->createView(),
         ]);
     }
+
 }
