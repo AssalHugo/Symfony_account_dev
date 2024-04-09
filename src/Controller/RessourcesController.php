@@ -122,13 +122,35 @@ class RessourcesController extends AbstractController
             });
 
             $data = [];
+            $dateMesure = null;
             foreach($mesures as $mesure){
-                $data[] = $mesure->getValeurUse();
 
+                //Si il existe une mesure pour la date actuelle, on ajoute une valeur null pour les dates où il n'y a pas de mesure
+                if ($dateMesure != null) {
+                    $interval = $dateMesure->diff($mesure->getDateMesure());
+                    //on modèle l'interval en fonction de la période
+                    if($periode == '30 days'){
+                        $nbJours = $interval->format('%a');
+                    }elseif($periode == '1 year'){
+                        $nbJours = $interval->format('%a') / 7;
+                    }
+                    else {
+                        $nbJours = $interval->format('%y');
+                    }
+
+                    for($i = 1; $i < $nbJours; $i++){
+
+                        array_unshift($data, null);
+                    }
+                }
+
+                array_unshift($data, $mesure->getValeurUse());
+
+                $dateMesure = $mesure->getDateMesure();
                 //On stocke les dates des mesures dans un tableau si elles ne sont pas déjà stockées
-                if(!in_array($mesure->getDateMesure()->format($format), $labels)) {
+                if(!in_array($dateMesure->format($format), $labels)) {
 
-                    $labels[] = $mesure->getDateMesure()->format($format);
+                    $labels[] = $dateMesure->format($format);
                 }
             }
 
@@ -152,6 +174,19 @@ class RessourcesController extends AbstractController
 
         }
 
+        //On trie les dates pour les afficher dans l'ordre croissant (en prenant en compte le format de la date), il faut également traiter le cas où label est null
+        usort($labels, function($a, $b) use ($format){
+            $dateA = $this->convertDate($a, $format);
+            $dateB = $this->convertDate($b, $format);
+
+            if($dateA == $dateB){
+                return 0;
+            }
+
+            return $dateA < $dateB ? -1 : 1;
+        });
+
+
         //On crée le graphique
         $chart = $chartBuilder->createChart(Chart::TYPE_LINE);
 
@@ -164,14 +199,12 @@ class RessourcesController extends AbstractController
         $chart->setOptions([
             'scales' => [
                 'y' => [
-                    'beginAtZero' => true,
                     'title' => [
                         'display' => true,
                         'text' => 'Valeur utilisée',
                     ],
                 ],
                 'x' => [
-                    'reverse' => true,
                     'title' => [
                         'display' => true,
                         'text' => 'Date',
@@ -190,6 +223,20 @@ class RessourcesController extends AbstractController
             'chart' => $chart,
             'form' => $form->createView(),
         ]);
+    }
+
+    private function convertDate($date, $format) {
+        if($format == 'd/m/Y H:i:s') {
+            return \DateTime::createFromFormat('d/m/Y H:i:s', $date)->format('Y-m-d');
+        } elseif($format == 'W/Y') {
+            // Convertir le format de semaine/année en une date
+            list($week, $year) = explode('/', $date);
+            $date = new \DateTime();
+            $date->setISODate($year, $week);
+            return $date->format('Y-m-d');
+        } else {
+            return \DateTime::createFromFormat('Y', $date)->format('Y-m-d');
+        }
     }
 
 }
