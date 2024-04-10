@@ -26,7 +26,6 @@ class RessourcesController extends AbstractController
         $user = $this->getUser();
 
         $resStockagesHomeRepository = $em->getRepository(ResStockagesHome::class);
-        $resStockagesHome = $resStockagesHomeRepository->findBy(['user' => $user]);
         $mesureDeChaqueResHomeID = $resStockagesHomeRepository->findLatestMeasurementsByUser($user->getId());
 
         //On récupere la derniere mesure de chaque ressource Home
@@ -51,7 +50,6 @@ class RessourcesController extends AbstractController
 
         $resStockagesWorkRepo = $em->getRepository(ResStockageWork::class);
         //On récupère les ressources de chaque groupeSys
-        $resStockageWork = $resStockagesWorkRepo->findBy(['groupeSys' => $groupeSys]);
         $mesureDeChaqueResWorkID = $resStockagesWorkRepo->findLatestMeasurementsByUser($groupeSys);
 
         //On récupère la dernière mesure de chaque ressource Work
@@ -67,6 +65,10 @@ class RessourcesController extends AbstractController
             $mesureDeChaqueResWork[] = $mesure;
         }
 
+
+        //On récupère les ressources de l'utilisateur connecté
+        $resStockageWork = $resStockagesWorkRepo->findBy(['groupeSys' => $groupeSys]);
+        $resStockagesHome = $resStockagesHomeRepository->findBy(['user' => $user]);
         //On fusionne les deux tableaux de ressources
         $resStockages = array_merge($resStockagesHome, $resStockageWork);
 
@@ -97,7 +99,6 @@ class RessourcesController extends AbstractController
 
         //---------------------------------Graphique---------------------------------
         $dataSet = [];
-        $labels = [];
 
         //Le format change en fonction de la période choisie
         if($periode == '30 days'){
@@ -109,57 +110,48 @@ class RessourcesController extends AbstractController
             $format = 'Y';
         }
 
-        //On crée un graphique contenant les mesures de chaque ressource de l'utilisateur connecté ces 30 derniers jours
+        //On récupère d'abord tous les labels
+        $labels = [];
         foreach($resStockages as $resStockage){
+            //On récupère les mesures de la ressource qui ont la meme période que celle choisie
+            $mesures = $this->getMesures($resStockage, $periode);
 
-            //On récupère les mesures de la ressource qui ont la meme période que celle choisie, et qui sont dans la période choisie
-            $mesures = $resStockage->getMesures()->filter(function($mesure) use ($periode){
-
-                $dateMesure = $mesure->getDateMesure();
-                $dateActuelle = new \DateTime();
-
-                if($periode == '30 days'){
-                    $dateActuelle->modify('-30 days');
-                }elseif($periode == '1 year'){
-                    $dateActuelle->modify('-1 year');
-                }else{
-                    $dateActuelle->modify('-5 years');
+            foreach($mesures as $mesure){
+                $label = $mesure->getDateMesure()->format($format);
+                if(!in_array($label, $labels)) {
+                    $labels[] = $label;
                 }
+            }
+        }
 
-                return $mesure->getPeriode()->getType() == $periode && $dateMesure >= $dateActuelle;
-            });
+        //On trie les labels par ordre croissant
+        usort($labels, function($a, $b) use ($format){
+            $dateA = $this->convertDate($a, $format);
+            $dateB = $this->convertDate($b, $format);
+
+            if($dateA == $dateB){
+                return 0;
+            }
+
+            return $dateA < $dateB ? -1 : 1;
+        });
+
+        //Maintenant pour chaque ressource on regarde si elle a une mesure à la date du label et on récupère la valeur
+        foreach($resStockages as $resStockage){
+            //On récupère les mesures de la ressource qui ont la meme période que celle choisie
+            $mesures = $this->getMesures($resStockage, $periode);
 
             $data = [];
-            $dateMesure = null;
-            foreach($mesures as $mesure){
-
-                //Si il existe une mesure pour la date actuelle, on ajoute une valeur null pour les dates où il n'y a pas de mesure
-                if ($dateMesure != null) {
-                    $interval = $dateMesure->diff($mesure->getDateMesure());
-                    //on modèle l'interval en fonction de la période
-                    if($periode == '30 days'){
-                        $nbJours = $interval->format('%a');
-                    }elseif($periode == '1 year'){
-                        $nbJours = $interval->format('%a') / 7;
-                    }
-                    else {
-                        $nbJours = $interval->format('%y');
-                    }
-
-                    for($i = 1; $i < $nbJours; $i++){
-
-                        array_unshift($data, null);
+            foreach($labels as $label){
+                $valeur = null;
+                foreach($mesures as $mesure){
+                    //Si la date de la mesure est égale à la date du label, on récupère la valeur
+                    if($label == $mesure->getDateMesure()->format($format)){
+                        $valeur = $mesure->getValeurUse() / $mesure->getValeurMax() * 100;
+                        break;
                     }
                 }
-
-                array_unshift($data, $mesure->getValeurUse() / $mesure->getValeurMax() * 100);
-
-                $dateMesure = $mesure->getDateMesure();
-                //On stocke les dates des mesures dans un tableau si elles ne sont pas déjà stockées
-                if(!in_array($dateMesure->format($format), $labels)) {
-
-                    $labels[] = $dateMesure->format($format);
-                }
+                $data[] = $valeur;
             }
 
             //On génère une couleur aléatoire hexadécimale pour chaque ressource, qu'on stocke en session pour ne pas que la couleur change à chaque rafraichissement de la page
@@ -173,26 +165,13 @@ class RessourcesController extends AbstractController
                 $color = $session->get('color_'.$resStockage->getNom().$resStockage->getId());
             }
 
-            //On stocke les données de chaque ressource dans un tableau
+
             $dataSet[] = [
                 'label' => $resStockage->getNom(),
                 'borderColor' => $color,
                 'data' => $data,
             ];
-
         }
-
-        //On trie les dates pour les afficher dans l'ordre croissant (en prenant en compte le format de la date), il faut également traiter le cas où label est null
-        usort($labels, function($a, $b) use ($format){
-            $dateA = $this->convertDate($a, $format);
-            $dateB = $this->convertDate($b, $format);
-
-            if($dateA == $dateB){
-                return 0;
-            }
-
-            return $dateA < $dateB ? -1 : 1;
-        });
 
 
         //On crée le graphique
@@ -207,6 +186,8 @@ class RessourcesController extends AbstractController
         $chart->setOptions([
             'scales' => [
                 'y' => [
+                    'min' => 0,
+                    'suggestedMax' => 100,
                     'title' => [
                         'display' => true,
                         'text' => 'Pourcentage',
@@ -251,6 +232,27 @@ class RessourcesController extends AbstractController
         } else {
             return \DateTime::createFromFormat('Y', $date)->format('Y-m-d');
         }
+    }
+
+    /**
+     * récupère les mesures de la ressource qui ont la meme période que celle choisie
+     */
+    private function getMesures($resStockage, $periode) {
+        return $resStockage->getMesures()->filter(function($mesure) use ($periode, &$i){
+
+            $dateMesure = $mesure->getDateMesure();
+            $dateActuelle = new \DateTime();
+
+            if($periode == '30 days'){
+                $dateActuelle->modify('-30 days');
+            }elseif($periode == '1 year'){
+                $dateActuelle->modify('-1 year');
+            }else{
+                $dateActuelle->modify('-5 years');
+            }
+
+            return $dateMesure >= $dateActuelle && $mesure->getPeriode()->getType() == $periode;
+        });
     }
 
 }
