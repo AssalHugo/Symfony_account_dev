@@ -21,6 +21,23 @@ class StockagesMesuresWorkRepository extends ServiceEntityRepository
         parent::__construct($registry, StockagesMesuresWork::class);
     }
 
+    /**
+     * Fonction qui permet de récupérer la derniere mesure (la mesure qui a la date la plus récente) de chaque stockage work qui appartient au tableau de GroupesSys donné
+     */
+    public function findLatestMeasurementsByUser($groupes)
+    {
+        $qb = $this->createQueryBuilder('m');
+
+        $qb->innerJoin('m.resStockageWork', 'r')
+            ->innerJoin('r.groupe', 'g')
+            ->where('g IN (:groupes)')
+            ->setParameter('groupes', $groupes)
+            ->orderBy('m.date_mesure', 'DESC')
+            ->groupBy('r.id');
+
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return StockagesMesuresWork[] Returns an array of StockagesMesuresWork objects
     //     */

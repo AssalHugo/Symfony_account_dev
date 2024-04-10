@@ -54,21 +54,16 @@ class RessourcesController extends AbstractController
         $groupes[] = $employe->getGroupePrincipal();
 
         $resStockagesWorkRepo = $em->getRepository(ResStockageWork::class);
-        //On récupère les ressources de chaque groupe
 
-        $mesureDeChaqueResWorkID = $resStockagesWorkRepo->findLatestMeasurementsByUser($groupes);
+        //On récupère les dernières mesures de chaque ressource Work
+        $mesureDeChaqueResWork = $em->getRepository(StockagesMesuresWork::class)->findLatestMeasurementsByUser($groupes);
 
         //On récupère la dernière mesure de chaque ressource Work
-        $mesureDeChaqueResWork = [];
         $pourcentageWork = [];
-        foreach($mesureDeChaqueResWorkID as $mesureResWorkID){
-            //On récupère la mesure
-            $mesure = $em->getRepository(StockagesMesuresWork::class)->find($mesureResWorkID['id']);
+        foreach($mesureDeChaqueResWork as $mesureResWork){
 
             //On calcule le pourcentage deux chiffres après la virgule entre la valeur actuelle et la valeur max
-            $pourcentageWork[] = round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
-
-            $mesureDeChaqueResWork[] = $mesure;
+            $pourcentageWork[] = round(($mesureResWork->getValeurUse() / $mesureResWork->getValeurMax()) * 100, 2);
         }
 
 

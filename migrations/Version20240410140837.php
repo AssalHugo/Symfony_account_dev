@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20240410124105 extends AbstractMigration
+final class Version20240410140837 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -37,9 +37,10 @@ final class Version20240410124105 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_936C0A7A1B65292 ON employe_groupes (employe_id)');
         $this->addSql('CREATE INDEX IDX_936C0A7A305371B ON employe_groupes (groupes_id)');
         $this->addSql('CREATE TABLE etats_requetes (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, etat VARCHAR(30) NOT NULL)');
-        $this->addSql('CREATE TABLE groupes (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, responsable_id INTEGER DEFAULT NULL, departement_id INTEGER DEFAULT NULL, nom VARCHAR(32) NOT NULL, acronyme VARCHAR(8) DEFAULT NULL, CONSTRAINT FK_576366D953C59D72 FOREIGN KEY (responsable_id) REFERENCES employe (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_576366D9CCF9E01E FOREIGN KEY (departement_id) REFERENCES departement (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE TABLE groupes (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, responsable_id INTEGER DEFAULT NULL, departement_id INTEGER DEFAULT NULL, res_stockage_work_id INTEGER DEFAULT NULL, nom VARCHAR(32) NOT NULL, acronyme VARCHAR(8) DEFAULT NULL, CONSTRAINT FK_576366D953C59D72 FOREIGN KEY (responsable_id) REFERENCES employe (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_576366D9CCF9E01E FOREIGN KEY (departement_id) REFERENCES departement (id) NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_576366D9A4512571 FOREIGN KEY (res_stockage_work_id) REFERENCES res_stockage_work (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_576366D953C59D72 ON groupes (responsable_id)');
         $this->addSql('CREATE INDEX IDX_576366D9CCF9E01E ON groupes (departement_id)');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_576366D9A4512571 ON groupes (res_stockage_work_id)');
         $this->addSql('CREATE TABLE groupes_employe (groupes_id INTEGER NOT NULL, employe_id INTEGER NOT NULL, PRIMARY KEY(groupes_id, employe_id), CONSTRAINT FK_792B4803305371B FOREIGN KEY (groupes_id) REFERENCES groupes (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_792B48031B65292 FOREIGN KEY (employe_id) REFERENCES employe (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_792B4803305371B ON groupes_employe (groupes_id)');
         $this->addSql('CREATE INDEX IDX_792B48031B65292 ON groupes_employe (employe_id)');
@@ -52,8 +53,7 @@ final class Version20240410124105 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_2D13E3C435E47E35 ON requetes (referent_id)');
         $this->addSql('CREATE INDEX IDX_2D13E3C4B1B7685A ON requetes (etat_requete_id)');
         $this->addSql('CREATE INDEX IDX_2D13E3C41823061F ON requetes (contrat_id)');
-        $this->addSql('CREATE TABLE res_stockage_work (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, groupe_id INTEGER DEFAULT NULL, nom VARCHAR(40) NOT NULL, path VARCHAR(64) DEFAULT NULL, CONSTRAINT FK_9959FB327A45358C FOREIGN KEY (groupe_id) REFERENCES groupes (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
-        $this->addSql('CREATE UNIQUE INDEX UNIQ_9959FB327A45358C ON res_stockage_work (groupe_id)');
+        $this->addSql('CREATE TABLE res_stockage_work (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, nom VARCHAR(40) NOT NULL, path VARCHAR(64) DEFAULT NULL)');
         $this->addSql('CREATE TABLE res_stockage_work_employe (res_stockage_work_id INTEGER NOT NULL, employe_id INTEGER NOT NULL, PRIMARY KEY(res_stockage_work_id, employe_id), CONSTRAINT FK_DA4A14B9A4512571 FOREIGN KEY (res_stockage_work_id) REFERENCES res_stockage_work (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_DA4A14B91B65292 FOREIGN KEY (employe_id) REFERENCES employe (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_DA4A14B9A4512571 ON res_stockage_work_employe (res_stockage_work_id)');
         $this->addSql('CREATE INDEX IDX_DA4A14B91B65292 ON res_stockage_work_employe (employe_id)');
