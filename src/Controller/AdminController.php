@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Employe;
 use App\Entity\EtatsRequetes;
+use App\Entity\Groupes;
+use App\Entity\GroupesSys;
 use App\Entity\Requetes;
 use App\Entity\Telephones;
 use App\Entity\User;
@@ -15,6 +17,7 @@ use App\Service\SenderMail;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -44,8 +47,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/admin/verificationDemandeCompte/{id}', name: 'verificationDemandeCompteAdmin')]
-    public function verificationDemandeCompte($id, EntityManagerInterface $entityManager, Request $request): Response
-    {
+    public function verificationDemandeCompte($id, EntityManagerInterface $entityManager, Request $request): Response {
         //On Réccupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
 
@@ -88,9 +90,28 @@ class AdminController extends AbstractController
             $employes = $employeRepo->findBy(['nom' => $demandeCompte->getNom(), 'prenom' => $demandeCompte->getPrenom()]);
         }
 
+        //On crée un formulaire pour séléctionner un GroupeSys auquel affilié l'user
+        $formGroupeSys = $this->createFormBuilder()
+            ->add('groupeSys', EntityType::class, [
+                'class' => GroupesSys::class,
+                'choice_label' => 'nom',
+                'label' => 'Groupe Système : ',
+                'required' => false,
+            ])
+            ->add('creerEmploye', SubmitType::class, ['label' => 'Créer l\'employé', 'attr' => ['class' => 'btn btn-success']])
+            ->getForm();
+
+        $formGroupeSys->handleRequest($request);
+
+        if ($formGroupeSys->isSubmitted() && $formGroupeSys->isValid() && $formGroupeSys->get('creerEmploye')->isClicked()) {
+
+            return $this->redirectToRoute('validerDemandeCompteAdmin', ['idDemandeCompte' => $demandeCompte->getId(), 'idGroupeSys' => $formGroupeSys->getData()['groupeSys']->getId()]);
+        }
+
         return $this->render('admin/verificationDemandeCompte.html.twig', [
             'form' => $formPrenomNom->createView(),
             'employes' => $employes,
+            'formGroupeSys' => $formGroupeSys->createView(),
             'demande' => $demandeCompte,
         ]);
     }
@@ -168,15 +189,19 @@ class AdminController extends AbstractController
     }
 
 
-    #[Route('/admin/validerDemandeCompte/{id}', name: 'validerDemandeCompteAdmin')]
-    public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher, SenderMail $senderMail): Response {
+    #[Route('/admin/validerDemandeCompte/{idDemandeCompte}/{idGroupeSys}', name: 'validerDemandeCompteAdmin')]
+    public function validerDemandeCompte($idDemandeCompte, $idGroupeSys, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher, SenderMail $senderMail): Response {
         //On récupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
-        $demandeCompte = $requetesRepo->find($id);
+        $demandeCompte = $requetesRepo->find($idDemandeCompte);
+
+        $groupeSys = $entityManager->getRepository(GroupesSys::class)->find($idGroupeSys);
 
 
         //On crée un nouvel utilisateur
         $user = new User();
+        //On donne le groupeSys à l'utilisateur
+        $user->addGroupeSy($groupeSys);
         //On set le nom d'utilisateur de l'utilisateur la premiere lettre du prenom suivie du nom avec un max de 8 caracteres
         $username = substr($demandeCompte->getPrenom(), 0, 1) . $demandeCompte->getNom();
         $username = substr($username, 0, 8);
@@ -242,7 +267,8 @@ class AdminController extends AbstractController
 
         try {
             $senderMail->sendMail('mail@mail.com', $demandeCompte->getMail(), 'Votre demande de compte a été validée ' . $demandeCompte->getPrenom() . ' ' . $demandeCompte->getNom(), $message);
-        } catch (TransportExceptionInterface $e) {
+        }
+        catch (TransportExceptionInterface $e) {
             //On crée un message flash pour informer l'utilisateur que le mail n'a pas pu être envoyé
             $session = $request->getSession();
             $session->getFlashBag()->add('message', "Le mail n'a pas pu être envoyé.");

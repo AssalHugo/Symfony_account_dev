@@ -18,7 +18,7 @@ use Symfony\UX\Chartjs\Model\Chart;
 
 class RessourcesController extends AbstractController
 {
-    #[Route('/ressources', name: 'ressources')]
+    #[Route('/ressources/stockage', name: 'stockage')]
     public function index(EntityManagerInterface $em, ChartBuilderInterface $chartBuilder, Request $request): Response {
 
 
@@ -202,7 +202,7 @@ class RessourcesController extends AbstractController
             ],
         ]);
 
-        return $this->render('ressources/index.html.twig', [
+        return $this->render('ressources/stockage.html.twig', [
             'resStockagesHome' => $resStockagesHome,
             'resStockagesWork' => $resStockageWork,
             'mesuresHome' => $mesureDeChaqueResHome,
@@ -213,6 +213,8 @@ class RessourcesController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+
+    #[Route('/ressources/{id}', name: 'ressources_show')]
 
     /**
      * Convertir une date en fonction de son format
