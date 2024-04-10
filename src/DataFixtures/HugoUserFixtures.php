@@ -4,7 +4,6 @@ namespace App\DataFixtures;
 
 use App\Entity\Departement;
 use App\Entity\EtatsRequetes;
-use App\Entity\GroupesSys;
 use App\Entity\Periode;
 use App\Entity\ResStockagesHome;
 use App\Entity\ResStockageWork;
@@ -59,21 +58,11 @@ class HugoUserFixtures extends Fixture
         $user->setPassword("hugo26**");
         $user->setEmploye($employe);
 
-        $groupeSysH = new GroupesSys();
-        $groupeSysH->setNom("groupeSys 1");
-        $groupeSysH->setUser($user);
-        $manager->persist($groupeSysH);
-
         $user2 = new User();
         $user2->setUsername("jean");
         $user2->setEmail("jean@mail.com");
         $user2->setPassword("jean26**");
         $user2->setEmploye($employe2);
-
-        $groupeSys = new GroupesSys();
-        $groupeSys->setNom("groupeSys 2");
-        $groupeSys->setUser($user2);
-        $manager->persist($groupeSys);
 
         $status = new Status();
         $status->setType("Stagiaire");
@@ -194,12 +183,6 @@ class HugoUserFixtures extends Fixture
             $user2->setEmail("mail" . $i);
             $user2->setPassword("password" . $i);
             $user2->setEmploye($employe);
-
-            //Groupe Sys
-            $groupeSys = new GroupesSys();
-            $groupeSys->setNom("groupeSys" . $i);
-            $groupeSys->setUser($user2);
-            $manager->persist($groupeSys);
 
             $contrat = new Contrats;
             $contrat->setDateDebut(new \DateTime("2015-09-31"));
@@ -362,7 +345,7 @@ class HugoUserFixtures extends Fixture
         $resStockageWork = new ResStockageWork();
         $resStockageWork->setNom("apex");
         $resStockageWork->setPath("/work/apex");
-        $resStockageWork->setGroupeSys($groupeSysH);
+        $resStockageWork->setGroupe($groupe2);
 
         $valeur = 5;
         for ($i=0; $i < 4000; $i++) {
@@ -382,7 +365,7 @@ class HugoUserFixtures extends Fixture
         $resStockageWork2 = new ResStockageWork();
         $resStockageWork2->setNom("uc");
         $resStockageWork->setPath("/work/uc");
-        $resStockageWork2->setGroupeSys($groupeSys);
+        $resStockageWork2->setGroupe($groupe);
 
         $valeur = 10;
         for ($i=0; $i < 4000; $i++) {

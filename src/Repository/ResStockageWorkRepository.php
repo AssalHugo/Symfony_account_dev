@@ -30,7 +30,8 @@ class ResStockageWorkRepository extends ServiceEntityRepository
 
         $qb->select('m.id')
             ->innerJoin('r.mesure', 'm')
-            ->where('r.groupeSys = :groupesSysId')
+            ->innerJoin('r.groupe', 'g')
+            ->where('g.id = :groupesSysId')
             ->setParameter('groupesSysId', $groupesSysId)
             ->orderBy('m.date_mesure', 'DESC')
             ->groupBy('r.id');
@@ -38,6 +39,21 @@ class ResStockageWorkRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * Fonction qui permet de récupérer les ressources de stockage work qui appartiennent à un groupe donné
+     * @param $groupes
+     * @return mixed
+     */
+    public function findByGroupes($groupes)
+    {
+        $qb = $this->createQueryBuilder('r');
+
+        $qb->innerJoin('r.groupe', 'g')
+            ->where('g IN (:groupes)')
+            ->setParameter('groupes', $groupes);
+
+        return $qb->getQuery()->getResult();
+    }
     //    /**
     //     * @return ResStockageWork[] Returns an array of ResStockageWork objects
     //     */

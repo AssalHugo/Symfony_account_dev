@@ -24,9 +24,6 @@ class ResStockageWork
     #[ORM\ManyToMany(targetEntity: Employe::class, inversedBy: 'resStockageWorks')]
     private Collection $responsables;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    private ?GroupesSys $groupeSys = null;
-
     /**
      * @var Collection<int, StockagesMesuresWork>
      */
@@ -35,6 +32,9 @@ class ResStockageWork
 
     #[ORM\Column(length: 64, nullable: true)]
     private ?string $path;
+
+    #[ORM\OneToOne(mappedBy: 'resStockageWork', cascade: ['persist', 'remove'])]
+    private ?Groupes $groupe = null;
 
     public function __construct()
     {
@@ -83,18 +83,6 @@ class ResStockageWork
         return $this;
     }
 
-    public function getGroupeSys(): ?GroupesSys
-    {
-        return $this->groupeSys;
-    }
-
-    public function setGroupeSys(?GroupesSys $groupeSys): static
-    {
-        $this->groupeSys = $groupeSys;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, StockagesMesuresWork>
      */
@@ -133,6 +121,36 @@ class ResStockageWork
     public function setPath(string $path): static
     {
         $this->path = $path;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, StockagesMesuresWork>
+     */
+    public function getMesure(): Collection
+    {
+        return $this->mesure;
+    }
+
+    public function getGroupe(): ?Groupes
+    {
+        return $this->groupe;
+    }
+
+    public function setGroupe(?Groupes $groupe): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($groupe === null && $this->groupe !== null) {
+            $this->groupe->setResStockageWork(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($groupe !== null && $groupe->getResStockageWork() !== $this) {
+            $groupe->setResStockageWork($this);
+        }
+
+        $this->groupe = $groupe;
 
         return $this;
     }

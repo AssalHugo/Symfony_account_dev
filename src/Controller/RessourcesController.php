@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\GroupesSys;
+use App\Entity\Groupes;
 use App\Entity\ResStockagesHome;
 use App\Entity\ResStockageWork;
 use App\Entity\StockagesMesuresHome;
@@ -19,7 +19,7 @@ use Symfony\UX\Chartjs\Model\Chart;
 class RessourcesController extends AbstractController
 {
     #[Route('/ressources/stockage', name: 'stockage')]
-    public function index(EntityManagerInterface $em, ChartBuilderInterface $chartBuilder, Request $request): Response {
+    public function stockage(EntityManagerInterface $em, ChartBuilderInterface $chartBuilder, Request $request): Response {
 
 
         //On récupère les ressources de l'utilisateur connecté
@@ -45,12 +45,18 @@ class RessourcesController extends AbstractController
 
         //Partie Work
         //On récupère les ressources de l'utilisateur connecté
-        //On récupère tous les groupesSys de l'utilisateur connecté
-        $groupeSys = $em->getRepository(GroupesSys::class)->findBy(['user' => $user]);
+        //On récupère tous les groupes de l'utilisateur connecté
+        $employe = $user->getEmploye();
+
+        $groupes = $employe->getGroupesSecondaires();
+
+        //On ajoute le groupe principal à la liste des groupes secondaires
+        $groupes[] = $employe->getGroupePrincipal();
 
         $resStockagesWorkRepo = $em->getRepository(ResStockageWork::class);
-        //On récupère les ressources de chaque groupeSys
-        $mesureDeChaqueResWorkID = $resStockagesWorkRepo->findLatestMeasurementsByUser($groupeSys);
+        //On récupère les ressources de chaque groupe
+
+        $mesureDeChaqueResWorkID = $resStockagesWorkRepo->findLatestMeasurementsByUser($groupes);
 
         //On récupère la dernière mesure de chaque ressource Work
         $mesureDeChaqueResWork = [];
@@ -66,8 +72,9 @@ class RessourcesController extends AbstractController
         }
 
 
+
         //On récupère les ressources de l'utilisateur connecté
-        $resStockageWork = $resStockagesWorkRepo->findBy(['groupeSys' => $groupeSys]);
+        $resStockageWork = $resStockagesWorkRepo->findByGroupes($groupes);
         $resStockagesHome = $resStockagesHomeRepository->findBy(['user' => $user]);
         //On fusionne les deux tableaux de ressources
         $resStockages = array_merge($resStockagesHome, $resStockageWork);
@@ -214,7 +221,17 @@ class RessourcesController extends AbstractController
         ]);
     }
 
-    #[Route('/ressources/{id}', name: 'ressources_show')]
+    #[Route('/ressources/serveurs', name: 'serveurs')]
+    public function serveurs(EntityManagerInterface $em): Response {
+
+        //On récupère les ressources de l'utilisateur connecté
+        $user = $this->getUser();
+        $groupeSys = $em->getRepository(Groupes::class)->findBy(['user' => $user]);
+
+
+
+        return $this->render('ressources/serveurs.html.twig');
+    }
 
     /**
      * Convertir une date en fonction de son format

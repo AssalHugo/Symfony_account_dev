@@ -8,7 +8,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use App\Entity\Employe;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
@@ -43,16 +42,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: ResStockagesHome::class, mappedBy: 'user')]
     private Collection $resStockagesHomes;
 
-    /**
-     * @var Collection<int, GroupesSys>
-     */
-    #[ORM\OneToMany(targetEntity: GroupesSys::class, mappedBy: 'user')]
-    private Collection $groupeSys;
-
     public function __construct()
     {
         $this->resStockagesHomes = new ArrayCollection();
-        $this->groupeSys = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -206,36 +198,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($resStockagesHome->getUser() === $this) {
                 $resStockagesHome->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, GroupesSys>
-     */
-    public function getGroupeSys(): Collection
-    {
-        return $this->groupeSys;
-    }
-
-    public function addGroupeSy(GroupesSys $groupeSy): static
-    {
-        if (!$this->groupeSys->contains($groupeSy)) {
-            $this->groupeSys->add($groupeSy);
-            $groupeSy->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeGroupeSy(GroupesSys $groupeSy): static
-    {
-        if ($this->groupeSys->removeElement($groupeSy)) {
-            // set the owning side to null (unless already changed)
-            if ($groupeSy->getUser() === $this) {
-                $groupeSy->setUser(null);
             }
         }
 

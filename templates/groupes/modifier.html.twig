@@ -12,7 +12,7 @@
                     {% for groupe in groupesSecondairesEmploye %}
                         <li class="list-group-item">
 
-                            <strong> groupe {{loop.index}} : </strong><a class="btn btn-danger my-2" href="" >&#128465;&#65039;</a>
+                            <strong> groupe {{loop.index}} : </strong><a class="btn btn-danger my-2" href="{{ path('removeGroupeSecondaire', {'id': groupe.vars.value['groupeSecondaire'].id}) }}">&#128465;&#65039;</a>
                             </br>
 
                             {{ form_start(groupe, {'action': path('modifier', {'index': loop.index0})}) }}

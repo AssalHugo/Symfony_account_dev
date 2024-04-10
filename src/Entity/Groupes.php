@@ -33,17 +33,15 @@ class Groupes
     #[ORM\OneToMany(targetEntity: Employe::class, mappedBy: 'groupe_principal')]
     private Collection $employes_grp_principaux;
 
-    #[ORM\ManyToOne(inversedBy: 'groupes')]
+    #[ORM\ManyToOne(targetEntity: Departement::class, inversedBy: 'groupes')]
     private ?Departement $departement = null;
 
     #[ORM\OneToMany(targetEntity: Requetes::class, mappedBy: 'groupe_principal')]
     private Collection $requetes;
 
-    /**
-     * @var Collection<int, GroupesSys>
-     */
-    #[ORM\OneToMany(targetEntity: GroupesSys::class, mappedBy: 'groupe')]
-    private Collection $groupesSys;
+    #[ORM\OneToOne(inversedBy: 'groupe', cascade: ['persist', 'remove'])]
+    private ?ResStockageWork $resStockageWork = null;
+
 
     public function __construct()
     {
@@ -51,7 +49,6 @@ class Groupes
         $this->employe_grp_secondaires = new ArrayCollection();
         $this->employes_grp_principaux = new ArrayCollection();
         $this->requetes = new ArrayCollection();
-        $this->groupesSys = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -219,32 +216,14 @@ class Groupes
         return $this;
     }
 
-    /**
-     * @return Collection<int, GroupesSys>
-     */
-    public function getGroupesSys(): Collection
+    public function getResStockageWork(): ?ResStockageWork
     {
-        return $this->groupesSys;
+        return $this->resStockageWork;
     }
 
-    public function addGroupesSy(GroupesSys $groupesSy): static
+    public function setResStockageWork(?ResStockageWork $resStockageWork): static
     {
-        if (!$this->groupesSys->contains($groupesSy)) {
-            $this->groupesSys->add($groupesSy);
-            $groupesSy->setGroupe($this);
-        }
-
-        return $this;
-    }
-
-    public function removeGroupesSy(GroupesSys $groupesSy): static
-    {
-        if ($this->groupesSys->removeElement($groupesSy)) {
-            // set the owning side to null (unless already changed)
-            if ($groupesSy->getGroupe() === $this) {
-                $groupesSy->setGroupe(null);
-            }
-        }
+        $this->resStockageWork = $resStockageWork;
 
         return $this;
     }
