@@ -21,6 +21,24 @@ class ResStockagesHomeRepository extends ServiceEntityRepository
         parent::__construct($registry, ResStockagesHome::class);
     }
 
+    /**
+     * Fonction qui permet de récupérer la derniere mesure (la mesure qui a la date la plus récente) de chaque stockage home qui appartient à un utilisateur donné
+     */
+    public function findLatestMeasurementsByUser($userId)
+    {
+        $qb = $this->createQueryBuilder('r');
+
+        $qb->select('m.id')
+            ->innerJoin('r.mesures', 'm')
+            ->where('r.user = :userId')
+            ->setParameter('userId', $userId)
+            ->orderBy('m.date_mesure', 'DESC')
+            ->groupBy('r.id');
+
+        return $qb->getQuery()->getResult();
+    }
+
+
     //    /**
     //     * @return ResStockagesHome[] Returns an array of ResStockagesHome objects
     //     */

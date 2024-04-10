@@ -323,6 +323,7 @@ class HugoUserFixtures extends Fixture
         for ($i=0; $i < 4000; $i++) {
             $valeur = $this->mesureHome($manager, $resStockageHome, $periodeJour, $valeur, $i, 10);
 
+
             //Toutes les semaine on ajoute une mesure
             if ($i % 7 == 0) {
                 $valeur = $this->mesureHome($manager, $resStockageHome, $periodeSemaine, $valeur, $i, 10);
@@ -342,6 +343,21 @@ class HugoUserFixtures extends Fixture
         $valeur = 10;
         for ($i=0; $i < 4000; $i++) {
             $valeur = $this->mesureHome($manager, $resStockageHome2, $periodeJour, $valeur, $i, 20);
+
+            $mesure2 = new StockagesMesuresHome();
+            $mesure2->setPeriode($periodeJour);
+            $resStockageHome->addMesure($mesure2);
+            $mesure2->setDateMesure(new \DateTimeImmutable($i . " days ago". " 00:08:00"));
+            $valeur += rand(-2, 2);
+            if ($valeur > 20) {
+                $valeur = 20;
+            }
+            else if ($valeur < 0) {
+                $valeur = 0;
+            }
+            $mesure2->setValeurUse($valeur);
+            $mesure2->setValeurMax(20);
+            $manager->persist($mesure2);
 
             //Toutes les semaine on ajoute une mesure
             if ($i % 7 == 0) {
@@ -406,12 +422,12 @@ class HugoUserFixtures extends Fixture
     }
 
 
-    public function mesureHome(ObjectManager $manager, $resStockageHome, $periode, $valeur, $i, $max) : int
+    private function mesureHome(ObjectManager $manager, $resStockageHome, $periode, $valeur, $i, $max) : int
     {
         $mesure2 = new StockagesMesuresHome();
         $mesure2->setPeriode($periode);
         $resStockageHome->addMesure($mesure2);
-        $mesure2->setDateMesure(new \DateTime($i . " days ago"));
+        $mesure2->setDateMesure(new \DateTimeImmutable($i . " days ago"));
         $valeur += rand(-2, 2);
         if ($valeur > $max) {
             $valeur = $max;
@@ -431,7 +447,7 @@ class HugoUserFixtures extends Fixture
         $mesure = new StockagesMesuresWork();
         $mesure->setPeriode($periode);
         $resStockageWork->addMesure($mesure);
-        $mesure->setDateMesure(new \DateTime($i . " days ago"));
+        $mesure->setDateMesure(new \DateTimeImmutable($i . " days ago"));
         //On fait légèrement varier les valeurs pour chaque mesure pour simuler des données réelles
         //On récupère la valeur de la mesure précédente et on lui ajoute un nombre aléatoire entre -3 et 3, sans dépasser la valeur max
         $valeur = $valeur + rand(-2, 2);

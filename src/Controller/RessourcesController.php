@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\GroupesSys;
 use App\Entity\ResStockagesHome;
 use App\Entity\ResStockageWork;
+use App\Entity\StockagesMesuresHome;
+use App\Entity\StockagesMesuresWork;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -23,14 +25,16 @@ class RessourcesController extends AbstractController
         //On récupère les ressources de l'utilisateur connecté
         $user = $this->getUser();
 
-        $resStockagesHome = $em->getRepository(ResStockagesHome::class)->findBy(['user' => $user]);
+        $resStockagesHomeRepository = $em->getRepository(ResStockagesHome::class);
+        $resStockagesHome = $resStockagesHomeRepository->findBy(['user' => $user]);
+        $mesureDeChaqueResHomeID = $resStockagesHomeRepository->findLatestMeasurementsByUser($user->getId());
 
         //On récupere la derniere mesure de chaque ressource Home
         $mesureDeChaqueResHome = [];
         $pourcentageHome = [];
-        foreach($resStockagesHome as $resStockage){
-            $mesure = $resStockage->getMesures()->first();
-
+        foreach($mesureDeChaqueResHomeID as $mesureResHomeID){
+            //On récupère la mesure
+            $mesure = $em->getRepository(StockagesMesuresHome::class)->find($mesureResHomeID['id']);
 
             //On calcule le pourcentage deux chiffres après la virgule entre la valeur actuelle et la valeur max
             $pourcentageHome[] = round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
@@ -45,14 +49,18 @@ class RessourcesController extends AbstractController
         //On récupère tous les groupesSys de l'utilisateur connecté
         $groupeSys = $em->getRepository(GroupesSys::class)->findBy(['user' => $user]);
 
+        $resStockagesWorkRepo = $em->getRepository(ResStockageWork::class);
         //On récupère les ressources de chaque groupeSys
-        $resStockageWork = $em->getRepository(ResStockageWork::class)->findBy(['groupeSys' => $groupeSys]);
+        $resStockageWork = $resStockagesWorkRepo->findBy(['groupeSys' => $groupeSys]);
+        $mesureDeChaqueResWorkID = $resStockagesWorkRepo->findLatestMeasurementsByUser($groupeSys);
 
         //On récupère la dernière mesure de chaque ressource Work
         $mesureDeChaqueResWork = [];
         $pourcentageWork = [];
-        foreach($resStockageWork as $resStockage){
-            $mesure = $resStockage->getMesures()->first();
+        foreach($mesureDeChaqueResWorkID as $mesureResWorkID){
+            //On récupère la mesure
+            $mesure = $em->getRepository(StockagesMesuresWork::class)->find($mesureResWorkID['id']);
+
             //On calcule le pourcentage deux chiffres après la virgule entre la valeur actuelle et la valeur max
             $pourcentageWork[] = round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
 
@@ -144,7 +152,7 @@ class RessourcesController extends AbstractController
                     }
                 }
 
-                array_unshift($data, $mesure->getValeurUse());
+                array_unshift($data, $mesure->getValeurUse() / $mesure->getValeurMax() * 100);
 
                 $dateMesure = $mesure->getDateMesure();
                 //On stocke les dates des mesures dans un tableau si elles ne sont pas déjà stockées
@@ -201,7 +209,7 @@ class RessourcesController extends AbstractController
                 'y' => [
                     'title' => [
                         'display' => true,
-                        'text' => 'Valeur utilisée',
+                        'text' => 'Pourcentage',
                     ],
                 ],
                 'x' => [
@@ -225,7 +233,13 @@ class RessourcesController extends AbstractController
         ]);
     }
 
-    private function convertDate($date, $format) {
+    /**
+     * Convertir une date en fonction de son format
+     * @param $date
+     * @param $format
+     * @return \DateTime|false|string
+     */
+    private function convertDate($date, $format) : \DateTime|false|string {
         if($format == 'd/m/Y H:i:s') {
             return \DateTime::createFromFormat('d/m/Y H:i:s', $date)->format('Y-m-d');
         } elseif($format == 'W/Y') {
