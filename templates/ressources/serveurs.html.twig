@@ -2,6 +2,8 @@
 {% block body %}
 <div class="container">
     <h1 class="text-center">Serveurs</h1>
+    <br>
+    <h2>Liste des serveurs</h2>
     <br> <table class="table table-striped">
         <thead>
         <tr>
@@ -31,10 +33,29 @@
         </tbody>
     </table>
     <br>
-    <h2>Graphique CPU et nb user</h2>
+    <h2>Graphiques</h2>
+    <h3>Filtrer</h3>
+    {{ form(form) }}
+    <br>
+    <h3>Graphique CPU et nb user</h3>
     {{ render_chart(chart) }}
     <br>
-    <h2>Graphique RAM</h2>
+    <h3>Graphique RAM</h3>
     {{ render_chart(chartRAM) }}
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        // Fonction pour mettre à jour les serveurs
+        function updateServeur() {
+            let serveur = document.getElementById('form_serveurs').value;
+            let groupe = document.getElementById('form_groupes').value;
+
+            console.log(serveur);
+            console.log(groupe.id);
+        }
+
+        window.addEventListener('load', updateServeur);
+    </script>
 {% endblock %}

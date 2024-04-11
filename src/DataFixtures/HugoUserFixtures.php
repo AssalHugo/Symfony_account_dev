@@ -466,11 +466,11 @@ class HugoUserFixtures extends Fixture
             }
             else {
 
-                $mesure->setCpu(50);
-                $mesure->setCpuTotal(100);
-                $mesure->setRamUtilise(50);
-                $mesure->setRamMax(100);
-                $mesure->setNbUtilisateurs(15);
+                $mesure->setCpu(rand(0, 100));
+                $mesure->setCpuTotal(rand(90, 100));
+                $mesure->setRamUtilise(rand(0, 100));
+                $mesure->setRamMax(rand(90, 100));
+                $mesure->setNbUtilisateurs(rand(0, 50));
             }
 
             $derniereMesure = $mesure;

@@ -12,6 +12,8 @@ use App\Entity\StockagesMesuresWork;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -225,6 +227,7 @@ class RessourcesController extends AbstractController
         //On récupère les serveurs de l'utilisateur connecté
         $user = $this->getUser();
 
+
         $employe = $user->getEmploye();
         $groupes = $employe->getGroupesSecondaires();
         //On ajoute le groupe principal à la liste des groupes secondaires
@@ -232,14 +235,61 @@ class RessourcesController extends AbstractController
 
         $serveurMesuresRepo = $em->getRepository(ServeursMesures::class);
 
-        //On récupère les dernières mesures de chaque serveur
-        $lastMesureDeChaqueServeur = $serveurMesuresRepo->findLatestMeasurementsByUser($groupes);
 
         //On récupère les serveurs de l'utilisateur connecté
         $serveurs = $em->getRepository(ResServeur::class)->findByGroupes($groupes);
 
+
+        //On récupère les dernières mesures de chaque serveur
+        $lastMesureDeChaqueServeur = $serveurMesuresRepo->findLatestMeasurementsByUser($groupes);
+
+        //---------------------------------Formulaire sur le groupe et les serveurs---------------------------------
+        //On crée un formulaire pour permettre de modifier le groupe et les serveurs affichés
+        $form = $this->createFormBuilder()
+            ->add('groupes', ChoiceType::class, [
+                'choices' => $groupes,
+                'choice_label' => 'nom',
+                'label' => 'Groupe',
+                'required' => false,
+                'attr' => [
+                    'id' => 'groupes_select',
+                ],
+            ])
+            ->add('serveurs', ChoiceType::class, [
+                //On fait un choiceType cochable pour pouvoir choisir plusieurs serveurs à la fois, on affiche les cases à cocher en ligne
+                'expanded' => true,
+                'choices' => $serveurs,
+                'choice_label' => 'nom',
+                'label' => 'Serveurs',
+                'multiple' => true,
+                'attr' => [
+                    'id' => 'serveurs_select',
+                ],
+            ])
+            ->add('submit', SubmitType::class, [
+                'label' => 'Valider',
+            ])
+            ->getForm();
+
+
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+            $groupes = $form->getData()['groupes'];
+            $serveursChart = $form->getData()['serveurs'];
+        }
+        else{
+            $serveursChart = $serveurs;
+        }
+
+
+
+
+        //---------------------------------Graphique---------------------------------
+
         //On récupère les labels en fonction des serveurs
-        $labelsMesures = $serveurMesuresRepo->findlabelEnFonctionDesServeurs($serveurs);
+        $labelsMesures = $serveurMesuresRepo->findlabelEnFonctionDesServeurs($serveursChart);
 
         $labels = [];
         //On met les labels dans le bon format
@@ -250,9 +300,10 @@ class RessourcesController extends AbstractController
         // On récupère les mesures de chaque serveur
         $mesureDeChaqueServeur = [];
         $mesureDeChaqueServeurRAM = [];
-        foreach($serveurs as $serveur){
+        foreach($serveursChart as $serveur){
             //On récupère les mesures du serveur qui n'ont pas comme date de mesure une date inférieure à la date actuelle -30 jours
             $mesures = $serveurMesuresRepo->findMesuresEnFonctionDuServeur($serveur);
+
             if (count($mesures) == count($labels)) {
 
                 $dataCpu = array_map(function($mesure) {
@@ -302,18 +353,22 @@ class RessourcesController extends AbstractController
                 'borderColor' => $color,
                 'data' => $dataCpu,
                 'yAxisID' => 'y-axis-1',
+                'pointStyle' => false,
+
             ];
             $mesureDeChaqueServeurRAM[] = [
                 'label' => $serveur->getNom() . ' - RAM',
                 'borderColor' => $color,
                 'data' => $dataRam,
                 'yAxisID' => 'y-axis-1',
+                'pointStyle' => false,
             ];
             $mesureDeChaqueServeur[] = [
                 'label' => $serveur->getNom() . ' - Nb Users',
                 'borderColor' => $color,
                 'data' => $dataNbUsers,
                 'yAxisID' => 'y-axis-2',
+                'pointStyle' => false,
             ];
         }
 
@@ -323,6 +378,7 @@ class RessourcesController extends AbstractController
         $chart->setData([
             'labels' => $labels,
             'datasets' => $mesureDeChaqueServeur,
+
         ]);
 
             // On donne deux axes pour le graphique (un pour le nombre d'utilisateurs et l'autre pour le reste)
@@ -384,7 +440,18 @@ class RessourcesController extends AbstractController
             'chart' => $chart,
             'lastMesureDeChaqueServeur' => $lastMesureDeChaqueServeur,
             'chartRAM' => $chartRAM,
+            'form' => $form->createView(),
         ]);
+    }
+
+    #[Route('/ressources/serveurs/{id}', name: 'serveurs_du_groupe')]
+    public function getServeursDuGroupe(EntityManagerInterface $em, Request $request, $id): Response {
+
+        $groupes = $em->getRepository(Groupes::class)->find($id);
+
+        $serveurs = $groupes->getResServeurs();
+
+        return new JsonResponse($serveurs);
     }
 
     /**
