@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+<div class="container">
+    <h1 class="text-center">Serveurs</h1>
+    <br> <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Groupe</th>
+            <th>Nom</th>
+            <th>Nombre d'utilisateurs</th>
+            <th>RAM utilisé</th>
+            <th>RAM total</th>
+            <th>CPU %</th>
+            <th>CPU Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for serveur in serveurs %}
+            <tr>
+                <td>{{ lastMesureDeChaqueServeur[loop.index0].DateMesure | date('Y-m-d H:i:s') }}</td>
+                <td>{{ serveur.groupe.nom }}</td>
+                <td>{{ serveur.nom }}</td>
+                <td>{{ lastMesureDeChaqueServeur[loop.index0].nbUtilisateurs }}</td>
+                <td>{{ lastMesureDeChaqueServeur[loop.index0].ramUtilise }}</td>
+                <td>{{ lastMesureDeChaqueServeur[loop.index0].ramMax }}</td>
+                <td>{{ lastMesureDeChaqueServeur[loop.index0].cpu }}</td>
+                <td>{{ lastMesureDeChaqueServeur[loop.index0].cpuTotal }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <h2>Graphique</h2>
+    {{ render_chart(chart) }}
+</div>
+{% endblock %}

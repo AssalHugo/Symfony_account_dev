@@ -5,8 +5,10 @@ namespace App\DataFixtures;
 use App\Entity\Departement;
 use App\Entity\EtatsRequetes;
 use App\Entity\Periode;
+use App\Entity\ResServeur;
 use App\Entity\ResStockagesHome;
 use App\Entity\ResStockageWork;
+use App\Entity\ServeursMesures;
 use App\Entity\StockagesMesuresHome;
 use App\Entity\StockagesMesuresWork;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -385,6 +387,82 @@ class HugoUserFixtures extends Fixture
         $manager->persist($resStockageWork);
         $manager->persist($resStockageWork2);
 
+        //On crée un serveur
+        $serveur = new ResServeur();
+        $serveur->setNom("serveur1");
+        $serveur->setGroupe($groupe2);
+        $serveur->addResponsable($employe2);
+
+
+        $derniereMesure = null;
+        //On crée des mesures pour le serveur
+        for ($i=0; $i < 4000; $i++) {
+            $mesure = new ServeursMesures();
+            //On rajoute 1 heure à chaque mesure
+            $mesure->setDateMesure(new \DateTimeImmutable($i . " hours ago" . " 08:00:00"));
+
+            //On fait légèrement varier les valeurs pour chaque mesure pour simuler des données réelles
+            //On récupère la  dernière valeur de la mesure précédente et on lui ajoute un nombre aléatoire entre -3 et 3, sans dépasser la valeur max
+            if ($derniereMesure != null) {
+                $cpu = $derniereMesure->getCpu() + rand(-2, 2);
+                if ($cpu > 100) {
+                    $cpu = 100;
+                }
+                else if ($cpu < 0) {
+                    $cpu = 0;
+                }
+                $mesure->setCpu($cpu);
+
+                $cpuTotal = $derniereMesure->getCpuTotal() + rand(-1, 1);
+                if ($cpuTotal > 100) {
+                    $cpuTotal = 100;
+                }
+                else if ($cpuTotal < 0) {
+                    $cpuTotal = 0;
+                }
+                $mesure->setCpuTotal($cpuTotal);
+
+                $ramUtilise = $derniereMesure->getRamUtilise() + rand(-2, 2);
+                if ($ramUtilise > 100) {
+                    $ramUtilise = 100;
+                }
+                else if ($ramUtilise < 0) {
+                    $ramUtilise = 0;
+                }
+                $mesure->setRamUtilise($ramUtilise);
+
+                $ramMax = $derniereMesure->getRamMax() + rand(-1, 1);
+
+                if ($ramMax > 100) {
+                    $ramMax = 100;
+                }
+                else if ($ramMax < 0) {
+                    $ramMax = 0;
+                }
+
+                $mesure->setRamMax($ramMax);
+
+                $nbUtilisateurs = $derniereMesure->getNbUtilisateurs() + rand(-1, 1);
+                if ($nbUtilisateurs < 0) {
+                    $nbUtilisateurs = 0;
+                }
+                $mesure->setNbUtilisateurs($nbUtilisateurs);
+            }
+            else {
+
+                $mesure->setCpu(5);
+                $mesure->setCpuTotal(10);
+                $mesure->setRamUtilise(5);
+                $mesure->setRamMax(10);
+                $mesure->setNbUtilisateurs(5);
+            }
+
+            $derniereMesure = $mesure;
+            $serveur->addMesure($mesure);
+            $manager->persist($mesure);
+        }
+
+        $manager->persist($serveur);
 
         $manager->flush();
     }

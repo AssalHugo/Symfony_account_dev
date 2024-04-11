@@ -105,6 +105,12 @@ class Employe
     #[ORM\ManyToMany(targetEntity: ResStockageWork::class, mappedBy: 'responsables')]
     private Collection $resStockageWorks;
 
+    /**
+     * @var Collection<int, ResServeur>
+     */
+    #[ORM\ManyToMany(targetEntity: ResServeur::class, mappedBy: 'responsable')]
+    private Collection $resServeurs;
+
 
     public function __construct()
     {
@@ -119,6 +125,7 @@ class Employe
         $this->updatedAt = new \DateTimeImmutable();
         $this->responsable_des_departements = new ArrayCollection();
         $this->resStockageWorks = new ArrayCollection();
+        $this->resServeurs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -627,6 +634,33 @@ class Employe
     {
         if ($this->resStockageWorks->removeElement($resStockageWork)) {
             $resStockageWork->removeResponsable($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ResServeur>
+     */
+    public function getResServeurs(): Collection
+    {
+        return $this->resServeurs;
+    }
+
+    public function addResServeur(ResServeur $resServeur): static
+    {
+        if (!$this->resServeurs->contains($resServeur)) {
+            $this->resServeurs->add($resServeur);
+            $resServeur->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResServeur(ResServeur $resServeur): static
+    {
+        if ($this->resServeurs->removeElement($resServeur)) {
+            $resServeur->removeUser($this);
         }
 
         return $this;

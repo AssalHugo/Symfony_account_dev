@@ -42,6 +42,12 @@ class Groupes
     #[ORM\OneToOne(inversedBy: 'groupe', cascade: ['persist', 'remove'])]
     private ?ResStockageWork $resStockageWork = null;
 
+    /**
+     * @var Collection<int, ResServeur>
+     */
+    #[ORM\OneToMany(targetEntity: ResServeur::class, mappedBy: 'groupe')]
+    private Collection $resServeurs;
+
 
     public function __construct()
     {
@@ -49,6 +55,7 @@ class Groupes
         $this->employe_grp_secondaires = new ArrayCollection();
         $this->employes_grp_principaux = new ArrayCollection();
         $this->requetes = new ArrayCollection();
+        $this->resServeurs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -224,6 +231,36 @@ class Groupes
     public function setResStockageWork(?ResStockageWork $resStockageWork): static
     {
         $this->resStockageWork = $resStockageWork;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ResServeur>
+     */
+    public function getResServeurs(): Collection
+    {
+        return $this->resServeurs;
+    }
+
+    public function addResServeur(ResServeur $resServeur): static
+    {
+        if (!$this->resServeurs->contains($resServeur)) {
+            $this->resServeurs->add($resServeur);
+            $resServeur->setGroupe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResServeur(ResServeur $resServeur): static
+    {
+        if ($this->resServeurs->removeElement($resServeur)) {
+            // set the owning side to null (unless already changed)
+            if ($resServeur->getGroupe() === $this) {
+                $resServeur->setGroupe(null);
+            }
+        }
 
         return $this;
     }

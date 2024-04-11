@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Groupes;
+use App\Entity\ResServeur;
 use App\Entity\ResStockagesHome;
 use App\Entity\ResStockageWork;
+use App\Entity\ServeursMesures;
 use App\Entity\StockagesMesuresHome;
 use App\Entity\StockagesMesuresWork;
 use Doctrine\ORM\EntityManagerInterface;
@@ -217,15 +219,147 @@ class RessourcesController extends AbstractController
     }
 
     #[Route('/ressources/serveurs', name: 'serveurs')]
-    public function serveurs(EntityManagerInterface $em): Response {
+    public function serveurs(EntityManagerInterface $em, ChartBuilderInterface $chartBuilder, Request $request): Response {
 
-        //On récupère les ressources de l'utilisateur connecté
+        //On récupère les serveurs de l'utilisateur connecté
         $user = $this->getUser();
-        $groupeSys = $em->getRepository(Groupes::class)->findBy(['user' => $user]);
+
+        $employe = $user->getEmploye();
+
+        $groupes = $employe->getGroupesSecondaires();
+
+        //On ajoute le groupe principal à la liste des groupes secondaires
+        $groupes[] = $employe->getGroupePrincipal();
+
+        $serveurMesuresRepo = $em->getRepository(ServeursMesures::class);
+
+        //On récupère les dernières mesures de chaque serveur
+        $lastMesureDeChaqueServeur = $serveurMesuresRepo->findLatestMeasurementsByUser($groupes);
+
+        //On récupère les serveurs de l'utilisateur connecté
+        $serveurs = $em->getRepository(ResServeur::class)->findByGroupes($groupes);
+
+        //On récupère d'abord tous les labels
+        $labels = [];
+        foreach($serveurs as $serveur){
+            //On récupère les mesures de la ressource qui ont la meme période que celle choisie
+            $mesures = $serveur->getMesures()->filter(function($mesure){
+                $dateMesure = $mesure->getDateMesure();
+                $dateActuelle = new \DateTime();
+
+                $dateActuelle->modify('-30 days');
+
+                return $dateMesure >= $dateActuelle;
+            });
+
+            foreach($mesures as $mesure){
+                $label = $mesure->getDateMesure()->format('d/m/Y H:i:s');
+                if(!in_array($label, $labels)) {
+                    $labels[] = $label;
+                }
+            }
+        }
+
+        //On trie les labels par ordre croissant
+        usort($labels, function($a, $b){
+            $dateA = \DateTime::createFromFormat('d/m/Y H:i:s', $a);
+            $dateB = \DateTime::createFromFormat('d/m/Y H:i:s', $b);
+
+            if($dateA == $dateB){
+                return 0;
+            }
+
+            return $dateA < $dateB ? -1 : 1;
+        });
+
+        //On récupère les mesures de chaque serveur
+        $mesureDeChaqueServeur = [];
+        foreach($serveurs as $serveur){
+            $mesures = $serveur->getMesures()->filter(function($mesure){
+                $dateMesure = $mesure->getDateMesure();
+                $dateActuelle = new \DateTime();
+
+                $dateActuelle->modify('-30 days');
+
+                return $dateMesure >= $dateActuelle;
+            });
+
+            $data = [];
+            foreach($labels as $label){
+                $valeur = null;
+                foreach($mesures as $mesure){
+                    //Si la date de la mesure est égale à la date du label, on récupère la valeur
+                    if($label == $mesure->getDateMesure()->format('d/m/Y H:i:s')){
+                        $valeur = $mesure->getCpu();
+                        break;
+                    }
+                }
+                $data[] = $valeur;
+            }
+
+            //On génère une couleur aléatoire hexadécimale pour chaque serveurs, qu'on stocke en session pour ne pas que la couleur change à chaque rafraichissement de la page
+            $session = $request->getSession();
+
+            //Si la couleur liée à la ressource n'existe pas en session, on la génère
+            if(!$session->has('color_'.$serveur->getNom().$serveur->getId())){
+                $color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+                $session->set('color_'.$serveur->getNom().$serveur->getId(), $color);
+            }else{
+                $color = $session->get('color_'.$serveur->getNom().$serveur->getId());
+            }
+
+            $mesureDeChaqueServeur[] = [
+                'label' => $serveur->getNom(),
+                'borderColor' => $color,
+                'data' => $data,
+            ];
+        }
+
+        //On crée le graphique
+        $chart = $chartBuilder->createChart(Chart::TYPE_LINE);
+
+        $chart->setData([
+            'labels' => $labels,
+            'datasets' => $mesureDeChaqueServeur,
+        ]);
+
+        //On donne deux axes pour le graphique (un pour le nombre d'utilisateurs et l'autre pour le reste)
+        $chart->setOptions([
+            'scales' => [
+                'yAxes' => [
+                    [
+                        'type' => 'linear',
+                        'display' => true,
+                        'position' => 'left',
+                        'id' => 'y-axis-1',
+                        'labels' => [
+                            'show' => true,
+                            'text' => 'CPU',
+                        ],
+                    ],
+                    [
+                        'type' => 'linear',
+                        'display' => true,
+                        'position' => 'right',
+                        'id' => 'y-axis-2',
+                        'gridLines' => [
+                            'drawOnChartArea' => false,
+                        ],
+                        'labels' => [
+                            'show' => true,
+                            'text' => 'Nombre d\'utilisateurs',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
 
 
-
-        return $this->render('ressources/serveurs.html.twig');
+        return $this->render('ressources/serveurs.html.twig', [
+            'serveurs' => $serveurs,
+            'chart' => $chart,
+            'lastMesureDeChaqueServeur' => $lastMesureDeChaqueServeur,
+        ]);
     }
 
     /**
@@ -236,7 +370,7 @@ class RessourcesController extends AbstractController
      */
     private function convertDate($date, $format) : \DateTime|false|string {
         if($format == 'd/m/Y H:i:s') {
-            return \DateTime::createFromFormat('d/m/Y H:i:s', $date)->format('Y-m-d');
+            return \DateTime::createFromFormat('d/m/Y H:i:s', $date);
         } elseif($format == 'W/Y') {
             // Convertir le format de semaine/année en une date
             list($week, $year) = explode('/', $date);

@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20240410140837 extends AbstractMigration
+final class Version20240410145810 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -53,6 +53,11 @@ final class Version20240410140837 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_2D13E3C435E47E35 ON requetes (referent_id)');
         $this->addSql('CREATE INDEX IDX_2D13E3C4B1B7685A ON requetes (etat_requete_id)');
         $this->addSql('CREATE INDEX IDX_2D13E3C41823061F ON requetes (contrat_id)');
+        $this->addSql('CREATE TABLE res_serveur (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, groupe_id INTEGER DEFAULT NULL, nom VARCHAR(40) NOT NULL, CONSTRAINT FK_558F07487A45358C FOREIGN KEY (groupe_id) REFERENCES groupes (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE INDEX IDX_558F07487A45358C ON res_serveur (groupe_id)');
+        $this->addSql('CREATE TABLE res_serveur_employe (res_serveur_id INTEGER NOT NULL, employe_id INTEGER NOT NULL, PRIMARY KEY(res_serveur_id, employe_id), CONSTRAINT FK_AC8633A42A8E116B FOREIGN KEY (res_serveur_id) REFERENCES res_serveur (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_AC8633A41B65292 FOREIGN KEY (employe_id) REFERENCES employe (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE INDEX IDX_AC8633A42A8E116B ON res_serveur_employe (res_serveur_id)');
+        $this->addSql('CREATE INDEX IDX_AC8633A41B65292 ON res_serveur_employe (employe_id)');
         $this->addSql('CREATE TABLE res_stockage_work (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, nom VARCHAR(40) NOT NULL, path VARCHAR(64) DEFAULT NULL)');
         $this->addSql('CREATE TABLE res_stockage_work_employe (res_stockage_work_id INTEGER NOT NULL, employe_id INTEGER NOT NULL, PRIMARY KEY(res_stockage_work_id, employe_id), CONSTRAINT FK_DA4A14B9A4512571 FOREIGN KEY (res_stockage_work_id) REFERENCES res_stockage_work (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_DA4A14B91B65292 FOREIGN KEY (employe_id) REFERENCES employe (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_DA4A14B9A4512571 ON res_stockage_work_employe (res_stockage_work_id)');
@@ -62,6 +67,9 @@ final class Version20240410140837 extends AbstractMigration
         $this->addSql('CREATE TABLE res_stockages_home_stockages_mesures_home (res_stockages_home_id INTEGER NOT NULL, stockages_mesures_home_id INTEGER NOT NULL, PRIMARY KEY(res_stockages_home_id, stockages_mesures_home_id), CONSTRAINT FK_A379D2E2E5C77D6 FOREIGN KEY (res_stockages_home_id) REFERENCES res_stockages_home (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE, CONSTRAINT FK_A379D2E23FFCA4B FOREIGN KEY (stockages_mesures_home_id) REFERENCES stockages_mesures_home (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX IDX_A379D2E2E5C77D6 ON res_stockages_home_stockages_mesures_home (res_stockages_home_id)');
         $this->addSql('CREATE INDEX IDX_A379D2E23FFCA4B ON res_stockages_home_stockages_mesures_home (stockages_mesures_home_id)');
+        $this->addSql('CREATE TABLE serveurs_mesures (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, res_serveur_id INTEGER DEFAULT NULL, date_mesure DATETIME NOT NULL --(DC2Type:datetime_immutable)
+        , cpu INTEGER NOT NULL, ram_utilise INTEGER NOT NULL, ram_max INTEGER NOT NULL, nb_utilisateurs INTEGER NOT NULL, CONSTRAINT FK_2494B7362A8E116B FOREIGN KEY (res_serveur_id) REFERENCES res_serveur (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
+        $this->addSql('CREATE INDEX IDX_2494B7362A8E116B ON serveurs_mesures (res_serveur_id)');
         $this->addSql('CREATE TABLE status (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, type VARCHAR(32) NOT NULL)');
         $this->addSql('CREATE TABLE stockages_mesures_home (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, periode_id INTEGER DEFAULT NULL, date_mesure DATETIME NOT NULL --(DC2Type:datetime_immutable)
         , valeur_use INTEGER NOT NULL, valeur_max INTEGER NOT NULL, CONSTRAINT FK_5800368AF384C1CF FOREIGN KEY (periode_id) REFERENCES periode (id) NOT DEFERRABLE INITIALLY IMMEDIATE)');
@@ -93,10 +101,13 @@ final class Version20240410140837 extends AbstractMigration
         $this->addSql('DROP TABLE localisations');
         $this->addSql('DROP TABLE periode');
         $this->addSql('DROP TABLE requetes');
+        $this->addSql('DROP TABLE res_serveur');
+        $this->addSql('DROP TABLE res_serveur_employe');
         $this->addSql('DROP TABLE res_stockage_work');
         $this->addSql('DROP TABLE res_stockage_work_employe');
         $this->addSql('DROP TABLE res_stockages_home');
         $this->addSql('DROP TABLE res_stockages_home_stockages_mesures_home');
+        $this->addSql('DROP TABLE serveurs_mesures');
         $this->addSql('DROP TABLE status');
         $this->addSql('DROP TABLE stockages_mesures_home');
         $this->addSql('DROP TABLE stockages_mesures_work');
