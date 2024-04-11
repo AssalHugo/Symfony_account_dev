@@ -305,7 +305,7 @@ class HugoUserFixtures extends Fixture
         $resStockageHome->setUser($user);
 
         $valeur = 5;
-        for ($i=0; $i < 4000; $i++) {
+        for ($i=0; $i < 2000; $i++) {
             $valeur = $this->mesureHome($manager, $resStockageHome, $periodeJour, $valeur, $i, 10);
 
 
@@ -326,7 +326,7 @@ class HugoUserFixtures extends Fixture
         $resStockageHome2->setPath("/home" . $user->getUsername());
 
         $valeur = 10;
-        for ($i=0; $i < 4000; $i++) {
+        for ($i=0; $i < 2000; $i++) {
             $valeur = $this->mesureHome($manager, $resStockageHome2, $periodeJour, $valeur, $i, 20);
 
             //Toutes les semaine on ajoute une mesure
@@ -350,7 +350,7 @@ class HugoUserFixtures extends Fixture
         $resStockageWork->setGroupe($groupe2);
 
         $valeur = 5;
-        for ($i=0; $i < 4000; $i++) {
+        for ($i=0; $i < 2000; $i++) {
             $valeur = $this->mesureWork($manager, $resStockageWork, $periodeJour, $valeur, $i, 10);
 
             //Toutes les semaine on ajoute une mesure
@@ -370,7 +370,7 @@ class HugoUserFixtures extends Fixture
         $resStockageWork2->setGroupe($groupe);
 
         $valeur = 10;
-        for ($i=0; $i < 4000; $i++) {
+        for ($i=0; $i < 2000; $i++) {
             $valeur = $this->mesureWork($manager, $resStockageWork2, $periodeJour, $valeur, $i, 20);
 
             //Toutes les semaine on ajoute une mesure
@@ -384,19 +384,28 @@ class HugoUserFixtures extends Fixture
             }
         }
 
+        $manager->flush();
+
         $manager->persist($resStockageWork);
         $manager->persist($resStockageWork2);
 
-        //On crée un serveur
+        //On crée des serveurs
+        for ($i=0; $i < 5; $i++) {
+            $this->creerServeur($groupe, $employe, $manager, "serveur" . $i);
+        }
+        $manager->flush();
+    }
+
+    private function creerServeur($groupe, $employe, $manager, $nomServeur){
         $serveur = new ResServeur();
-        $serveur->setNom("serveur1");
-        $serveur->setGroupe($groupe2);
-        $serveur->addResponsable($employe2);
+        $serveur->setNom($nomServeur);
+        $serveur->setGroupe($groupe);
+        $serveur->addResponsable($employe);
 
 
         $derniereMesure = null;
         //On crée des mesures pour le serveur
-        for ($i=0; $i < 4000; $i++) {
+        for ($i=0; $i < 1000; $i++) {
             $mesure = new ServeursMesures();
             //On rajoute 1 heure à chaque mesure
             $mesure->setDateMesure(new \DateTimeImmutable($i . " hours ago" . " 08:00:00"));
@@ -470,91 +479,6 @@ class HugoUserFixtures extends Fixture
         }
 
         $manager->persist($serveur);
-
-        //On crée un 2eme serveur
-        $serveur2 = new ResServeur();
-        $serveur2->setNom("serveur2");
-        $serveur2->setGroupe($groupe);
-        $serveur2->addResponsable($employe);
-
-        $derniereMesure = null;
-        //On crée des mesures pour le serveur
-        for ($i=0; $i < 4000; $i++) {
-            $mesure = new ServeursMesures();
-            //On rajoute 1 heure à chaque mesure
-            $mesure->setDateMesure(new \DateTimeImmutable($i . " hours ago" . " 08:00:00"));
-
-            //On fait légèrement varier les valeurs pour chaque mesure pour simuler des données réelles
-            //On récupère la  dernière valeur de la mesure précédente et on lui ajoute un nombre aléatoire entre -3 et 3, sans dépasser la valeur max
-            if ($derniereMesure != null && $i % 2 == 0) {
-                //On ajout -1 0 ou 1 à la valeur de la mesure précédente
-                $cpu = $derniereMesure->getCpu() + rand(-1, 1);
-                if ($cpu > 100) {
-                    $cpu = 100;
-                }
-                else if ($cpu < 0) {
-                    $cpu = 0;
-                }
-                $mesure->setCpu($cpu);
-
-                $cpuTotal = $derniereMesure->getCpuTotal() + rand(-1, 1);
-                if ($cpuTotal > 100) {
-                    $cpuTotal = 100;
-                }
-                else if ($cpuTotal < 0) {
-                    $cpuTotal = 0;
-                }
-                $mesure->setCpuTotal($cpuTotal);
-
-                $ramUtilise = $derniereMesure->getRamUtilise() + rand(-1, 1);
-                if ($ramUtilise > 100) {
-                    $ramUtilise = 100;
-                }
-                else if ($ramUtilise < 0) {
-                    $ramUtilise = 0;
-                }
-                $mesure->setRamUtilise($ramUtilise);
-
-                $ramMax = $derniereMesure->getRamMax() + rand(-1, 1);
-
-                if ($ramMax > 100) {
-                    $ramMax = 100;
-                }
-                else if ($ramMax < 0) {
-                    $ramMax = 0;
-                }
-
-                $mesure->setRamMax($ramMax);
-
-                $nbUtilisateurs = $derniereMesure->getNbUtilisateurs() + rand(-1, 1);
-                if ($nbUtilisateurs < 0) {
-                    $nbUtilisateurs = 0;
-                }
-                $mesure->setNbUtilisateurs($nbUtilisateurs);
-            }
-            else if ($derniereMesure != null){
-                $mesure->setCpu($derniereMesure->getCpu());
-                $mesure->setCpuTotal($derniereMesure->getCpuTotal());
-                $mesure->setRamUtilise($derniereMesure->getRamUtilise());
-                $mesure->setRamMax($derniereMesure->getRamMax());
-                $mesure->setNbUtilisateurs($derniereMesure->getNbUtilisateurs());
-            }
-            else {
-
-                $mesure->setCpu(50);
-                $mesure->setCpuTotal(100);
-                $mesure->setRamUtilise(50);
-                $mesure->setRamMax(100);
-                $mesure->setNbUtilisateurs(15);
-            }
-
-            $derniereMesure = $mesure;
-            $serveur2->addMesure($mesure);
-            $manager->persist($mesure);
-        }
-
-        $manager->persist($serveur2);
-        $manager->flush();
     }
 
 

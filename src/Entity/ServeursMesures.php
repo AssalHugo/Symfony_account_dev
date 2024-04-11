@@ -16,19 +16,19 @@ class ServeursMesures
     #[ORM\Column]
     private ?\DateTimeImmutable $date_mesure = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $cpu = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $cpu_total = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $ram_utilise = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $ram_max = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $nb_utilisateurs = null;
 
     #[ORM\ManyToOne(inversedBy: 'serveursMesures')]

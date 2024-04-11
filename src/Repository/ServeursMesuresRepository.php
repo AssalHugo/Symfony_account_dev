@@ -37,6 +37,46 @@ class ServeursMesuresRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * Fonction qui permet de récupérer toutes les mesures des serveurs donnés qui n'ont pas comme date de mesure une date inférieure à la date actuelle -30 jours
+     */
+    public function findlabelEnFonctionDesServeurs(array $serveurs) {
+        $qb = $this->createQueryBuilder('s');
+
+        $qb->select('s.date_mesure')
+            ->where('s.resServeur IN (:serveurs)')
+            ->andWhere('s.date_mesure >= :date')
+            ->setParameter('serveurs', $serveurs)
+            ->setParameter('date', new \DateTimeImmutable('-30 days'))
+        //On trie par date de mesure
+            ->orderBy('s.date_mesure', 'ASC')
+
+        //On ne séléctionne pas les mesures qui ont une date de mesure deja présente
+            ->groupBy('s.date_mesure');
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Fonction qui permet de récupérer toutes les mesures du serveur donné qui n'ont pas comme date de mesure une date inférieure à la date actuelle -30 jours
+     */
+    public function findMesuresEnFonctionDuServeur($serveur)
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $qb->select('s')
+            ->where('s.resServeur = :serveur')
+            ->andWhere('s.date_mesure >= :date')
+            ->setParameter('serveur', $serveur)
+            ->setParameter('date', new \DateTimeImmutable('-30 days'))
+        //On trie par date de mesure
+            ->orderBy('s.date_mesure', 'ASC')
+
+        ->groupBy('s.date_mesure');
+
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return ServeursMesures[] Returns an array of ServeursMesures objects
     //     */

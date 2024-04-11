@@ -145,29 +145,30 @@ class RessourcesController extends AbstractController
             //On récupère les mesures de la ressource qui ont la meme période que celle choisie
             $mesures = $this->getMesures($resStockage, $periode);
 
+
             $data = [];
-            foreach($labels as $label){
-                $valeur = null;
+            if (count($mesures) == count($labels)) {
+
                 foreach($mesures as $mesure){
-                    //Si la date de la mesure est égale à la date du label, on récupère la valeur
-                    if($label == $mesure->getDateMesure()->format($format)){
-                        $valeur = $mesure->getValeurUse() / $mesure->getValeurMax() * 100;
-                        break;
-                    }
+                    $data[] = $mesure->getValeurUse() / $mesure->getValeurMax() * 100;
                 }
-                $data[] = $valeur;
+            }
+            else{
+                foreach($labels as $label){
+                    $valeur = null;
+                    foreach($mesures as $mesure){
+                        //Si la date de la mesure est égale à la date du label, on récupère la valeur
+                        if($label == $mesure->getDateMesure()->format($format)){
+                            $valeur = $mesure->getValeurUse() / $mesure->getValeurMax() * 100;
+                            break;
+                        }
+                    }
+                    $data[] = $valeur;
+                }
             }
 
             //On génère une couleur aléatoire hexadécimale pour chaque ressource, qu'on stocke en session pour ne pas que la couleur change à chaque rafraichissement de la page
-            $session = $request->getSession();
-
-            //Si la couleur liée à la ressource n'existe pas en session, on la génère
-            if(!$session->has('color_'.$resStockage->getNom().$resStockage->getId())){
-                $color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
-                $session->set('color_'.$resStockage->getNom().$resStockage->getId(), $color);
-            }else{
-                $color = $session->get('color_'.$resStockage->getNom().$resStockage->getId());
-            }
+            $color = $this->generateRandomColor($request, $resStockage);
 
 
             $dataSet[] = [
@@ -225,9 +226,7 @@ class RessourcesController extends AbstractController
         $user = $this->getUser();
 
         $employe = $user->getEmploye();
-
         $groupes = $employe->getGroupesSecondaires();
-
         //On ajoute le groupe principal à la liste des groupes secondaires
         $groupes[] = $employe->getGroupePrincipal();
 
@@ -239,82 +238,63 @@ class RessourcesController extends AbstractController
         //On récupère les serveurs de l'utilisateur connecté
         $serveurs = $em->getRepository(ResServeur::class)->findByGroupes($groupes);
 
-        //On récupère d'abord tous les labels
+        //On récupère les labels en fonction des serveurs
+        $labelsMesures = $serveurMesuresRepo->findlabelEnFonctionDesServeurs($serveurs);
+
         $labels = [];
-        foreach($serveurs as $serveur){
-            //On récupère les mesures de la ressource qui ont la meme période que celle choisie
-            $mesures = $serveur->getMesures()->filter(function($mesure){
-                $dateMesure = $mesure->getDateMesure();
-                $dateActuelle = new \DateTime();
-
-                $dateActuelle->modify('-30 days');
-
-                return $dateMesure >= $dateActuelle;
-            });
-
-            foreach($mesures as $mesure){
-                $label = $mesure->getDateMesure()->format('d/m/Y H:i:s');
-                if(!in_array($label, $labels)) {
-                    $labels[] = $label;
-                }
-            }
+        //On met les labels dans le bon format
+        foreach($labelsMesures as $label){
+            $labels[] = $label['date_mesure']->format('d/m/Y H:i:s');
         }
-
-        //On trie les labels par ordre croissant
-        usort($labels, function($a, $b){
-            $dateA = \DateTime::createFromFormat('d/m/Y H:i:s', $a);
-            $dateB = \DateTime::createFromFormat('d/m/Y H:i:s', $b);
-
-            if($dateA == $dateB){
-                return 0;
-            }
-
-            return $dateA < $dateB ? -1 : 1;
-        });
 
         // On récupère les mesures de chaque serveur
         $mesureDeChaqueServeur = [];
+        $mesureDeChaqueServeurRAM = [];
         foreach($serveurs as $serveur){
-            $mesures = $serveur->getMesures()->filter(function($mesure){
-                $dateMesure = $mesure->getDateMesure();
-                $dateActuelle = new \DateTime();
+            //On récupère les mesures du serveur qui n'ont pas comme date de mesure une date inférieure à la date actuelle -30 jours
+            $mesures = $serveurMesuresRepo->findMesuresEnFonctionDuServeur($serveur);
+            if (count($mesures) == count($labels)) {
 
-                $dateActuelle->modify('-30 days');
+                $dataCpu = array_map(function($mesure) {
+                    return $mesure->getCpu();
+                }, $mesures);
 
-                return $dateMesure >= $dateActuelle;
-            });
+                $dataRam = array_map(function($mesure) {
+                    return $mesure->getRamUtilise();
+                }, $mesures);
 
-            $dataCpu = [];
-            $dataRam = [];
-            $dataNbUsers = [];
-            foreach($labels as $label){
-                $valeurCpu = null;
-                $valeurRam = null;
-                $valeurNbUsers = null;
-                foreach($mesures as $mesure){
-                    // Si la date de la mesure est égale à la date du label, on récupère la valeur
-                    if($label == $mesure->getDateMesure()->format('d/m/Y H:i:s')){
-                        $valeurCpu = $mesure->getCpu();
-                        $valeurRam = $mesure->getRamUtilise();
-                        $valeurNbUsers = $mesure->getNbUtilisateurs();
-                        break;
+                $dataNbUsers = array_map(function($mesure) {
+                    return $mesure->getNbUtilisateurs();
+                }, $mesures);
+            }//Sinon on cherche ou sont les trous dans les mesures et on les comble avec des valeurs nulles
+            else {
+                $dataCpu = [];
+                $dataRam = [];
+                $dataNbUsers = [];
+                foreach($labels as $label){
+
+                    $valeurCpu = null;
+                    $valeurRam = null;
+                    $valeurNbUsers = null;
+                    foreach($mesures as $mesure){
+
+                        // Si la date de la mesure est égale à la date du label, on récupère la valeur
+                        if($label == $mesure->getDateMesure()->format('d/m/Y H:i:s')){
+                            $valeurCpu = $mesure->getCpu();
+                            $valeurRam = $mesure->getRamUtilise();
+                            $valeurNbUsers = $mesure->getNbUtilisateurs();
+                            break;
+                        }
                     }
+                    $dataCpu[] = $valeurCpu;
+                    $dataRam[] = $valeurRam;
+                    $dataNbUsers[] = $valeurNbUsers;
                 }
-                $dataCpu[] = $valeurCpu;
-                $dataRam[] = $valeurRam;
-                $dataNbUsers[] = $valeurNbUsers;
             }
+
 
             // On génère une couleur aléatoire hexadécimale pour chaque serveurs, qu'on stocke en session pour ne pas que la couleur change à chaque rafraichissement de la page
-            $session = $request->getSession();
-
-            // Si la couleur liée à la ressource n'existe pas en session, on la génère
-            if(!$session->has('color_'.$serveur->getNom().$serveur->getId())){
-                $color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
-                $session->set('color_'.$serveur->getNom().$serveur->getId(), $color);
-            }else{
-                $color = $session->get('color_'.$serveur->getNom().$serveur->getId());
-            }
+            $color = $this->generateRandomColor($request, $serveur);
 
             $mesureDeChaqueServeur[] = [
                 //On n'affiche pas le label sur le graphique, ni la couleur
@@ -323,7 +303,7 @@ class RessourcesController extends AbstractController
                 'data' => $dataCpu,
                 'yAxisID' => 'y-axis-1',
             ];
-            $mesureDeChaqueServeur[] = [
+            $mesureDeChaqueServeurRAM[] = [
                 'label' => $serveur->getNom() . ' - RAM',
                 'borderColor' => $color,
                 'data' => $dataRam,
@@ -337,7 +317,7 @@ class RessourcesController extends AbstractController
             ];
         }
 
-// On crée le graphique
+        // On crée le graphique
         $chart = $chartBuilder->createChart(Chart::TYPE_LINE);
 
         $chart->setData([
@@ -374,12 +354,58 @@ class RessourcesController extends AbstractController
             ],
         ]);
 
+            //On crée un deuxième graphique pour la RAM
+            $chartRAM = $chartBuilder->createChart(Chart::TYPE_LINE);
+
+            $chartRAM->setData([
+                'labels' => $labels,
+                'datasets' => $mesureDeChaqueServeurRAM,
+            ]);
+
+            $chartRAM->setOptions([
+                'scales' => [
+                    'y-axis-1' => [
+                        'type' => 'linear',
+                        'display' => true,
+                        'position' => 'left',
+                        'title' => [
+                            'display' => true,
+                            'text' => 'RAM',
+                        ],
+                        'suggestedMin' => 0,
+                        'suggestedMax' => 100,
+                    ],
+                ],
+            ]);
+
 
         return $this->render('ressources/serveurs.html.twig', [
             'serveurs' => $serveurs,
             'chart' => $chart,
             'lastMesureDeChaqueServeur' => $lastMesureDeChaqueServeur,
+            'chartRAM' => $chartRAM,
         ]);
+    }
+
+    /**
+     * Generate random color
+     * @param $request
+     * @param $serveur
+     * @return string
+     */
+    private function generateRandomColor($request, $serveur) : string
+    {
+        $session = $request->getSession();
+
+        // Si la couleur liée à la ressource n'existe pas en session, on la génère
+        if (!$session->has('color_' . $serveur->getNom() . $serveur->getId())) {
+            $color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+            $session->set('color_' . $serveur->getNom() . $serveur->getId(), $color);
+        } else {
+            $color = $session->get('color_' . $serveur->getNom() . $serveur->getId());
+        }
+
+        return $color;
     }
 
     /**
@@ -422,5 +448,4 @@ class RessourcesController extends AbstractController
             return $dateMesure >= $dateActuelle && $mesure->getPeriode()->getType() == $periode;
         });
     }
-
 }

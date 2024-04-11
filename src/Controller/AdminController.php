@@ -90,28 +90,9 @@ class AdminController extends AbstractController
             $employes = $employeRepo->findBy(['nom' => $demandeCompte->getNom(), 'prenom' => $demandeCompte->getPrenom()]);
         }
 
-        //On crée un formulaire pour séléctionner un GroupeSys auquel affilié l'user
-        $formGroupeSys = $this->createFormBuilder()
-            ->add('groupeSys', EntityType::class, [
-                'class' => GroupesSys::class,
-                'choice_label' => 'nom',
-                'label' => 'Groupe Système : ',
-                'required' => false,
-            ])
-            ->add('creerEmploye', SubmitType::class, ['label' => 'Créer l\'employé', 'attr' => ['class' => 'btn btn-success']])
-            ->getForm();
-
-        $formGroupeSys->handleRequest($request);
-
-        if ($formGroupeSys->isSubmitted() && $formGroupeSys->isValid() && $formGroupeSys->get('creerEmploye')->isClicked()) {
-
-            return $this->redirectToRoute('validerDemandeCompteAdmin', ['idDemandeCompte' => $demandeCompte->getId(), 'idGroupeSys' => $formGroupeSys->getData()['groupeSys']->getId()]);
-        }
-
         return $this->render('admin/verificationDemandeCompte.html.twig', [
             'form' => $formPrenomNom->createView(),
             'employes' => $employes,
-            'formGroupeSys' => $formGroupeSys->createView(),
             'demande' => $demandeCompte,
         ]);
     }
@@ -195,13 +176,10 @@ class AdminController extends AbstractController
         $requetesRepo = $entityManager->getRepository(Requetes::class);
         $demandeCompte = $requetesRepo->find($idDemandeCompte);
 
-        $groupeSys = $entityManager->getRepository(GroupesSys::class)->find($idGroupeSys);
-
 
         //On crée un nouvel utilisateur
         $user = new User();
         //On donne le groupeSys à l'utilisateur
-        $user->addGroupeSy($groupeSys);
         //On set le nom d'utilisateur de l'utilisateur la premiere lettre du prenom suivie du nom avec un max de 8 caracteres
         $username = substr($demandeCompte->getPrenom(), 0, 1) . $demandeCompte->getNom();
         $username = substr($username, 0, 8);
