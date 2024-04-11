@@ -272,7 +272,7 @@ class RessourcesController extends AbstractController
             return $dateA < $dateB ? -1 : 1;
         });
 
-        //On récupère les mesures de chaque serveur
+        // On récupère les mesures de chaque serveur
         $mesureDeChaqueServeur = [];
         foreach($serveurs as $serveur){
             $mesures = $serveur->getMesures()->filter(function($mesure){
@@ -284,23 +284,31 @@ class RessourcesController extends AbstractController
                 return $dateMesure >= $dateActuelle;
             });
 
-            $data = [];
+            $dataCpu = [];
+            $dataRam = [];
+            $dataNbUsers = [];
             foreach($labels as $label){
-                $valeur = null;
+                $valeurCpu = null;
+                $valeurRam = null;
+                $valeurNbUsers = null;
                 foreach($mesures as $mesure){
-                    //Si la date de la mesure est égale à la date du label, on récupère la valeur
+                    // Si la date de la mesure est égale à la date du label, on récupère la valeur
                     if($label == $mesure->getDateMesure()->format('d/m/Y H:i:s')){
-                        $valeur = $mesure->getCpu();
+                        $valeurCpu = $mesure->getCpu();
+                        $valeurRam = $mesure->getRamUtilise();
+                        $valeurNbUsers = $mesure->getNbUtilisateurs();
                         break;
                     }
                 }
-                $data[] = $valeur;
+                $dataCpu[] = $valeurCpu;
+                $dataRam[] = $valeurRam;
+                $dataNbUsers[] = $valeurNbUsers;
             }
 
-            //On génère une couleur aléatoire hexadécimale pour chaque serveurs, qu'on stocke en session pour ne pas que la couleur change à chaque rafraichissement de la page
+            // On génère une couleur aléatoire hexadécimale pour chaque serveurs, qu'on stocke en session pour ne pas que la couleur change à chaque rafraichissement de la page
             $session = $request->getSession();
 
-            //Si la couleur liée à la ressource n'existe pas en session, on la génère
+            // Si la couleur liée à la ressource n'existe pas en session, on la génère
             if(!$session->has('color_'.$serveur->getNom().$serveur->getId())){
                 $color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
                 $session->set('color_'.$serveur->getNom().$serveur->getId(), $color);
@@ -309,13 +317,27 @@ class RessourcesController extends AbstractController
             }
 
             $mesureDeChaqueServeur[] = [
-                'label' => $serveur->getNom(),
+                //On n'affiche pas le label sur le graphique, ni la couleur
+                'label' => $serveur->getNom() . ' - CPU',
                 'borderColor' => $color,
-                'data' => $data,
+                'data' => $dataCpu,
+                'yAxisID' => 'y-axis-1',
+            ];
+            $mesureDeChaqueServeur[] = [
+                'label' => $serveur->getNom() . ' - RAM',
+                'borderColor' => $color,
+                'data' => $dataRam,
+                'yAxisID' => 'y-axis-1',
+            ];
+            $mesureDeChaqueServeur[] = [
+                'label' => $serveur->getNom() . ' - Nb Users',
+                'borderColor' => $color,
+                'data' => $dataNbUsers,
+                'yAxisID' => 'y-axis-2',
             ];
         }
 
-        //On crée le graphique
+// On crée le graphique
         $chart = $chartBuilder->createChart(Chart::TYPE_LINE);
 
         $chart->setData([
@@ -323,32 +345,30 @@ class RessourcesController extends AbstractController
             'datasets' => $mesureDeChaqueServeur,
         ]);
 
-        //On donne deux axes pour le graphique (un pour le nombre d'utilisateurs et l'autre pour le reste)
-        $chart->setOptions([
+            // On donne deux axes pour le graphique (un pour le nombre d'utilisateurs et l'autre pour le reste)
+            $chart->setOptions([
             'scales' => [
-                'yAxes' => [
-                    [
-                        'type' => 'linear',
+                'y-axis-1' => [
+                    'type' => 'linear',
+                    'display' => true,
+                    'position' => 'left',
+                    'title' => [
                         'display' => true,
-                        'position' => 'left',
-                        'id' => 'y-axis-1',
-                        'labels' => [
-                            'show' => true,
-                            'text' => 'CPU',
-                        ],
+                        'text' => 'RAM / CPU',
                     ],
-                    [
-                        'type' => 'linear',
+                    'suggestedMin' => 0,
+                    'suggestedMax' => 100,
+                ],
+                'y-axis-2' => [
+                    'type' => 'linear',
+                    'display' => true,
+                    'position' => 'right',
+                    'grid' => [
+                        'display' => false,
+                    ],
+                    'title' => [
                         'display' => true,
-                        'position' => 'right',
-                        'id' => 'y-axis-2',
-                        'gridLines' => [
-                            'drawOnChartArea' => false,
-                        ],
-                        'labels' => [
-                            'show' => true,
-                            'text' => 'Nombre d\'utilisateurs',
-                        ],
+                        'text' => 'Nb Users',
                     ],
                 ],
             ],
