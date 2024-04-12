@@ -251,9 +251,12 @@ class RessourcesController extends AbstractController
                 'choice_label' => 'nom',
                 'label' => 'Groupe',
                 'required' => false,
+                'expanded' => true,
+                'multiple' => true,
                 'attr' => [
                     'id' => 'groupes_select',
                 ],
+                'choice_value' => 'id',
             ])
             ->add('serveurs', ChoiceType::class, [
                 //On fait un choiceType cochable pour pouvoir choisir plusieurs serveurs à la fois, on affiche les cases à cocher en ligne
@@ -265,6 +268,7 @@ class RessourcesController extends AbstractController
                 'attr' => [
                     'id' => 'serveurs_select',
                 ],
+                'choice_value' => 'id',
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Valider',
@@ -434,7 +438,6 @@ class RessourcesController extends AbstractController
                 ],
             ]);
 
-
         return $this->render('ressources/serveurs.html.twig', [
             'serveurs' => $serveurs,
             'chart' => $chart,
@@ -444,12 +447,20 @@ class RessourcesController extends AbstractController
         ]);
     }
 
+    /**
+     * Récupérer les serveurs (id, nom) d'un groupe
+     * @param EntityManagerInterface $em
+     * @param Request $request
+     * @param $id
+     * @return Response
+     */
     #[Route('/ressources/serveurs/{id}', name: 'serveurs_du_groupe')]
     public function getServeursDuGroupe(EntityManagerInterface $em, Request $request, $id): Response {
 
-        $groupes = $em->getRepository(Groupes::class)->find($id);
+        //On récupère les serveurs du groupe
+        $groupe = $em->getRepository(Groupes::class)->find($id);
 
-        $serveurs = $groupes->getResServeurs();
+        $serveurs = $em->getRepository(ResServeur::class)->findServeurIdNomAvecGroupe($groupe);
 
         return new JsonResponse($serveurs);
     }

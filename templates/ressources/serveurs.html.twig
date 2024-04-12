@@ -47,15 +47,84 @@
 
 {% block javascripts %}
     <script>
-        // Fonction pour mettre à jour les serveurs
-        function updateServeur() {
-            let serveur = document.getElementById('form_serveurs').value;
-            let groupe = document.getElementById('form_groupes').value;
+        let inputGroupes = [];
+        let Formserveurs = null;
 
-            console.log(serveur);
-            console.log(groupe.id);
+        window.addEventListener('load', function() {
+            // Fonction pour mettre à jour les serveurs
+            let Formgroupes = document.getElementById('form_groupes');
+
+            Formserveurs = document.getElementById('form_serveurs');
+
+            //dans groupes on récupère les groupes sélectionnés
+            inputGroupes = Formgroupes.getElementsByClassName('form-check-input');
+
+            //Si un des input est checked on met à jour les serveurs
+            for (let i = 0; i < inputGroupes.length; i++) {
+                inputGroupes[i].addEventListener('change', function() {
+                    updateServeur();
+                });
+            }
+        });
+
+
+
+        //Fonction pour mettre à jour les serveurs
+        let groupServers = {}; // This object will store the servers for each group
+
+        function updateServeur() {
+            let groupes = [];
+
+            for (let i = 0; i < inputGroupes.length; i++) {
+                if (inputGroupes[i].checked) {
+                    groupes.push(inputGroupes[i].value);
+                }
+            }
+
+            // Remove all servers from the form
+            Formserveurs.innerHTML = '';
+
+            // Add the servers for the selected groups
+            for (let i = 0; i < groupes.length; i++) {
+                if (groupServers[groupes[i]]) {
+                    // If the servers for this group have already been fetched, use them
+                    addServersToForm(groupServers[groupes[i]]);
+                } else {
+                    // Otherwise, fetch the servers
+                    fetch('/ressources/serveurs/' + groupes[i])
+                        .then(response => response.json())
+                        .then(data => {
+                            // Store the servers for this group
+                            groupServers[groupes[i]] = data;
+
+                            // Add the servers to the form
+                            addServersToForm(data);
+                        });
+                }
+            }
         }
 
-        window.addEventListener('load', updateServeur);
+        function addServersToForm(servers) {
+            for (let j = 0; j < servers.length; j++) {
+                let div = document.createElement('div');
+                div.className = 'form-check';
+
+                let input = document.createElement('input');
+                input.type = 'checkbox';
+                input.id = 'form_serveurs_' + j;
+                input.name = 'form[serveurs][]';
+                input.className = 'form-check-input';
+                input.value = servers[j].id;
+
+                let label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.htmlFor = 'form_serveurs_' + j;
+                label.innerHTML = servers[j].nom;
+
+                div.appendChild(input);
+                div.appendChild(label);
+                Formserveurs.appendChild(div);
+            }
+        }
     </script>
 {% endblock %}

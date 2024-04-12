@@ -24,7 +24,7 @@ class ResServeur
     #[ORM\ManyToMany(targetEntity: Employe::class, inversedBy: 'resServeurs')]
     private Collection $responsable;
 
-    #[ORM\ManyToOne(inversedBy: 'resServeurs')]
+    #[ORM\ManyToOne(targetEntity: Groupes::class, cascade: ['persist', 'remove'], inversedBy: 'resServeurs')]
     private ?Groupes $groupe = null;
 
     /**

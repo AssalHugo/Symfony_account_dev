@@ -36,6 +36,18 @@ class ResServeurRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function findServeurIdNomAvecGroupe($groupe){
+
+        $qb = $this->createQueryBuilder('r');
+
+        $qb->select('r.id', 'r.nom')
+            ->where('r.groupe = :groupe')
+            ->setParameter('groupe', $groupe);
+
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return ResServeur[] Returns an array of ResServeur objects
     //     */

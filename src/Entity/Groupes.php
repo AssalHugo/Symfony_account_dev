@@ -45,7 +45,7 @@ class Groupes
     /**
      * @var Collection<int, ResServeur>
      */
-    #[ORM\OneToMany(targetEntity: ResServeur::class, mappedBy: 'groupe')]
+    #[ORM\OneToMany(targetEntity: ResServeur::class, mappedBy: 'groupe', cascade: ['persist', 'remove'])]
     private Collection $resServeurs;
 
 

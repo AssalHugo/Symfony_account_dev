@@ -390,16 +390,21 @@ class HugoUserFixtures extends Fixture
         $manager->persist($resStockageWork2);
 
         //On crée des serveurs
-        for ($i=0; $i < 5; $i++) {
-            $this->creerServeur($groupe, $employe, $manager, "serveur" . $i);
+        for ($i=0; $i < 20; $i++) {
+            //On lui donne un groupe différent de manière aléatoire
+            if ($i % 2 == 0) {
+                $this->creerServeur($groupe, $employe, $manager, "serveur" . $i);
+            } else {
+                $this->creerServeur($groupe2, $employe, $manager, "serveur" . $i);
+            }
         }
         $manager->flush();
     }
 
-    private function creerServeur($groupe, $employe, $manager, $nomServeur){
+    private function creerServeur($groupe, $employe, $manager, $nomServeur) : void{
         $serveur = new ResServeur();
         $serveur->setNom($nomServeur);
-        $serveur->setGroupe($groupe);
+        $groupe->addResServeur($serveur);
         $serveur->addResponsable($employe);
 
 
