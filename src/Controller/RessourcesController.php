@@ -260,8 +260,6 @@ class RessourcesController extends AbstractController
             ])
             ->getForm();
 
-
-
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){
@@ -272,9 +270,7 @@ class RessourcesController extends AbstractController
             $serveursChart = $serveurs;
         }
 
-
-
-
+        
         //---------------------------------Graphique---------------------------------
 
         //On récupère les labels en fonction des serveurs

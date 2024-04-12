@@ -70,7 +70,8 @@
 
 
         //Fonction pour mettre à jour les serveurs
-        let groupServers = {}; // This object will store the servers for each group
+        // This object will store the servers for each group
+        let groupServers = {};
 
         function updateServeur() {
             let groupes = [];
@@ -86,13 +87,19 @@
 
             // Add the servers for the selected groups
             for (let i = 0; i < groupes.length; i++) {
+                // If the servers for this group have already been fetched, use them or
                 if (groupServers[groupes[i]]) {
-                    // If the servers for this group have already been fetched, use them
+
                     addServersToForm(groupServers[groupes[i]]);
-                } else {
-                    // Otherwise, fetch the servers
+                }//if there already are a fetch request for this group, we wait for the response
+                else if (groupServers[groupes[i]] === 'fetching') {
+                    console.log('waiting for response');
+                    setTimeout(updateServeur, 400);
+                    return;
+                }
+                else {
                     fetch('/ressources/serveurs/' + groupes[i])
-                        .then(response => response.json())
+                        .then(response => response.json(), groupServers[groupes[i]] = 'fetching')
                         .then(data => {
                             // Store the servers for this group
                             groupServers[groupes[i]] = data;
