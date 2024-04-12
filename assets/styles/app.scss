@@ -18,3 +18,8 @@ $headings-color: rgb(7,22,73);
   border-radius: 10%;
   height: 400px;
 }
+
+.form-check {
+  display: inline-block;
+  margin-right: 10px; /* Ajoutez une marge à droite pour espacer les checkbox */
+}
