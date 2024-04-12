@@ -29,52 +29,36 @@ class RessourcesController extends AbstractController
         //On récupère les ressources de l'utilisateur connecté
         $user = $this->getUser();
 
-        $resStockagesHomeRepository = $em->getRepository(ResStockagesHome::class);
-        $mesureDeChaqueResHomeID = $resStockagesHomeRepository->findLatestMeasurementsByUser($user->getId());
+        $mesureDeChaqueResHome = $em->getRepository(StockagesMesuresHome::class)->findLatestMeasurementsByUser($user->getId());
 
         //On récupere la derniere mesure de chaque ressource Home
-        $mesureDeChaqueResHome = [];
-        $pourcentageHome = [];
-        foreach($mesureDeChaqueResHomeID as $mesureResHomeID){
-            //On récupère la mesure
-            $mesure = $em->getRepository(StockagesMesuresHome::class)->find($mesureResHomeID['id']);
-
-            //On calcule le pourcentage deux chiffres après la virgule entre la valeur actuelle et la valeur max
-            $pourcentageHome[] = round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
-
-            $mesureDeChaqueResHome[] = $mesure;
-        }
-
+        $pourcentageHome = array_map(function($mesure) {
+            return round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
+        }, $mesureDeChaqueResHome);
 
 
         //Partie Work
         //On récupère les ressources de l'utilisateur connecté
-        //On récupère tous les groupes de l'utilisateur connecté
         $employe = $user->getEmploye();
 
+        //On récupère tous les groupes de l'utilisateur connecté
         $groupes = $employe->getGroupesSecondaires();
-
         //On ajoute le groupe principal à la liste des groupes secondaires
         $groupes[] = $employe->getGroupePrincipal();
 
-        $resStockagesWorkRepo = $em->getRepository(ResStockageWork::class);
 
         //On récupère les dernières mesures de chaque ressource Work
         $mesureDeChaqueResWork = $em->getRepository(StockagesMesuresWork::class)->findLatestMeasurementsByUser($groupes);
 
         //On récupère la dernière mesure de chaque ressource Work
-        $pourcentageWork = [];
-        foreach($mesureDeChaqueResWork as $mesureResWork){
-
-            //On calcule le pourcentage deux chiffres après la virgule entre la valeur actuelle et la valeur max
-            $pourcentageWork[] = round(($mesureResWork->getValeurUse() / $mesureResWork->getValeurMax()) * 100, 2);
-        }
-
+        $pourcentageWork = array_map(function($mesure) {
+            return round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
+        }, $mesureDeChaqueResWork);
 
 
         //On récupère les ressources de l'utilisateur connecté
-        $resStockageWork = $resStockagesWorkRepo->findByGroupes($groupes);
-        $resStockagesHome = $resStockagesHomeRepository->findBy(['user' => $user]);
+        $resStockageWork = $em->getRepository(ResStockageWork::class)->findByGroupes($groupes);
+        $resStockagesHome = $em->getRepository(ResStockagesHome::class)->findBy(['user' => $user]);
         //On fusionne les deux tableaux de ressources
         $resStockages = array_merge($resStockagesHome, $resStockageWork);
 
@@ -118,9 +102,10 @@ class RessourcesController extends AbstractController
 
         //On récupère d'abord tous les labels
         $labels = [];
+        $mesuresArray = [];
         foreach($resStockages as $resStockage){
             //On récupère les mesures de la ressource qui ont la meme période que celle choisie
-            $mesures = $this->getMesures($resStockage, $periode);
+            $mesures =$this->getMesures($resStockage, $periode);
 
             foreach($mesures as $mesure){
                 $label = $mesure->getDateMesure()->format($format);
@@ -128,6 +113,7 @@ class RessourcesController extends AbstractController
                     $labels[] = $label;
                 }
             }
+            $mesuresArray[] = $mesures;
         }
 
         //On trie les labels par ordre croissant
@@ -143,18 +129,18 @@ class RessourcesController extends AbstractController
         });
 
         //Maintenant pour chaque ressource on regarde si elle a une mesure à la date du label et on récupère la valeur
-        foreach($resStockages as $resStockage){
-            //On récupère les mesures de la ressource qui ont la meme période que celle choisie
-            $mesures = $this->getMesures($resStockage, $periode);
-
+        foreach($resStockages as $i => $resStockage){
+            //On récupère les mesures de la ressource à partir du tableau de mesures
+            $mesures = $mesuresArray[$i];
 
             $data = [];
+            //Si le nombre de mesures est égal au nombre de labels, on récupère directement les valeurs
             if (count($mesures) == count($labels)) {
 
                 foreach($mesures as $mesure){
                     $data[] = $mesure->getValeurUse() / $mesure->getValeurMax() * 100;
                 }
-            }
+            }//Sinon on cherche ou sont les trous dans les mesures et on les comble avec des valeurs nulles
             else{
                 foreach($labels as $label){
                     $valeur = null;
@@ -171,7 +157,6 @@ class RessourcesController extends AbstractController
 
             //On génère une couleur aléatoire hexadécimale pour chaque ressource, qu'on stocke en session pour ne pas que la couleur change à chaque rafraichissement de la page
             $color = $this->generateRandomColor($request, $resStockage);
-
 
             $dataSet[] = [
                 'label' => $resStockage->getNom(),
@@ -227,14 +212,14 @@ class RessourcesController extends AbstractController
         //On récupère les serveurs de l'utilisateur connecté
         $user = $this->getUser();
 
-
+        //On récupère tous les groupes de l'utilisateur connecté
         $employe = $user->getEmploye();
         $groupes = $employe->getGroupesSecondaires();
         //On ajoute le groupe principal à la liste des groupes secondaires
         $groupes[] = $employe->getGroupePrincipal();
 
+        //Repository pour les mesures des serveurs
         $serveurMesuresRepo = $em->getRepository(ServeursMesures::class);
-
 
         //On récupère les serveurs de l'utilisateur connecté
         $serveurs = $em->getRepository(ResServeur::class)->findByGroupes($groupes);
