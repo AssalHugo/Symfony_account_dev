@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Employe;
 use App\Entity\EtatsRequetes;
 use App\Entity\Groupes;
-use App\Entity\GroupesSys;
+use App\Entity\ResStockagesHome;
 use App\Entity\Requetes;
 use App\Entity\Telephones;
 use App\Entity\User;
@@ -170,8 +170,9 @@ class AdminController extends AbstractController
     }
 
 
-    #[Route('/admin/validerDemandeCompte/{idDemandeCompte}/{idGroupeSys}', name: 'validerDemandeCompteAdmin')]
-    public function validerDemandeCompte($idDemandeCompte, $idGroupeSys, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher, SenderMail $senderMail): Response {
+    #[Route('/admin/validerDemandeCompte/{idDemandeCompte}', name: 'validerDemandeCompteAdmin')]
+    public function validerDemandeCompte($idDemandeCompte, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher, SenderMail $senderMail): Response {
+
         //On récupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
         $demandeCompte = $requetesRepo->find($idDemandeCompte);
@@ -179,7 +180,13 @@ class AdminController extends AbstractController
 
         //On crée un nouvel utilisateur
         $user = new User();
-        //On donne le groupeSys à l'utilisateur
+
+        //On crée un resStockageHome pour l'utilisateur
+        $resStockageHome = new ResStockagesHome();
+        $resStockageHome->setNom('home générale');
+        $resStockageHome->setPath("/home/" . $demandeCompte->getNom() . $demandeCompte->getPrenom());
+        $user->addResStockagesHome($resStockageHome);
+
         //On set le nom d'utilisateur de l'utilisateur la premiere lettre du prenom suivie du nom avec un max de 8 caracteres
         $username = substr($demandeCompte->getPrenom(), 0, 1) . $demandeCompte->getNom();
         $username = substr($username, 0, 8);

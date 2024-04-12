@@ -21,7 +21,7 @@ class ResStockagesHome
     #[ORM\Column(length: 128)]
     private ?string $path = null;
 
-    #[ORM\ManyToOne(inversedBy: 'resStockagesHomes')]
+    #[ORM\ManyToOne(targetEntity: User::class, cascade: ['persist'], inversedBy: 'resStockagesHomes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 

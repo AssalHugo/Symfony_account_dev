@@ -39,7 +39,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(inversedBy: 'user', cascade: ['persist', 'remove'])]
     private ?Employe $employe = null;
 
-    #[ORM\OneToMany(targetEntity: ResStockagesHome::class, mappedBy: 'user')]
+    #[ORM\OneToMany(targetEntity: ResStockagesHome::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private Collection $resStockagesHomes;
 
     public function __construct()
