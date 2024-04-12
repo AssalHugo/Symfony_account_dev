@@ -5,13 +5,17 @@ namespace App\Controller;
 use App\Entity\Employe;
 use App\Entity\EtatsRequetes;
 use App\Entity\Groupes;
+use App\Entity\ResServeur;
 use App\Entity\ResStockagesHome;
 use App\Entity\Requetes;
+use App\Entity\ResStockageWork;
 use App\Entity\Telephones;
 use App\Entity\User;
 use App\Form\ChangerMDPType;
 use App\Form\ChangerRoleType;
 use App\Form\RequeteType;
+use App\Form\ResServeurType;
+use App\Form\StockageWorkType;
 use App\Service\DemandeCompte;
 use App\Service\SenderMail;
 use Doctrine\ORM\EntityManagerInterface;
@@ -446,5 +450,86 @@ class AdminController extends AbstractController
         $user = $userRepo->find($id);
 
         return new JsonResponse($user->getRoles()[0]);
+    }
+
+    #[Route('/admin/ressources', name: 'ressourcesAdmin')]
+    public function ressources(EntityManagerInterface $entityManager, Request $request): Response
+    {
+        //Home
+        $ressourcesHome = $entityManager->getRepository(ResStockagesHome::class)->findAll();
+
+        //On crée un formulaire pour ajouter une ressource Home
+        $ressourceHome = new ResStockagesHome();
+        $formHome = $this->createFormBuilder($ressourceHome)
+            ->add('nom', TextType::class, [
+                'label' => 'Nom :',
+                'required' => true,
+            ])
+            ->add('path', TextType::class, [
+                'label' => 'Path :',
+                'required' => true,
+            ])
+            ->add('user', EntityType::class, [
+                'class' => User::class,
+                'choice_label' => 'username',
+                'label' => 'Utilisateur auquel rajouter la ressource :',
+                'required' => true,
+            ])
+            ->add('ajouter', SubmitType::class, ['label' => 'Ajouter'])
+            ->getForm();
+
+        $formHome->handleRequest($request);
+
+        if ($formHome->isSubmitted() && $formHome->isValid()) {
+            $entityManager->persist($ressourceHome);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('ressourcesAdmin');
+        }
+
+        //Work
+        $ressourcesWork = $entityManager->getRepository(ResStockageWork::class)->findAll();
+
+        //On crée un formulaire pour ajouter une ressource Work
+        $ressourceWork = new ResStockageWork();
+        $formWork = $this->createForm(StockageWorkType::class, $ressourceWork);
+
+        $formWork->add('ajouter', SubmitType::class, ['label' => 'Ajouter']);
+
+        $formWork->handleRequest($request);
+
+        if ($formWork->isSubmitted() && $formWork->isValid()) {
+            $entityManager->persist($ressourceWork);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('ressourcesAdmin');
+        }
+
+        //Serveur
+        $ressourcesServer = $entityManager->getRepository(ResServeur::class)->findAll();
+
+        //On crée un formulaire pour ajouter une ressource Serveur
+        $ressourceServer = new ResServeur();
+        $formServer = $this->createForm(ResServeurType::class, $ressourceServer);
+
+        $formServer->add('ajouter', SubmitType::class, ['label' => 'Ajouter']);
+
+        $formServer->handleRequest($request);
+
+        if ($formServer->isSubmitted() && $formServer->isValid()) {
+            $entityManager->persist($ressourceServer);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('ressourcesAdmin');
+        }
+
+        return $this->render('admin/ressources.html.twig', [
+            'ressourcesHome' => $ressourcesHome,
+            'ressourcesWork' => $ressourcesWork,
+            'ressourcesServer' => $ressourcesServer,
+            'formHome' => $formHome->createView(),
+            'formWork' => $formWork->createView(),
+            'formServer' => $formServer->createView(),
+        ]);
     }
 }

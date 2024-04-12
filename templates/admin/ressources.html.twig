@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container">
+    <h1 class="text-center">Ressources</h1>
+    <br>
+    <h3>Ressources Home</h3>
+    <br>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Nom</th>
+            <th scope="col">Path</th>
+            <th scope="col">user</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for ressourceHome in ressourcesHome %}
+            <tr>
+                <td>{{ ressourceHome.nom }}</td>
+                <td>{{ ressourceHome.path }}</td>
+                <td>{{ ressourceHome.user.username }}</td>
+                <td><td><a href="" class="btn btn-info">Infos</a></td>
+            </tr>
+        {% endfor %}
+        <tr>
+
+            <td>{{ form(formHome) }}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <br>
+    <h3>Ressources Work</h3>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Nom</th>
+            <th scope="col">Path</th>
+            <th scope="col">Responsable</th>
+            <th scope="col">groupe</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for ressourceWork in ressourcesWork %}
+            <tr>
+                <td>{{ ressourceWork.nom }}</td>
+                <td>{{ ressourceWork.path }}</td>
+                <td>{{ ressourceWork.groupe.nom }}</td>
+                <td><td><a href="" class="btn btn-info">Infos</a></td>
+            </tr>
+        {% endfor %}
+        <tr>
+
+            <td>{{ form(formWork) }}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <br>
+    <h3>Ressources Server</h3>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Nom</th>
+            <th scope="col">Responsable</th>
+            <th scope="col">groupe</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for ressourceWork in ressourcesWork %}
+            <tr>
+                <td>{{ ressourceWork.nom }}</td>
+                <td>{{ ressourceWork.groupe.nom }}</td>
+                <td><td><a href="" class="btn btn-info">Infos</a></td>
+            </tr>
+        {% endfor %}
+        <tr>
+
+            <td>{{ form(formServer) }}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

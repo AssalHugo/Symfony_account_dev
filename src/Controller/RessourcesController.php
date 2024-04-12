@@ -194,6 +194,22 @@ class RessourcesController extends AbstractController
             ],
         ]);
 
+        //Si $resStockagesHome n'a pas le meme nombre d'éléments que $mesureDeChaqueResHome, on ajoute des valeurs nulles
+        if(count($resStockagesHome) != count($mesureDeChaqueResHome)){
+
+            $nb = count($resStockagesHome) - count($mesureDeChaqueResHome);
+            $mesureDeChaqueResHome = array_merge($mesureDeChaqueResHome, array_fill(0, $nb, null));
+            $pourcentageHome = array_merge($pourcentageHome, array_fill(0, $nb, null));
+        }
+
+        //Si $resStockageWork n'a pas le meme nombre d'éléments que $mesureDeChaqueResWork, on ajoute des valeurs nulles
+        if(count($resStockageWork) != count($mesureDeChaqueResWork)){
+
+            $nb = count($resStockageWork) - count($mesureDeChaqueResWork);
+            $mesureDeChaqueResWork = array_merge($mesureDeChaqueResWork, array_fill(0, $nb, null));
+            $pourcentageWork = array_merge($pourcentageWork, array_fill(0, $nb, null));
+        }
+
         return $this->render('ressources/stockage.html.twig', [
             'resStockagesHome' => $resStockagesHome,
             'resStockagesWork' => $resStockageWork,
@@ -418,6 +434,14 @@ class RessourcesController extends AbstractController
                     ],
                 ],
             ]);
+
+        //Si $serveurs n'a pas le meme nombre d'éléments que $lastMesureDeChaqueServeur, on ajoute des valeurs nulles
+        if(count($serveurs) != count($lastMesureDeChaqueServeur)){
+
+            $nb = count($serveurs) - count($lastMesureDeChaqueServeur);
+            $lastMesureDeChaqueServeur = array_merge($lastMesureDeChaqueServeur, array_fill(0, $nb, null));
+        }
+
 
         return $this->render('ressources/serveurs.html.twig', [
             'serveurs' => $serveurs,
