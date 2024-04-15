@@ -59,12 +59,14 @@ class HugoUserFixtures extends Fixture
         $user->setEmail("hugo@mail.com");
         $user->setPassword("hugo26**");
         $user->setEmploye($employe);
+        $user->setRoles(["ROLE_ADMIN"]);
 
         $user2 = new User();
         $user2->setUsername("jean");
         $user2->setEmail("jean@mail.com");
         $user2->setPassword("jean26**");
         $user2->setEmploye($employe2);
+        $user2->setRoles(["ROLE_RH"]);
 
         $status = new Status();
         $status->setType("Stagiaire");
@@ -185,6 +187,7 @@ class HugoUserFixtures extends Fixture
             $user2->setEmail("mail" . $i);
             $user2->setPassword("password" . $i);
             $user2->setEmploye($employe);
+            $user2->setRoles(["ROLE_USER"]);
 
             $contrat = new Contrats;
             $contrat->setDateDebut(new \DateTime("2015-09-31"));

@@ -2,23 +2,17 @@
 
 namespace App\Controller;
 
-use App\Entity\Contrats;
 use App\Entity\Departement;
 use App\Entity\Employe;
 use App\Entity\EtatsRequetes;
 use App\Entity\Groupes;
-use App\Entity\Localisations;
 use App\Entity\Requetes;
-use App\Entity\Telephones;
 use App\Entity\User;
 use App\Form\AjouterGroupeType;
-use App\Form\ContactSuppportType;
 use App\Form\DepartementType;
 use App\Form\EmployeInformationsType;
-use App\Form\LocalisationType;
 use App\Form\RequeteType;
 use App\Form\ResponsableType;
-use App\Form\TelephonesType;
 use App\Service\DemandeCompte;
 use App\Service\Remove;
 use App\Service\SenderMail;
@@ -30,18 +24,21 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 class RhController extends AbstractController
 {
+    /**
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
     #[Route('/rh/listeDemandesComptes', name: 'listeDemandesComptes')]
-    public function index(Request $request, EntityManagerInterface $entityManager): Response
+    public function listeDemandesComptes(EntityManagerInterface $entityManager): Response
     {
         //On récupère les demandes de comptes ou le statut est 'Demandé'
         $requetesRepo = $entityManager->getRepository(Requetes::class);
 
+        //On récupère les demandes de comptes ou le statut est 'Demandé' ainsi que les demandes de comptes ou le statut est 'Informations manquantes'
         $demandesComptesDemandes = $requetesRepo->findByEtatRequete('Demandé');
         $demandesComptesInfoManquantes = $requetesRepo->findByEtatRequete('Informations manquantes');
 
@@ -52,6 +49,13 @@ class RhController extends AbstractController
         ]);
     }
 
+    /**
+     * @param $id
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
+     * @param SenderMail $senderMail
+     * @return Response
+     */
     #[Route('/rh/validerDemandeCompte/{id}', name: 'validerDemandeCompte')]
     public function validerDemandeCompte($id, EntityManagerInterface $entityManager, Request $request, SenderMail $senderMail): Response
     {
@@ -103,7 +107,8 @@ class RhController extends AbstractController
     }
 
     #[Route('/rh/refuserDemandeCompte/{id}', name: 'refuserDemandeCompte')]
-    public function refuserDemandeCompte($id, Request $request, DemandeCompte $demandeCompte): Response {
+    public function refuserDemandeCompte($id, Request $request, DemandeCompte $demandeCompte): Response
+    {
 
         $demandeCompte->refuserDemandeCompte($id, $request);
 
@@ -153,8 +158,7 @@ class RhController extends AbstractController
 
 
             return $this->redirectToRoute('listeDemandesComptes');
-        }
-        else if ($form->get('annuler')->isClicked()) {
+        } else if ($form->get('annuler')->isClicked()) {
             return $this->redirectToRoute('listeDemandesComptes');
         }
 
@@ -240,13 +244,13 @@ class RhController extends AbstractController
             ->add('nom')
             ->add('acronyme')
             ->add('responsable', EntityType::class, [
-                'class' => Employe::class,
-                'choice_label' => function ($employe) {
-                    return $employe->getPrenom() . ' ' . $employe->getNom();
-                },
-                'label' => 'Responsable :',
-            ]
-        );
+                    'class' => Employe::class,
+                    'choice_label' => function ($employe) {
+                        return $employe->getPrenom() . ' ' . $employe->getNom();
+                    },
+                    'label' => 'Responsable :',
+                ]
+            );
 
         $formAjoutDepartement->add('ajouter', SubmitType::class, [
             'label' => 'Ajouter',
@@ -292,8 +296,7 @@ class RhController extends AbstractController
             $session = $request->getSession();
             $session->getFlashBag()->add('message', "Le département ne peut pas être supprimé car il contient des groupes.");
             $session->set('statut', 'danger');
-        }
-        else {
+        } else {
             //On supprime le département
             $entityManager->remove($departement);
             $entityManager->flush();
@@ -316,13 +319,12 @@ class RhController extends AbstractController
         $groupe = $groupesRepo->find($id);
 
         //Si le groupe contient des employés
-        if ($groupe->getEmployesGrpPrincipaux()->count() > 0 || $groupe->getEmployeGrpSecondaires()->count() > 0){
+        if ($groupe->getEmployesGrpPrincipaux()->count() > 0 || $groupe->getEmployeGrpSecondaires()->count() > 0) {
             //On crée un message flash pour informer l'utilisateur que le groupe ne peut pas être supprimé
             $session = $request->getSession();
             $session->getFlashBag()->add('message', "Le groupe ne peut pas être supprimé car il contient des employés.");
             $session->set('statut', 'danger');
-        }
-        else {
+        } else {
             //On supprime le groupe
             $entityManager->remove($groupe);
             $entityManager->flush();
@@ -425,7 +427,8 @@ class RhController extends AbstractController
     }
 
     #[Route('/rh/supprimerEmpGroupe/{idEmploye}/{idGroupe}', name: 'supprimerEmployeDuGroupeRH')]
-    public function supprimerEmployeDuGroupe(int $idEmploye, int $idGroupe, Remove $remove, Request $request): Response {
+    public function supprimerEmployeDuGroupe(int $idEmploye, int $idGroupe, Remove $remove, Request $request): Response
+    {
 
         $remove->supprimerEmployeDuGroupeSecond($idEmploye, $idGroupe, $request);
 
@@ -450,7 +453,6 @@ class RhController extends AbstractController
         foreach ($employe->getGroupesSecondaires() as $groupe) {
             $originalGroupesSecondaires->add($groupe);
         }
-
 
 
         //On crée un formulaire pour modifier les informations de l'employé
@@ -492,8 +494,7 @@ class RhController extends AbstractController
             $session->set('statut', 'success');
 
             return $this->redirectToRoute('infoEmploye', ['idEmploye' => $idEmploye, 'idGroupe' => $idGroupe]);
-        }
-        else if ($form->get('annuler')->isClicked()) {
+        } else if ($form->get('annuler')->isClicked()) {
             return $this->redirectToRoute('listeGroupe', ['id' => $idGroupe]);
         }
 
