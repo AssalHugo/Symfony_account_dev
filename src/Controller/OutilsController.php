@@ -54,28 +54,32 @@ class OutilsController extends AbstractController
 
         //Si le formulaire est soumis et valide
         if ($formFiltre->isSubmitted() && $formFiltre->isValid()) {
-            //On vide tout le GET en un appel de fonction
+            //On vide tout le GET
             $request->query->replace([]);
 
             //On récupère les données du formulaire
             $data = $formFiltre->getData();
             //On récupère le département, le groupe et le statut
+            $nom = $data['nom'];
+            $prenom = $data['prenom'];
             $departement = $data['departement'];
             $groupe = $data['groupe'];
             $statut = $data['statut'];
 
             //On récupère les utilisateurs en fonction des filtres
-            $query = $employeRepository->findByFiltre($departement, $groupe, $statut);
+            $query = $employeRepository->findByFiltre($nom, $prenom, $departement, $groupe, $statut);
 
             //On met les informations dans la session pour les garder en mémoire
             $session = $request->getSession();
+            $session->set('nom', $nom);
+            $session->set('prenom', $prenom);
             $session->set('departement', $departement);
             $session->set('groupe', $groupe);
             $session->set('statutEmploye', $statut);
         } //Sinon si le GET contient des filtres
-        else if ($request->query->get('departement') != null || $request->query->get('groupe') != null || $request->query->get('statut') != null) {
+        else if ($request->query->get('nom') != null || $request->query->get('prenom') != null || $request->query->get('departement') != null || $request->query->get('groupe') != null || $request->query->get('statut') != null) {
 
-            //On vide la session en un appel de fonction
+            //On vide la session
             $request->getSession()->clear();
 
             //On récupère les utilisateurs en fonction des filtres
@@ -101,11 +105,14 @@ class OutilsController extends AbstractController
         }//Sinon si les filtre sont dans la session
         else if ($request->getSession()->get('departement') != null || $request->getSession()->get('groupe') != null || $request->getSession()->get('statutEmploye') != null) {
             //On récupère les utilisateurs en fonction des filtres
-            $departement = $request->getSession()->get('departement');
-            $groupe = $request->getSession()->get('groupe');
-            $statut = $request->getSession()->get('statutEmploye');
+            $session = $request->getSession();
+            $nom = $session->get('nom');
+            $prenom = $session->get('prenom');
+            $departement = $session->get('departement');
+            $groupe = $session->get('groupe');
+            $statut = $session->get('statutEmploye');
 
-            $query = $employeRepository->findByFiltre($departement, $groupe, $statut);
+            $query = $employeRepository->findByFiltre($nom, $prenom, $departement, $groupe, $statut);
         } //Sinon on récupère tous les utilisateurs
         else {
 
@@ -195,6 +202,8 @@ class OutilsController extends AbstractController
     public function supprimerFiltreSession(Request $request): Response
     {
         $session = $request->getSession();
+        $session->remove('nom');
+        $session->remove('prenom');
         $session->remove('departement');
         $session->remove('groupe');
         $session->remove('statutEmploye');

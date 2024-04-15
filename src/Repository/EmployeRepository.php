@@ -27,7 +27,7 @@ class EmployeRepository extends ServiceEntityRepository
     /**
      * Fonction qui permet de récupérer les employés en fonction des filtres
      */
-    public function findByFiltre($departement, $groupe, $statut): QueryBuilder {
+    public function findByFiltre($nom, $prenom, $departement, $groupe, $statut): QueryBuilder {
 
         //ne pas oublier que l'employé peut posséder plusieurs groupes il a les groupes secondaires et sont groupe principal
         $qb = $this->createQueryBuilder('e')
@@ -39,6 +39,15 @@ class EmployeRepository extends ServiceEntityRepository
                     ->leftJoin('gS.departement', 'dS');
 
 
+        if (!empty($nom)){
+            $qb->andWhere('e.nom LIKE :nom')
+                ->setParameter('nom', '%'.$nom.'%');
+        }
+
+        if (!empty($prenom)){
+            $qb->andWhere('e.prenom LIKE :prenom')
+                ->setParameter('prenom', '%'.$prenom.'%');
+        }
 
         if (!empty($statut)){
             $qb->Where('s.type LIKE :statut')
