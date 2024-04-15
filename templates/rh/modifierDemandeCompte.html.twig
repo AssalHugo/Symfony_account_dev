@@ -4,5 +4,11 @@
         <h1 class="text-center">Modifier la demande de compte</h1>
 
         {{ form(form) }}
+
+        {% if formMail is defined %}
+            <br>
+            <h3 class="text-center">Envoyer un mail pour informations complémentaires</h3>
+            {{ form(formMail) }}
+        {% endif %}
     </div>
 {% endblock %}

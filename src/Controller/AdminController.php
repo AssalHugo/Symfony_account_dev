@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Employe;
 use App\Entity\EtatsRequetes;
-use App\Entity\Groupes;
 use App\Entity\ResServeur;
 use App\Entity\ResStockagesHome;
 use App\Entity\Requetes;
@@ -20,11 +19,9 @@ use App\Form\StockageWorkType;
 use App\Service\DemandeCompte;
 use App\Service\SenderMail;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Exception\ORMException;
-use Doctrine\ORM\OptimisticLockException;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -359,8 +356,48 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('listeDemandesComptesAdmin');
         }
 
+        //On crée un formulaire pour envoyer un mail à l'utilisateur qui a fait la demande de compte
+        $formMail = $this->createFormBuilder()
+            ->add('message', TextareaType::class, ['label' => 'Message :'])
+            ->add('envoyer', SubmitType::class, ['label' => 'Envoyer'])
+            ->getForm();
+
+        $formMail->handleRequest($request);
+
+        if ($formMail->isSubmitted() && $formMail->isValid() && $formMail->get('envoyer')->isClicked()) {
+            $data = $formMail->getData();
+
+            $message = "Bonjour " . $demandeCompte->getPrenom() . " " . $demandeCompte->getNom() . ",\n\n";
+            $message .= $data['message'] . "\n\n";
+            $message .= "Cordialement,\n\n";
+
+            $user = $this->getUser();
+
+            try {
+                $senderMail->sendMail($user->getEmail(), $demandeCompte->getMail(), "Informations complémentaires sur votre demande de compte, pour : " . $demandeCompte->getPrenom() . ' ' . $demandeCompte->getNom(), $message);
+
+                //On récupere l'objet EtatsRequetes avec l'état 'Informations manquantes'
+                $etatRequete = $entityManager->getRepository(EtatsRequetes::class)->findOneBy(['etat' => 'Informations manquantes']);
+
+                //On change le statut de la demande de compte
+                $demandeCompte->setEtatRequete($etatRequete);
+
+                $entityManager->persist($demandeCompte);
+                $entityManager->flush();
+            }
+            catch (TransportExceptionInterface $e) {
+                //On crée un message flash pour informer l'utilisateur que le mail n'a pas pu être envoyé
+                $session = $request->getSession();
+                $session->getFlashBag()->add('message', "Le mail n'a pas pu être envoyé.");
+                $session->set('statut', 'danger');
+            }
+
+            return $this->redirectToRoute('listeDemandesComptesAdmin');
+        }
+
         return $this->render('rh/modifierDemandeCompte.html.twig', [
             'form' => $form->createView(),
+            'formMail' => $formMail->createView(),
         ]);
     }
 
@@ -413,6 +450,11 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
     #[Route('/admin/changerRole', name: 'changerRoleAdmin')]
     public function changerRole(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -457,6 +499,11 @@ class AdminController extends AbstractController
         ]);
     }
 
+    /**
+     * @param $id
+     * @param EntityManagerInterface $entityManager
+     * @return JsonResponse
+     */
     #[Route('/admin/{id}/role', name: 'roleAdmin')]
     public function getRole($id, EntityManagerInterface $entityManager): JsonResponse {
 
