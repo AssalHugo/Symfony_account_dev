@@ -25,7 +25,7 @@ class ResStockagesHome
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToMany(targetEntity: StockagesMesuresHome::class, inversedBy: 'resStockagesHomes')]
+    #[ORM\ManyToMany(targetEntity: StockagesMesuresHome::class, inversedBy: 'resStockagesHomes', cascade: ['persist', 'remove'])]
     private Collection $mesures;
 
     public function __construct()

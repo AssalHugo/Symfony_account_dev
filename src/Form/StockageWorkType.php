@@ -19,12 +19,15 @@ class StockageWorkType extends AbstractType
             ->add('path')
             ->add('responsables', EntityType::class, [
                 'class' => Employe::class,
-                'choice_label' => 'id',
+                'choice_label' => function ($employe) {
+                    return $employe->getPrenom() . ' ' . $employe->getNom();
+                },
                 'multiple' => true,
+                'expanded' => true,
             ])
             ->add('groupe', EntityType::class, [
                 'class' => Groupes::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
             ])
         ;
     }

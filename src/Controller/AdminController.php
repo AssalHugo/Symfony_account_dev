@@ -15,6 +15,7 @@ use App\Form\ChangerMDPType;
 use App\Form\ChangerRoleType;
 use App\Form\RequeteType;
 use App\Form\ResServeurType;
+use App\Form\ResStockageHomeType;
 use App\Form\StockageWorkType;
 use App\Service\DemandeCompte;
 use App\Service\SenderMail;
@@ -460,23 +461,7 @@ class AdminController extends AbstractController
 
         //On crée un formulaire pour ajouter une ressource Home
         $ressourceHome = new ResStockagesHome();
-        $formHome = $this->createFormBuilder($ressourceHome)
-            ->add('nom', TextType::class, [
-                'label' => 'Nom :',
-                'required' => true,
-            ])
-            ->add('path', TextType::class, [
-                'label' => 'Path :',
-                'required' => true,
-            ])
-            ->add('user', EntityType::class, [
-                'class' => User::class,
-                'choice_label' => 'username',
-                'label' => 'Utilisateur auquel rajouter la ressource :',
-                'required' => true,
-            ])
-            ->add('ajouter', SubmitType::class, ['label' => 'Ajouter'])
-            ->getForm();
+        $formHome = $this->createForm(ResStockageHomeType::class);
 
         $formHome->handleRequest($request);
 
@@ -531,5 +516,46 @@ class AdminController extends AbstractController
             'formWork' => $formWork->createView(),
             'formServer' => $formServer->createView(),
         ]);
+    }
+
+    /**
+     * Function qui va permettre de supprimer une ressource
+     * @param $id
+     * @param EntityManagerInterface $entityManager
+     * @param $entity
+     * @param Request $request
+     * @return Response
+     */
+    private function deleteRessource($id, EntityManagerInterface $entityManager, $entity, Request $request) : Response
+    {
+        $ressource = $entityManager->getRepository($entity)->find($id);
+
+        $entityManager->remove($ressource);
+        $entityManager->flush();
+
+        //On crée un message flash pour informer l'utilisateur que la ressource a bien été supprimée
+        $session = $request->getSession();
+        $session->getFlashBag()->add('message', "La ressource a bien été supprimée.");
+        $session->set('statut', 'success');
+
+        return $this->redirectToRoute('ressourcesAdmin');
+    }
+
+    #[Route('/admin/ressources/deleteHome/{id}', name: 'deleteRessourceHomeAdmin')]
+    public function deleteRessourceHome($id, EntityManagerInterface $entityManager, Request $request) : Response
+    {
+        return $this->deleteRessource($id, $entityManager, ResStockagesHome::class, $request);
+    }
+
+    #[Route('/admin/ressources/deleteWork/{id}', name: 'deleteRessourceWorkAdmin')]
+    public function deleteRessourceWork($id, EntityManagerInterface $entityManager, Request $request) : Response
+    {
+        return $this->deleteRessource($id, $entityManager, ResStockageWork::class, $request);
+    }
+
+    #[Route('/admin/ressources/deleteServer/{id}', name: 'deleteRessourceServerAdmin')]
+    public function deleteRessourceServer($id, EntityManagerInterface $entityManager, Request $request) : Response
+    {
+        return $this->deleteRessource($id, $entityManager, ResServeur::class, $request);
     }
 }

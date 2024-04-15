@@ -38,6 +38,7 @@ class UserController extends AbstractController
     #[Route('/user/mesInformations/{indexTelephone}/{indexLocalisation}', name: 'mesInfos', requirements: ['indexTelephone' => '\d*', 'indexLocalisation' => '\d*'], defaults: ['indexTelephone' => null, 'indexLocalisation' => null])]
     public function mesInformations($indexLocalisation, $indexTelephone, Request $request, EntityManagerInterface $entityManager, SenderMail $senderMail): Response {
 
+
         //On récupère le User connecté
         $user = $this->getUser();
 
@@ -170,7 +171,6 @@ class UserController extends AbstractController
         }
 
 
-
         //--------------------Partie contact support--------------
         $formContact = $this->createForm(ContactSuppportType::class);
 
@@ -220,6 +220,9 @@ class UserController extends AbstractController
 
             $entityManager->persist($employe);
             $entityManager->flush();
+
+            //On met l'image File à null pour éviter de provoquer une erreur lors de la serialization de l'user
+            $employe->setImageFile();
 
             $session = $request->getSession();
             $session->getFlashBag()->add('message', 'La photo de profil a bien été modifiée');
@@ -457,7 +460,7 @@ class UserController extends AbstractController
 
         return $this->render('user/ContatcSecondaires.html.twig', [
 
-            'formContacts' => $formContacts,
+            'formContacts' => $formContacts->createView(),
         ]);
     }
 }

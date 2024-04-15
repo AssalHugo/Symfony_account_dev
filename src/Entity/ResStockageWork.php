@@ -27,7 +27,7 @@ class ResStockageWork
     /**
      * @var Collection<int, StockagesMesuresWork>
      */
-    #[ORM\OneToMany(targetEntity: StockagesMesuresWork::class, mappedBy: 'resStockageWork')]
+    #[ORM\OneToMany(targetEntity: StockagesMesuresWork::class, mappedBy: 'resStockageWork', cascade: ['persist', 'remove'])]
     private Collection $mesure;
 
     #[ORM\Column(length: 64, nullable: true)]

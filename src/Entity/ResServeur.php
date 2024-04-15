@@ -24,13 +24,13 @@ class ResServeur
     #[ORM\ManyToMany(targetEntity: Employe::class, inversedBy: 'resServeurs')]
     private Collection $responsable;
 
-    #[ORM\ManyToOne(targetEntity: Groupes::class, cascade: ['persist', 'remove'], inversedBy: 'resServeurs')]
+    #[ORM\ManyToOne(targetEntity: Groupes::class, cascade: ['persist'], inversedBy: 'resServeurs')]
     private ?Groupes $groupe = null;
 
     /**
      * @var Collection<int, ServeursMesures>
      */
-    #[ORM\OneToMany(targetEntity: ServeursMesures::class, mappedBy: 'resServeur')]
+    #[ORM\OneToMany(targetEntity: ServeursMesures::class, mappedBy: 'resServeur', cascade: ['persist', 'remove'])]
     private Collection $serveursMesures;
 
     public function __construct()

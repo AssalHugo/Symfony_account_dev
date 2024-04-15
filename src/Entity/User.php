@@ -155,25 +155,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
-    public function serialize()
-    {
-        return serialize([
-            $this->id,
-            $this->username,
-            $this->password,
-        ]);
-    }
-
-    public function unserialize(string $data)
-    {
-        [
-            $this->id,
-            $this->username,
-            $this->password,
-        ] = unserialize($data, ['allowed_classes' => false]);
-    }
-
     /**
      * @return Collection<int, ResStockagesHome>
      */

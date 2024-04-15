@@ -39,13 +39,13 @@ class Groupes
     #[ORM\OneToMany(targetEntity: Requetes::class, mappedBy: 'groupe_principal')]
     private Collection $requetes;
 
-    #[ORM\OneToOne(inversedBy: 'groupe', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'groupe', cascade: ['persist'])]
     private ?ResStockageWork $resStockageWork = null;
 
     /**
      * @var Collection<int, ResServeur>
      */
-    #[ORM\OneToMany(targetEntity: ResServeur::class, mappedBy: 'groupe', cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(targetEntity: ResServeur::class, mappedBy: 'groupe', cascade: ['persist'])]
     private Collection $resServeurs;
 
 

@@ -21,7 +21,7 @@
                 <td>{{ ressourceHome.nom }}</td>
                 <td>{{ ressourceHome.path }}</td>
                 <td>{{ ressourceHome.user.username }}</td>
-                <td><td><a href="" class="btn btn-info">Infos</a></td>
+                <td><td><a href="{{ path('deleteRessourceHomeAdmin', {'id': ressourceHome.id}) }}" class="btn btn-danger">Supprimer</a></td>
             </tr>
         {% endfor %}
         <tr>
@@ -50,7 +50,7 @@
                 <td>{{ ressourceWork.nom }}</td>
                 <td>{{ ressourceWork.path }}</td>
                 <td>{{ ressourceWork.groupe.nom }}</td>
-                <td><td><a href="" class="btn btn-info">Infos</a></td>
+                <td><td><a href="{{ path('deleteRessourceWorkAdmin', {'id': ressourceWork.id}) }}" class="btn btn-danger">Supprimer</a></td>
             </tr>
         {% endfor %}
         <tr>
@@ -73,11 +73,11 @@
         </tr>
         </thead>
         <tbody>
-        {% for ressourceWork in ressourcesWork %}
+        {% for ressourceServer in ressourcesServer %}
             <tr>
-                <td>{{ ressourceWork.nom }}</td>
-                <td>{{ ressourceWork.groupe.nom }}</td>
-                <td><td><a href="" class="btn btn-info">Infos</a></td>
+                <td>{{ ressourceServer.nom }}</td>
+                <td>{{ ressourceServer.groupe.nom }}</td>
+                <td><td><a href="{{ path('deleteRessourceServerAdmin', {'id': ressourceServer.id}) }}" class="btn btn-danger">Supprimer</a></td>
             </tr>
         {% endfor %}
         <tr>
