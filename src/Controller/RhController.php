@@ -42,7 +42,10 @@ class RhController extends AbstractController
         //On récupère les demandes de comptes ou le statut est 'Demandé'
         $requetesRepo = $entityManager->getRepository(Requetes::class);
 
-        $demandesComptes = $requetesRepo->findByEtatRequete('Demandé');
+        $demandesComptesDemandes = $requetesRepo->findByEtatRequete('Demandé');
+        $demandesComptesInfoManquantes = $requetesRepo->findByEtatRequete('Informations manquantes');
+
+        $demandesComptes = array_merge($demandesComptesDemandes, $demandesComptesInfoManquantes);
 
         return $this->render('rh/demandesCompte.html.twig', [
             'demandes' => $demandesComptes,
