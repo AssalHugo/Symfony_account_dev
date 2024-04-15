@@ -40,7 +40,7 @@ class EmployeRepository extends ServiceEntityRepository
 
 
         if (!empty($nom)){
-            $qb->andWhere('e.nom LIKE :nom')
+            $qb->Where('e.nom LIKE :nom')
                 ->setParameter('nom', '%'.$nom.'%');
         }
 
@@ -50,19 +50,17 @@ class EmployeRepository extends ServiceEntityRepository
         }
 
         if (!empty($statut)){
-            $qb->Where('s.type LIKE :statut')
+            $qb->andWhere('s.type LIKE :statut')
                 ->setParameter('statut', '%'.$statut.'%');
         }
 
         if (!empty($groupe)){
-            $qb->andWhere('gP.nom LIKE :groupe')
-                ->orWhere('gS.nom LIKE :groupe')
+            $qb->andWhere('gP.nom LIKE :groupe OR gS.nom LIKE :groupe')
                 ->setParameter('groupe', '%'.$groupe.'%');
         }
 
         if (!empty($departement)){
-            $qb->andWhere('dP.nom LIKE :departement')
-                ->orWhere('dS.nom LIKE :departement')
+            $qb->andWhere('dP.nom LIKE :departement OR dS.nom LIKE :departement')
                 ->setParameter('departement', '%'.$departement.'%');
         }
 
@@ -108,14 +106,12 @@ class EmployeRepository extends ServiceEntityRepository
         }
 
         if (!empty($groupe)) {
-            $qb->andWhere('gP.id = :groupe')
-                ->orWhere('gS.id = :groupe')
+            $qb->andWhere('gP.id = :groupe OR gS.id = :groupe')
                 ->setParameter('groupe', $groupe);
         }
 
         if (!empty($departement)) {
-            $qb->andWhere('dP.id = :departement')
-                ->orWhere('dS.id = :departement')
+            $qb->andWhere('dP.id = :departement OR dS.id = :departement')
                 ->setParameter('departement', $departement);
         }
 
