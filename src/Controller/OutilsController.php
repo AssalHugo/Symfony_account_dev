@@ -12,7 +12,9 @@ use App\Form\ContactSecondairesType;
 use App\Form\RedirectionMailType;
 use App\Form\RequeteType;
 use App\Form\TrombinoscopeType;
+use App\Service\FlashBag;
 use App\Service\SenderMail;
+use App\Service\Trombinoscope;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -41,7 +43,7 @@ class OutilsController extends AbstractController
      * @return Response
      */
     #[Route('/outils/trombinoscope', name: 'trombinoscope')]
-    public function trombinoscope(Request $request, EntityManagerInterface $entityManager): Response
+    public function trombinoscope(Request $request, EntityManagerInterface $entityManager, Trombinoscope $trombinoscope, FlashBag $flashBag): Response
     {
         $employeRepository = $entityManager->getRepository(Employe::class);
 
@@ -52,74 +54,8 @@ class OutilsController extends AbstractController
 
         $formFiltre->handleRequest($request);
 
-        //Si le formulaire est soumis et valide
-        if ($formFiltre->isSubmitted() && $formFiltre->isValid()) {
-            //On vide tout le GET
-            $request->query->replace([]);
-
-            //On récupère les données du formulaire
-            $data = $formFiltre->getData();
-            //On récupère le département, le groupe et le statut
-            $nom = $data['nom'];
-            $prenom = $data['prenom'];
-            $departement = $data['departement'];
-            $groupe = $data['groupe'];
-            $statut = $data['statut'];
-
-            //On récupère les utilisateurs en fonction des filtres
-            $query = $employeRepository->findByFiltre($nom, $prenom, $departement, $groupe, $statut);
-
-            //On met les informations dans la session pour les garder en mémoire
-            $session = $request->getSession();
-            $session->set('nom', $nom);
-            $session->set('prenom', $prenom);
-            $session->set('departement', $departement);
-            $session->set('groupe', $groupe);
-            $session->set('statutEmploye', $statut);
-
-        } //Sinon si le GET contient des filtres
-        else if ($request->query->get('nom') != null || $request->query->get('prenom') != null || $request->query->get('departement') != null || $request->query->get('groupe') != null || $request->query->get('statut') != null) {
-
-            //On vide la session
-            $request->getSession()->clear();
-
-            //On récupère les utilisateurs en fonction des filtres
-            if ($request->query->get('departement') != null) {
-                $departement = $request->query->get('departement');
-            } else {
-                $departement = "";
-            }
-
-            if ($request->query->get('groupe') != null) {
-                $groupe = $request->query->get('groupe');
-            } else {
-                $groupe = "";
-            }
-
-            if ($request->query->get('statut') != null) {
-                $statut = $request->query->get('statut');
-            } else {
-                $statut = "";
-            }
-
-            $query = $employeRepository->findByFiltreId($departement, $groupe, $statut);
-        }//Sinon si les filtre sont dans la session
-        else if ($request->getSession()->get('departement') != null || $request->getSession()->get('groupe') != null || $request->getSession()->get('statutEmploye') != null) {
-            //On récupère les utilisateurs en fonction des filtres
-            $session = $request->getSession();
-            $nom = $session->get('nom');
-            $prenom = $session->get('prenom');
-            $departement = $session->get('departement');
-            $groupe = $session->get('groupe');
-            $statut = $session->get('statutEmploye');
-
-            $query = $employeRepository->findByFiltre($nom, $prenom, $departement, $groupe, $statut);
-        } //Sinon on récupère tous les utilisateurs
-        else {
-
-            //On récupère tous les utilisateurs
-            $query = $employeRepository->findAllEmployes();
-        }
+        //On récupère la query en fonction des filtres
+        $query = $trombinoscope->getQuery($formFiltre, $request, $employeRepository);
 
         $page = $request->query->getInt('p', 1);
 
@@ -138,35 +74,8 @@ class OutilsController extends AbstractController
 
         //On récupère le nombres de groupes et de départements affichés
         $nbGroupesAffiches = 0;
-        $groupes = [];
         $nbDepartementsAffiches = 0;
-        $departements = [];
-        foreach ($queryResult as $employe) {
-
-            $groupePrincipal = $employe->getGroupePrincipal();
-            if ($groupePrincipal != null && !in_array($groupePrincipal, $groupes)) {
-                $nbGroupesAffiches++;
-                //On regarde si le département du groupe principal est déjà dans le tableau
-                if ($groupePrincipal->getDepartement() != null && !in_array($groupePrincipal->getDepartement(), $departements)) {
-                    $nbDepartementsAffiches++;
-                }
-            }
-            $groupes[] = $groupePrincipal;
-            $departements[] = $groupePrincipal->getDepartement();
-
-            //Pour chaque groupes secondaires de l'employé, on vérifie si il est déjà dans le tableau
-            foreach ($employe->getGroupesSecondaires() as $groupe) {
-                if ($groupe != null && !in_array($groupe, $groupes)) {
-                    $nbGroupesAffiches++;
-                    if ($groupe->getDepartement() != null && !in_array($groupe->getDepartement(), $departements)) {
-                        $nbDepartementsAffiches++;
-                    }
-                }
-                $groupes[] = $groupe;
-                $departements[] = $groupe->getDepartement();
-            }
-        }
-
+        $trombinoscope->setNbGroupesAffichesEtNbDepAffiches($queryResult, $nbGroupesAffiches, $nbDepartementsAffiches);
 
         //On pagine
         $employes = $this->paginator->paginate(
@@ -177,9 +86,7 @@ class OutilsController extends AbstractController
 
         //On traite si aucun employés
         if (count($employes) == 0) {
-            $session = $request->getSession();
-            $session->getFlashBag()->add('message', 'Aucun employé trouvé.');
-            $session->set('statut', 'danger');
+            $flashBag->flashBagDanger('Aucun employé ne correspond à votre recherche.', $request);
         }
 
 

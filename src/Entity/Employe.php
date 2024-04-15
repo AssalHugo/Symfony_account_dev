@@ -86,8 +86,7 @@ class Employe
     #[ORM\OneToMany(targetEntity: Requetes::class, mappedBy: 'referent')]
     private Collection $referentDe;
 
-    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'referent_de_
-    employe')]
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'referent_de_employe')]
     private ?self $referent = null;
 
     #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'referent')]

@@ -13,9 +13,11 @@ use App\Form\DepartementType;
 use App\Form\EmployeInformationsType;
 use App\Form\RequeteType;
 use App\Form\ResponsableType;
+use App\Form\TrombinoscopeType;
 use App\Service\DemandeCompte;
 use App\Service\Remove;
 use App\Service\SenderMail;
+use App\Service\Trombinoscope;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -502,5 +504,38 @@ class RhController extends AbstractController
             'employe' => $employe,
             'form' => $form->createView(),
         ]);
+    }
+
+    #[Route('/rh/trombinoscope', name: 'trombinoscopeRH')]
+    public function trombinoscope(EntityManagerInterface $entityManager, Request $request, Trombinoscope $trombinoscope): Response
+    {
+        $employeRepository = $entityManager->getRepository(Employe::class);
+
+        //On crée le formulaire de filtre
+        $formFiltre = $this->createForm(TrombinoscopeType::class);
+
+        $formFiltre->add('filtrer', SubmitType::class, ['label' => 'Filtrer']);
+
+        $formFiltre->handleRequest($request);
+
+        $employes = $trombinoscope->getQuery($formFiltre, $request, $employeRepository)->getQuery()->getResult();
+
+        //On récupère le nombres d'employés, de départements et de groupes au total dans la bd et le nombre affiché
+        $nbEmployes = $employeRepository->countEmployes();
+
+        $departementRepository = $entityManager->getRepository(Departement::class);
+        $nbDepartements = $departementRepository->countDepartements();
+
+        $groupeRepository = $entityManager->getRepository(Groupes::class);
+        $nbGroupes = $groupeRepository->countGroupes();
+
+        $nbEmployesAffiches = count($employes);
+
+        //On récupère le nombres de groupes et de départements affichés
+        $nbGroupesAffiches = 0;
+        $nbDepartementsAffiches = 0;
+        $trombinoscope->setNbGroupesAffichesEtNbDepAffiches($employes, $nbGroupesAffiches, $nbDepartementsAffiches);
+
+
     }
 }
