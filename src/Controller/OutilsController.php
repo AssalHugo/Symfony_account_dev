@@ -300,7 +300,7 @@ class OutilsController extends AbstractController
      * @return Response
      */
     #[Route('/outils/modifierDemandeCompteUser/{id}', name: 'modifierDemandeCompteUser')]
-    public function modifierDemandeCompteUser($id, EntityManagerInterface $entityManager, Request $request): Response
+    public function modifierDemandeCompteUser($id, EntityManagerInterface $entityManager, Request $request, SenderMail $senderMail): Response
     {
         //On récupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
@@ -323,6 +323,22 @@ class OutilsController extends AbstractController
             $session = $request->getSession();
             $session->getFlashBag()->add('message', "La demande a bien été modifiée.");
             $session->set('statut', 'success');
+
+            //On envoie un mail aux RH et aux admins pour les informer de la modification de la demande
+            $user = $this->getUser();
+            $from = $user->getEmail();
+
+            $rh = $entityManager->getRepository(User::class)->findByRole('ROLE_RH');
+            $admin = $entityManager->getRepository(User::class)->findByRole('ROLE_ADMIN');
+
+            $recipients = array_merge($rh, $admin);
+
+            $to = "";
+            foreach ($recipients as $recipient) {
+                $to .= $recipient->getEmail() . ', ';
+            }
+
+            $senderMail->sendMail($from, $to, 'Modification de la demande de compte : ' . $demandeCompte->getId(), 'La demande de compte' . $demandeCompte->getNom() . ' ' . $demandeCompte->getPrenom() . ' a été modifiée, par ' . $user->getEmploye()->getNom() . ' ' . $user->getEmploye()->getPrenom() . '.');
 
             return $this->redirectToRoute('formulaireDemandeCompte');
         }
