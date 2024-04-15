@@ -57,7 +57,7 @@ class HugoUserFixtures extends Fixture
         $user = new User();
         $user->setUsername("hassal");
         $user->setEmail("hugo@mail.com");
-        $user->setPassword("hugo26**");
+        $user->setPassword('$2y$13$JFDUleuuWN0RDgAFPx3OuOuh6O5kA7QquP1unEIQpum1c2HGKadfW');
         $user->setEmploye($employe);
         $user->setRoles(["ROLE_ADMIN"]);
 
@@ -93,7 +93,7 @@ class HugoUserFixtures extends Fixture
 
         $contrat2 = new Contrats;
         $contrat2->setDateDebut(new \DateTime("2017-09-31"));
-        $contrat2->setDateFin(new \DateTime("2018-09-31"));
+        $contrat2->setDateFin(new \DateTime("2028-09-31"));
         $contrat2->setRemarque("remarque 2");
         $contrat2->setQuotite(20);
         $contrat2->setEmploye($employe2);
@@ -191,7 +191,7 @@ class HugoUserFixtures extends Fixture
 
             $contrat = new Contrats;
             $contrat->setDateDebut(new \DateTime("2015-09-31"));
-            $contrat->setDateFin(new \DateTime("2016-09-31"));
+            $contrat->setDateFin(new \DateTime("2026-09-31"));
             $contrat->setRemarque("remarque");
             $contrat->setQuotite(20);
             $contrat->setEmploye($employe);

@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container">
+    <h1 class="text-center">Liste des utilisateurs</h1>
+    <br>
+    <h3>Infos : </h3>
+    <h6>Utilisateurs : <strong>{{ nbEmployesAffiches }}/{{ nbEmployes }}</strong></h6>
+    <h6>Groupes : <strong>{{ nbGroupesAffiches }}/{{ nbGroupes }}</strong></h6>
+    <h6>Departements : <strong>{{ nbDepartementsAffiches }}/{{ nbDepartements }}</strong></h6>
+    <br>
+    <h3>Filtre : </h3>
+    <a href="{{ path('supprimerFiltreSessionRH') }}" class="btn btn-primary">Réinitialiser les filtres</a>
+    {{ form(formFiltre) }}
+
+    <br>
+    <h3>Liste des utilisateurs : </h3>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>Prénom</th>
+                <th>Nom</th>
+                <th>Date d'arrivée</th>
+                <th>Date de départ</th>
+                <th>Status</th>
+                <th>Departements</th>
+                <th>Groupes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employe in employes %}
+            <tr>
+                <td><img src="{{ vich_uploader_asset(employe, 'imageFile') }}" alt="photo" width="100" height="100"></td>
+                <td>{{ employe.prenom }}</td>
+                <td>{{ employe.nom }}</td>
+                <td>{{ employe.contrats[0].dateDebut|date('d/m/Y') }}</td>
+                <td>{{ employe.contrats[0].dateFin|date('d/m/Y') }}</td>
+                <td>{{ employe.contrats[0].status.type }}</td>
+                <td>
+                    {% if employe.groupeprincipal.departement %}
+                        {{ employe.groupeprincipal.departement.nom }}<br>
+                    {% endif %}
+                    {% for groupe in employe.groupessecondaires%}
+                        {% if groupe.departement and groupe.departement.id != employe.groupeprincipal.departement.id  %}
+                            {{ groupe.departement.nom }}<br>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if employe.groupeprincipal %}
+                        {{ employe.groupeprincipal.nom }}<br>
+                    {% endif %}
+                    {% for groupe in employe.groupessecondaires %}
+                        {{ groupe.nom }}<br>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+
+{% endblock %}
+

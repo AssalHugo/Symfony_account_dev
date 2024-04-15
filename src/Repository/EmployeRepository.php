@@ -70,12 +70,14 @@ class EmployeRepository extends ServiceEntityRepository
     public function findAllEmployes() : QueryBuilder{
 
         return $this->createQueryBuilder('e')
+            ->leftJoin('e.contrats', 'c')
                     ->select('e');
     }
 
     public function findByPrenomNom($prenom, $nom): array
     {
         return $this->createQueryBuilder('e')
+            ->leftJoin('e.contrats', 'c')
             ->andWhere('e.prenom LIKE :prenom')
             ->andWhere('e.nom LIKE :nom')
             ->setParameter('prenom', '%'.$prenom.'%')
@@ -127,6 +129,18 @@ class EmployeRepository extends ServiceEntityRepository
                     ->select('count(e.id)')
                     ->getQuery()
                     ->getSingleScalarResult();
+    }
+
+    public function countEmployesEntreDates() : int {
+
+        return $this->createQueryBuilder('e')
+                            ->select('count(e.id)')
+                            ->leftJoin('e.contrats', 'c')
+                            ->where('c.date_debut <= :date')
+                            ->andWhere('c.date_fin >= :date')
+                            ->setParameter('date', new \DateTime())
+                            ->getQuery()
+                            ->getSingleScalarResult();
     }
 
     //    /**

@@ -15,6 +15,7 @@ use App\Form\RequeteType;
 use App\Form\ResponsableType;
 use App\Form\TrombinoscopeType;
 use App\Service\DemandeCompte;
+use App\Service\FlashBag;
 use App\Service\Remove;
 use App\Service\SenderMail;
 use App\Service\Trombinoscope;
@@ -507,7 +508,7 @@ class RhController extends AbstractController
     }
 
     #[Route('/rh/trombinoscope', name: 'trombinoscopeRH')]
-    public function trombinoscope(EntityManagerInterface $entityManager, Request $request, Trombinoscope $trombinoscope): Response
+    public function trombinoscope(EntityManagerInterface $entityManager, Request $request, Trombinoscope $trombinoscope, FlashBag $flashBag): Response
     {
         $employeRepository = $entityManager->getRepository(Employe::class);
 
@@ -537,5 +538,34 @@ class RhController extends AbstractController
         $trombinoscope->setNbGroupesAffichesEtNbDepAffiches($employes, $nbGroupesAffiches, $nbDepartementsAffiches);
 
 
+        if (count($employes) == 0){
+
+            $flashBag->flashBagDanger("Aucun employé ne correspond à votre recherche.", $request);
+        }
+
+        return $this->render('rh/trombinoscope.html.twig', [
+            'employes' => $employes,
+            'formFiltre' => $formFiltre->createView(),
+            'nbEmployes' => $nbEmployes,
+            'nbDepartements' => $nbDepartements,
+            'nbGroupes' => $nbGroupes,
+            'nbEmployesAffiches' => $nbEmployesAffiches,
+            'nbGroupesAffiches' => $nbGroupesAffiches,
+            'nbDepartementsAffiches' => $nbDepartementsAffiches,
+        ]);
+    }
+
+    #[Route('/rh/supprimerFiltreSessionRH', name: 'supprimerFiltreSessionRH')]
+    public function supprimerFiltreSessionRH(Request $request): Response
+    {
+        $session = $request->getSession();
+
+        $session->remove('nom');
+        $session->remove('prenom');
+        $session->remove('departement');
+        $session->remove('groupe');
+        $session->remove('statutEmploye');
+
+        return $this->redirectToRoute('trombinoscopeRH');
     }
 }

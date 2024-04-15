@@ -57,10 +57,16 @@ class OutilsController extends AbstractController
         //On récupère la query en fonction des filtres
         $query = $trombinoscope->getQuery($formFiltre, $request, $employeRepository);
 
+        //On ne récupere que les employés actifs (qui ont une date de début de contrat inférieure à la date du jour et une date de fin de contrat supérieure à la date du jour)
+        $query
+            ->andWhere('c.date_debut <= :date')
+            ->andWhere('c.date_fin >= :date')
+            ->setParameter('date', new \DateTime('now'));
+
         $page = $request->query->getInt('p', 1);
 
         //On récupère le nombres d'employés, de départements et de groupes au total dans la bd et le nombre affiché
-        $nbEmployes = $employeRepository->countEmployes();
+        $nbEmployes = $employeRepository->countEmployesEntreDates();
 
         $departementRepository = $entityManager->getRepository(Departement::class);
         $nbDepartements = $departementRepository->countDepartements();
