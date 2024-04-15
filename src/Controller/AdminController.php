@@ -30,8 +30,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -454,8 +452,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/admin/ressources', name: 'ressourcesAdmin')]
-    public function ressources(EntityManagerInterface $entityManager, Request $request): Response
-    {
+    public function ressources(EntityManagerInterface $entityManager, Request $request): Response {
         //Home
         $ressourcesHome = $entityManager->getRepository(ResStockagesHome::class)->findAll();
 
@@ -557,5 +554,63 @@ class AdminController extends AbstractController
     public function deleteRessourceServer($id, EntityManagerInterface $entityManager, Request $request) : Response
     {
         return $this->deleteRessource($id, $entityManager, ResServeur::class, $request);
+    }
+
+    /**
+     * @param $id
+     * @param EntityManagerInterface $entityManager
+     * @param $entity
+     * @param Request $request
+     * @return Response
+     */
+    private function editRessource($id, EntityManagerInterface $entityManager, $entity, Request $request, $type) : Response
+    {
+        $ressource = $entityManager->getRepository($entity)->find($id);
+
+        $form = $this->createForm($type, $ressource);
+
+        $form->add('modifier', SubmitType::class, ['label' => 'Modifier']);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($ressource);
+            $entityManager->flush();
+
+            //On crée un message flash pour informer l'utilisateur que la ressource a bien été modifiée
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "La ressource a bien été modifiée.");
+            $session->set('statut', 'success');
+
+            return $this->redirectToRoute('ressourcesAdmin');
+        }
+
+        return $this->render('admin/editRessource.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/admin/ressources/editHome/{id}', name: 'editRessourceHomeAdmin')]
+    public function editRessourceHome($id, EntityManagerInterface $entityManager, Request $request) : Response
+    {
+
+        $type = ResStockageHomeType::class;
+        return $this->editRessource($id, $entityManager, ResStockagesHome::class, $request, $type);
+    }
+
+    #[Route('/admin/ressources/editWork/{id}', name: 'editRessourceWorkAdmin')]
+    public function editRessourceWork($id, EntityManagerInterface $entityManager, Request $request) : Response
+    {
+        $type = StockageWorkType::class;
+
+        return $this->editRessource($id, $entityManager, ResStockageWork::class, $request, $type);
+    }
+
+    #[Route('/admin/ressources/editServer/{id}', name: 'editRessourceServerAdmin')]
+    public function editRessourceServer($id, EntityManagerInterface $entityManager, Request $request) : Response
+    {
+        $type = ResServeurType::class;
+
+        return $this->editRessource($id, $entityManager, ResServeur::class, $request, $type);
     }
 }

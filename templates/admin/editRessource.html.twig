@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="text-center">Modifier la ressource</h1>
+        {{ form_start(form) }}
+        {{ form_row(form.nom) }}
+
+        {% if form.responsables is defined %}
+            <div class="responsable-container" data-prototype="{{ form_widget(form.responsables.vars.prototype)|e('html_attr') }}">
+                {{ form_label(form.responsables) }}
+                {% for responsable in form.responsables %}
+                    <div class="responsable" style="display: flex; flex-direction: row;">
+                        {{ form_row(responsable) }}
+                        <button type="button" class="remove-responsable-button btn btn-danger">Supprimer</button>
+                        {{ form_errors(responsable) }}
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="add-responsable-button btn btn-primary">Ajouter un responsable</button>
+        {% elseif form.responsable is defined %}
+            <div class="responsable-container" data-prototype="{{ form_widget(form.responsable.vars.prototype)|e('html_attr') }}">
+                {{ form_label(form.responsable) }}
+                {% for responsable in form.responsable %}
+                    <div class="responsable" style="display: flex; flex-direction: row;">
+                        {{ form_row(responsable) }}
+                        <button type="button" class="remove-responsable-button btn btn-danger">Supprimer</button>
+                        {{ form_errors(responsable) }}
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="add-responsable-button btn btn-primary">Ajouter un responsable</button>
+        {% endif %}
+        {{ form_end(form) }}
+
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        let responsableContainer = document.querySelector('.responsable-container');
+        let addResponsableButton = document.querySelector('.add-responsable-button');
+
+        addResponsableButton.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            let index = responsableContainer.querySelectorAll('.responsable').length;
+
+            let h6 = document.createElement('h6');
+            h6.innerText = 'Responsable' + (index + 1) + ' :';
+
+            let newResponsableForm = responsableContainer.getAttribute('data-prototype').replace(/__name__/g, index);
+
+            let removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.innerText = 'Supprimer';
+            removeButton.classList.add('remove-responsable-button', 'btn', 'btn-danger');
+
+            removeButton.addEventListener('click', function (e) {
+                e.preventDefault();
+                let responsable = e.target.parentElement;
+                responsable.remove();
+            });
+
+            let responsable = document.createElement('div');
+            responsable.classList.add('responsable');
+            responsable.appendChild(h6);
+            responsable.insertAdjacentHTML('beforeend', newResponsableForm);
+            responsable.appendChild(removeButton);
+
+            responsableContainer.appendChild(responsable);
+        });
+
+        let removeResponsableButtons = document.querySelectorAll('.remove-responsable-button');
+        removeResponsableButtons.forEach(function (button) {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                let responsable = e.target.parentElement;
+                responsable.remove();
+            });
+        });
+    });
+</script>
+{% endblock %}
+

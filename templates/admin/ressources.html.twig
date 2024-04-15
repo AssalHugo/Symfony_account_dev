@@ -13,6 +13,7 @@
             <th scope="col">Path</th>
             <th scope="col">user</th>
             <th scope="col"></th>
+            <th scope="col"></th>
         </tr>
         </thead>
         <tbody>
@@ -21,16 +22,14 @@
                 <td>{{ ressourceHome.nom }}</td>
                 <td>{{ ressourceHome.path }}</td>
                 <td>{{ ressourceHome.user.username }}</td>
-                <td><td><a href="{{ path('deleteRessourceHomeAdmin', {'id': ressourceHome.id}) }}" class="btn btn-danger">Supprimer</a></td>
+                <td><a href="{{ path('deleteRessourceHomeAdmin', {'id': ressourceHome.id}) }}" class="btn btn-danger">Supprimer</a></td>
+                <td><a href="{{ path('editRessourceHomeAdmin', {'id': ressourceHome.id}) }}" class="btn btn-primary">Modifier</a></td>
             </tr>
         {% endfor %}
-        <tr>
-
-            <td>{{ form(formHome) }}</td>
-        </tr>
         </tbody>
     </table>
-
+    <h5>Ajouter une ressource Home</h5>
+    {{ form(formHome) }}
     <br>
     <h3>Ressources Work</h3>
 
@@ -39,8 +38,8 @@
         <tr>
             <th scope="col">Nom</th>
             <th scope="col">Path</th>
-            <th scope="col">Responsable</th>
             <th scope="col">groupe</th>
+            <th scope="col"></th>
             <th scope="col"></th>
         </tr>
         </thead>
@@ -50,15 +49,29 @@
                 <td>{{ ressourceWork.nom }}</td>
                 <td>{{ ressourceWork.path }}</td>
                 <td>{{ ressourceWork.groupe.nom }}</td>
-                <td><td><a href="{{ path('deleteRessourceWorkAdmin', {'id': ressourceWork.id}) }}" class="btn btn-danger">Supprimer</a></td>
+                <td><a href="{{ path('deleteRessourceWorkAdmin', {'id': ressourceWork.id}) }}" class="btn btn-danger">Supprimer</a></td>
+                <td><a href="{{ path('editRessourceWorkAdmin', {'id': ressourceWork.id}) }}" class="btn btn-primary">Modifier</a></td>
             </tr>
         {% endfor %}
-        <tr>
-
-            <td>{{ form(formWork) }}</td>
-        </tr>
         </tbody>
     </table>
+    <h5>Ajouter une ressource Work</h5>
+    {{ form_start(formWork) }}
+    {{ form_row(formWork.nom) }}
+    {{ form_row(formWork.path) }}
+    <div class="responsable-container" data-prototype="{{ form_widget(formWork.responsables.vars.prototype)|e('html_attr') }}">
+        {{ form_label(formWork.responsables) }}
+        {% for responsable in formWork.responsables %}
+            <div class="responsable" style="display: flex; flex-direction: row;">
+                {{ form_row(responsable) }}
+                <button type="button" class="remove-responsable-button btn btn-danger">Supprimer</button>
+                {{ form_errors(responsable) }}
+            </div>
+        {% endfor %}
+    </div>
+    <button type="button" class="add-responsable-button btn btn-primary">Ajouter un responsable</button>
+    {{ form_row(formWork.groupe) }}
+    {{ form_end(formWork) }}
 
     <br>
     <h3>Ressources Server</h3>
@@ -67,8 +80,8 @@
         <thead>
         <tr>
             <th scope="col">Nom</th>
-            <th scope="col">Responsable</th>
             <th scope="col">groupe</th>
+            <th scope="col"></th>
             <th scope="col"></th>
         </tr>
         </thead>
@@ -77,14 +90,120 @@
             <tr>
                 <td>{{ ressourceServer.nom }}</td>
                 <td>{{ ressourceServer.groupe.nom }}</td>
-                <td><td><a href="{{ path('deleteRessourceServerAdmin', {'id': ressourceServer.id}) }}" class="btn btn-danger">Supprimer</a></td>
+                <td><a href="{{ path('deleteRessourceServerAdmin', {'id': ressourceServer.id}) }}" class="btn btn-danger">Supprimer</a></td>
+                <td><a href="{{ path('editRessourceServerAdmin', {'id': ressourceServer.id}) }}" class="btn btn-primary">Modifier</a></td>
             </tr>
         {% endfor %}
-        <tr>
-
-            <td>{{ form(formServer) }}</td>
-        </tr>
         </tbody>
     </table>
+    <h5>Ajouter une ressource Server</h5>
+    {{ form_start(formServer) }}
+    {{ form_row(formServer.nom) }}
+    <div class="responsableWork-container" data-prototype="{{ form_widget(formServer.responsable.vars.prototype)|e('html_attr') }}">
+        {{ form_label(formServer.responsable) }}
+        {% for responsable in formServer.responsable %}
+            <div class="responsableWork" style="display: flex; flex-direction: row;">
+                {{ form_row(responsable) }}
+                <button type="button" class="remove-responsableWork-button btn btn-danger">Supprimer</button>
+                {{ form_errors(responsable) }}
+            </div>
+        {% endfor %}
+    </div>
+    <button type="button" class="add-responsableWork-button btn btn-primary">Ajouter un responsable</button>
+    {{ form_row(formServer.groupe) }}
+    {{ form_end(formServer) }}
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            let responsableContainer = document.querySelector('.responsable-container');
+            let addResponsableButton = document.querySelector('.add-responsable-button');
+
+            addResponsableButton.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                let index = responsableContainer.querySelectorAll('.responsable').length;
+
+                let h6 = document.createElement('h6');
+                h6.innerText = 'Responsable' + (index + 1) + ' :';
+
+                let newResponsableForm = responsableContainer.getAttribute('data-prototype').replace(/__name__/g, index);
+
+                let removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.innerText = 'Supprimer';
+                removeButton.classList.add('remove-responsable-button', 'btn', 'btn-danger');
+
+                removeButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let responsable = e.target.parentElement;
+                    responsable.remove();
+                });
+
+                let responsable = document.createElement('div');
+                responsable.classList.add('responsable');
+                responsable.appendChild(h6);
+                responsable.insertAdjacentHTML('beforeend', newResponsableForm);
+                responsable.appendChild(removeButton);
+
+                responsableContainer.appendChild(responsable);
+            });
+
+            let removeResponsableButtons = document.querySelectorAll('.remove-responsable-button');
+            removeResponsableButtons.forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let responsable = e.target.parentElement;
+                    responsable.remove();
+                });
+            });
+
+
+            //On fait la même chose pour les responsables de la ressource Server
+            let responsableWorkContainer = document.querySelector('.responsableWork-container');
+            let addResponsableWorkButton = document.querySelector('.add-responsableWork-button');
+
+            addResponsableWorkButton.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                let index = responsableWorkContainer.querySelectorAll('.responsableWork').length;
+
+                let h6 = document.createElement('h6');
+                h6.innerText = 'Responsable' + (index + 1) + ' :';
+
+                let newResponsableWorkForm = responsableWorkContainer.getAttribute('data-prototype').replace(/__name__/g, index);
+
+                let removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.innerText = 'Supprimer';
+                removeButton.classList.add('remove-responsableWork-button', 'btn', 'btn-danger');
+
+                removeButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let responsableWork = e.target.parentElement;
+                    responsableWork.remove();
+                });
+
+                let responsableWork = document.createElement('div');
+                responsableWork.classList.add('responsableWork');
+                responsableWork.appendChild(h6);
+                responsableWork.insertAdjacentHTML('beforeend', newResponsableWorkForm);
+                responsableWork.appendChild(removeButton);
+
+                responsableWorkContainer.appendChild(responsableWork);
+            });
+
+            let removeResponsableWorkButtons = document.querySelectorAll('.remove-responsableWork-button');
+            removeResponsableWorkButtons.forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let responsableWork = e.target.parentElement;
+                    responsableWork.remove();
+                });
+            });
+        });
+    </script>
 {% endblock %}
