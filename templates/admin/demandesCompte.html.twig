@@ -1,6 +1,6 @@
 {% extends 'rh/demandesCompte.html.twig' %}
 {% block validerSupprimer %}
-    {% if demande.etatRequete.etat == 'Validé par RH'%}
+    {% if demande.etatRequete.etat != 'Validé par admin' or demande.etatRequete.etat != 'Refusé' %}
     <td>
         <a href="{{ path('verificationDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-success">Formulaire de validation</a>
     </td>
