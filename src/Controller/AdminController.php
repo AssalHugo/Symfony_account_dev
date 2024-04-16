@@ -73,22 +73,19 @@ class AdminController extends AbstractController
 
         $formPrenomNom->handleRequest($request);
 
-        if ($formPrenomNom->isSubmitted() && $formPrenomNom->isValid() && $formPrenomNom->get('rechercher')->isClicked()) {
+        $prenom = $demandeCompte->getPrenom();
+        $nom = $demandeCompte->getNom();
+
+        if ($formPrenomNom->isSubmitted() && $formPrenomNom->isValid()) {
             //On récupère les données du formulaire
             $data = $formPrenomNom->getData();
 
-            //On récupère les employés qui sont LIKE %nom% et LIKE %prenom%
-            $employes = $employeRepo->findByPrenomNom($data['prenom'], $data['nom']);
+            $prenom = $data['prenom'];
+            $nom = $data['nom'];
+        }
 
-            return $this->render('admin/verificationDemandeCompte.html.twig', [
-                'form' => $formPrenomNom->createView(),
-                'employes' => $employes,
-                'demande' => $demandeCompte,
-            ]);
-        }
-        else {
-            $employes = $employeRepo->findBy(['nom' => $demandeCompte->getNom(), 'prenom' => $demandeCompte->getPrenom()]);
-        }
+        //On récupère les employés qui sont LIKE %nom% et LIKE %prenom%
+        $employes = $employeRepo->findByPrenomNom($prenom, $nom);
 
         return $this->render('admin/verificationDemandeCompte.html.twig', [
             'form' => $formPrenomNom->createView(),
@@ -117,6 +114,7 @@ class AdminController extends AbstractController
         $employe->setPrenom($demandeCompte->getPrenom());
         $employe->setGroupePrincipal($demandeCompte->getGroupePrincipal());
         $employe->addLocalisation($demandeCompte->getLocalisation());
+        $employe->addTelephone($demandeCompte->getTelephone());
         $employe->addContrat($demandeCompte->getContrat());
         $employe->setReferent($demandeCompte->getReferent());
 

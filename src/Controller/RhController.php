@@ -543,7 +543,7 @@ class RhController extends AbstractController
             $flashBag->flashBagDanger("Aucun employé ne correspond à votre recherche.", $request);
         }
 
-        return $this->render('rh/trombinoscope.html.twig', [
+        return $this->render('rh/listeUtilisateurs.html.twig', [
             'employes' => $employes,
             'formFiltre' => $formFiltre->createView(),
             'nbEmployes' => $nbEmployes,
