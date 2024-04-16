@@ -35,6 +35,13 @@ class Remove
 
         $employe->removeGroupesSecondaire($groupe);
         $this->entityManager->persist($employe);
+
+        //Si l'employé qu'on supprime du groupe est adjoint de ce groupe, on le supprime de la liste des adjoints
+        if($groupe->getAdjoints()->contains($employe)){
+            $groupe->removeAdjoint($employe);
+            $this->entityManager->persist($groupe);
+        }
+
         $this->entityManager->flush();
 
         //Si le groupe est le groupe principal de l'employé, on affiche un message d'erreur

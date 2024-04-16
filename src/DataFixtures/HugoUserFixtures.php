@@ -38,6 +38,7 @@ class HugoUserFixtures extends Fixture
         $employe->setAnneeNaissance(2024);
         $employe->setPhoto("user.png");
         $employe->setRedirectionMail(true);
+        $employe->setReferent($employe);
 
         $employe2 = new Employe();
         $employe2->setNom("Jean");
@@ -51,6 +52,7 @@ class HugoUserFixtures extends Fixture
         $employe2->setAnneeNaissance(2004);
         $employe2->setPhoto("user.png");
         $employe2->setRedirectionMail(true);
+        $employe2->setReferent($employe);
 
         $employe->setReferent($employe2);
 
@@ -180,6 +182,7 @@ class HugoUserFixtures extends Fixture
             $employe->setAnneeNaissance(2024);
             $employe->setPhoto("user.png");
             $employe->setRedirectionMail(true);
+            $employe->setReferent($employe);
 
 
             $user2 = new User();
