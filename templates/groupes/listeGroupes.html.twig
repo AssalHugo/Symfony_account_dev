@@ -47,7 +47,7 @@
                     <td>{{ employeSec.contrats| last .datedebut|date('d/m/Y') }}</td>
                     <td>{{ employeSec.contrats| last .datefin|date('d/m/Y') }}</td>
                     <td>{{ employeSec.contrats| last .status.type }}</td>
-                    {% if app.user.roles[0] == 'ROLE_ADMIN' or app.user.roles[0] == 'ROLE_RH' or (groupe.responsable == app.user.employe or app.user.employe in groupe.adjoints) and app.user.employe != employeSec %}
+                    {% if (app.user.roles[0] == 'ROLE_ADMIN' or app.user.roles[0] == 'ROLE_RH') or ((groupe.responsable == app.user.employe or app.user.employe in groupe.adjoints) and app.user.employe != employeSec and employeSec != groupe.responsable) %}
                         <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': employeSec.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
                     {% endif %}
                 </tr>
