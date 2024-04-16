@@ -361,6 +361,21 @@ class RhController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            //Pour chaques adjoints et pour le responsable du groupe on donne comme Role à ces user 'ROLE_RESPONSABLE' seulement si ils sont 'ROLE_USER'
+            foreach ($groupe->getAdjoints() as $adjoint) {
+                $user = $adjoint->getUser();
+                if ($user->getRoles()[0] === 'ROLE_USER') {
+                    $user->setRoles(['ROLE_RESPONSABLE']);
+                    $entityManager->persist($user);
+                }
+            }
+            $user = $groupe->getResponsable()->getUser();
+            if ($user->getRoles()[0] === 'ROLE_USER') {
+                $user->setRoles(['ROLE_RESPONSABLE']);
+                $entityManager->persist($user);
+            }
+
             $entityManager->persist($groupe);
             $entityManager->flush();
 
@@ -438,7 +453,7 @@ class RhController extends AbstractController
         return $this->redirectToRoute('listeGroupe', ['id' => $idGroupe]);
     }
 
-    #[Route('/rh/infoEmploye/{idEmploye}/{idGroupe}', name: 'infoEmploye')]
+    #[Route('/rh/infoEmploye/{idEmploye}/{idGroupe}', name: 'infoEmploye', defaults: ['idGroupe' => null])]
     public function infoEmploye($idEmploye, $idGroupe, EntityManagerInterface $entityManager, Request $request): Response
     {
         //On récupère l'employé
@@ -496,8 +511,12 @@ class RhController extends AbstractController
             $session->getFlashBag()->add('message', "Les informations ont bien été modifiées.");
             $session->set('statut', 'success');
 
+
             return $this->redirectToRoute('infoEmploye', ['idEmploye' => $idEmploye, 'idGroupe' => $idGroupe]);
         } else if ($form->get('annuler')->isClicked()) {
+            if ($idGroupe == null) {
+                return $this->redirectToRoute('trombinoscopeRH');
+            }
             return $this->redirectToRoute('listeGroupe', ['id' => $idGroupe]);
         }
 

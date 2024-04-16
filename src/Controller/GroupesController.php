@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class GroupesController extends AbstractController
 {
@@ -165,9 +166,15 @@ class GroupesController extends AbstractController
     }
 
     #[Route('/groupes/supprimerEmpGroupe/{idEmploye}/{idGroupe}', name: 'supprimerEmployeDuGroupe')]
-    public function supprimerEmployeDuGroupe(int $idEmploye, int $idGroupe, Remove $remove, Request $request): Response {
+    public function supprimerEmployeDuGroupe(int $idEmploye, int $idGroupe, Remove $remove, Request $request, EntityManagerInterface $entityManager): Response {
 
-        $remove->supprimerEmployeDuGroupeSecond($idEmploye, $idGroupe, $request);
+        $groupeRepo = $entityManager->getRepository(Groupes::class);
+        $groupe = $groupeRepo->find($idGroupe);
+
+        //Si la personne connectée, est un admin, un RH, le responsable du groupe ou encore un adjoint du groupe
+        if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_RH') || array_search($groupe, $this->getUser()->getEmploye()->getAdjointDe()->toArray()) !== false || $groupe->getResponsable() == $this->getUser()->getEmploye()) {
+            $remove->supprimerEmployeDuGroupeSecond($idEmploye, $idGroupe, $request);
+        }
 
         return $this->redirectToRoute('liste');
     }
