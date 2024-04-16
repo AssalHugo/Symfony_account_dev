@@ -362,18 +362,12 @@ class RhController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            //Pour chaques adjoints et pour le responsable du groupe on donne comme Role à ces user 'ROLE_RESPONSABLE' seulement si ils sont 'ROLE_USER'
-            foreach ($groupe->getAdjoints() as $adjoint) {
-                $user = $adjoint->getUser();
-                if ($user->getRoles()[0] === 'ROLE_USER') {
-                    $user->setRoles(['ROLE_RESPONSABLE']);
-                    $entityManager->persist($user);
-                }
-            }
-            $user = $groupe->getResponsable()->getUser();
-            if ($user->getRoles()[0] === 'ROLE_USER') {
-                $user->setRoles(['ROLE_RESPONSABLE']);
-                $entityManager->persist($user);
+            //On ajoute le groupe en tant que groupe secondaire à chaque nouveau responsable ou adjoint
+            $responsable = $groupe->getResponsable();
+            $responsable->addGroupesSecondaire($groupe);
+            $adjoints = $groupe->getAdjoints();
+            foreach ($adjoints as $adjoint) {
+                $adjoint->addGroupesSecondaire($groupe);
             }
 
             $entityManager->persist($groupe);

@@ -24,7 +24,6 @@ class ChangerRoleType extends AbstractType
             ->add('role', ChoiceType::class, [
                 'choices' => [
                     'User' => 'ROLE_USER',
-                    'Responsable de Groupe' => 'ROLE_RESPONSABLE',
                     'RH' => 'ROLE_RH',
                     'Administrateur' => 'ROLE_ADMIN',
                 ],

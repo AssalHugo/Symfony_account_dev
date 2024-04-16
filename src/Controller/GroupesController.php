@@ -175,6 +175,11 @@ class GroupesController extends AbstractController
         if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_RH') || array_search($groupe, $this->getUser()->getEmploye()->getAdjointDe()->toArray()) !== false || $groupe->getResponsable() == $this->getUser()->getEmploye()) {
             $remove->supprimerEmployeDuGroupeSecond($idEmploye, $idGroupe, $request);
         }
+        else {
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "Vous n'avez pas les droits pour effectuer cette action");
+            $session->set('statut', 'danger');
+        }
 
         return $this->redirectToRoute('liste');
     }

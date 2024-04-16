@@ -52,8 +52,7 @@ security:
 
     role_hierarchy:
         ROLE_ADMIN:       ROLE_RH
-        ROLE_RH:          ROLE_RESPONSABLE
-        ROLE_RESPONSABLE: ROLE_USER
+        ROLE_RH:          ROLE_USER
 
 when@test:
     security:
