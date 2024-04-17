@@ -25,4 +25,11 @@ return [
     'chart.js/auto' => [
         'version' => '3.9.1',
     ],
+    'cropperjs' => [
+        'version' => '1.6.1',
+    ],
+    'cropperjs/dist/cropper.min.css' => [
+        'version' => '1.6.1',
+        'type' => 'css',
+    ],
 ];
