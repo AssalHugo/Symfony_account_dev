@@ -15,7 +15,7 @@
 
     <br>
     <h3>Liste des utilisateurs : </h3>
-    <table class="table table-bordered table-striped">
+    <table class="table table-hover">
         <thead>
             <tr>
                 <th>Photo</th>
@@ -32,8 +32,8 @@
             {% for employe in employes %}
             <tr onclick="window.location.href='{{ path('infoEmploye', {'idEmploye': employe.id}) }}';">
                 <td><img src="{{ vich_uploader_asset(employe, 'imageFile') }}" alt="photo" width="100" height="100"></td>
-                <td><a href="{{ path('infoEmploye', {'idEmploye': employe.id}) }}" class="link-offset-2 link-underline link-underline-opacity-0">{{ employe.prenom }}</a></td>
-                <td><a href="{{ path('infoEmploye', {'idEmploye': employe.id}) }}" class="link-offset-2 link-underline link-underline-opacity-0">{{ employe.nom }}</a></td>
+                <td>{{ employe.prenom }}</td>
+                <td>{{ employe.nom }}</td>
                 <td>{{ employe.contrats | last.dateDebut|date('d/m/Y') }}</td>
                 <td>{{ employe.contrats | last.dateFin|date('d/m/Y') }}</td>
                 <td>{{ employe.contrats | last.status.type }}</td>
@@ -46,9 +46,10 @@
                     {% endif %}
                     {% for groupe in employe.groupessecondaires %}
                         {% if groupe.departement %}
+                            {% if loop.first %},  <br>{% endif %}
                             {% set departement_id = groupe.departement.id %}
                             {% if departement_id not in displayed_departments %}
-                                {% if loop.first %},  <br>{% endif %}{{ groupe.departement.nom }}{% if not loop.last %}, {% endif %} <br>
+                                {{ groupe.departement.nom }}{% if not loop.last %}, {% endif %} <br>
                                 {% set displayed_departments = displayed_departments|merge([departement_id]) %}
                             {% endif %}
                         {% endif %}
