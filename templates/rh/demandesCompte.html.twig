@@ -3,6 +3,10 @@
 {% block body %}
     <div class="container">
         <h1 class="text-center">Liste demandes de compte</h1>
+        {% if demandes is empty %}
+            <p class="text-center">Aucune demande de compte en cours</p>
+            <br>
+        {% else %}
         <br>
         <table class="table table-striped">
             <thead>
@@ -56,6 +60,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% endif %}
     </div>
     {% block bas %}{% endblock %}
 {% endblock %}
