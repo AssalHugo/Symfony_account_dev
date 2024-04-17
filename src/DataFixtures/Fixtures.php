@@ -84,6 +84,9 @@ class Fixtures extends Fixture
 
         $status5 = new Status();
         $status5->setType("Doctorant");
+
+        $status5 = new Status();
+        $status5->setType("Collaborateur");
         
         $contrat = new Contrats;
         $contrat->setDateDebut(new \DateTime("2015-09-31"));

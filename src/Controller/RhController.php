@@ -29,8 +29,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-class RhController extends AbstractController
-{
+class RhController extends AbstractController {
+
     /**
      * @param EntityManagerInterface $entityManager
      * @return Response
@@ -362,12 +362,16 @@ class RhController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            //On ajoute le groupe en tant que groupe secondaire à chaque nouveau responsable ou adjoint
+            //On ajoute le groupe en tant que groupe secondaire à chaque nouveau responsable ou adjoint si il n'était pas déjà dans le groupe
             $responsable = $groupe->getResponsable();
-            $responsable->addGroupesSecondaire($groupe);
+            if ($groupe->getResponsable()->getGroupePrincipal() != $groupe) {
+                $responsable->addGroupesSecondaire($groupe);
+            }
             $adjoints = $groupe->getAdjoints();
             foreach ($adjoints as $adjoint) {
-                $adjoint->addGroupesSecondaire($groupe);
+                if ($adjoint->getGroupePrincipal() != $groupe) {
+                    $adjoint->addGroupesSecondaire($groupe);
+                }
             }
 
             $entityManager->persist($groupe);
@@ -387,7 +391,11 @@ class RhController extends AbstractController
 
         $employes = $employeRepo->findAll();
 
-        $employesGroupe = $groupe->getEmployesGrpPrincipaux()->toArray();
+        $employesGroupePrincipaux = $groupe->getEmployesGrpPrincipaux()->toArray();
+
+        $employesGroupeSecondaires = $groupe->getEmployeGrpSecondaires()->toArray();
+
+        $employesGroupe = array_merge($employesGroupePrincipaux, $employesGroupeSecondaires);
 
         $employesNonGroupe = array_udiff($employes, $employesGroupe,
             function ($obj_a, $obj_b) {
@@ -509,7 +517,7 @@ class RhController extends AbstractController
             return $this->redirectToRoute('infoEmploye', ['idEmploye' => $idEmploye, 'idGroupe' => $idGroupe]);
         } else if ($form->get('annuler')->isClicked()) {
             if ($idGroupe == null) {
-                return $this->redirectToRoute('trombinoscopeRH');
+                return $this->redirectToRoute('listeUtilisateurs');
             }
             return $this->redirectToRoute('listeGroupe', ['id' => $idGroupe]);
         }
@@ -520,8 +528,8 @@ class RhController extends AbstractController
         ]);
     }
 
-    #[Route('/rh/trombinoscope', name: 'trombinoscopeRH')]
-    public function trombinoscope(EntityManagerInterface $entityManager, Request $request, Trombinoscope $trombinoscope, FlashBag $flashBag): Response
+    #[Route('/rh/listeDesUtilisateurs', name: 'listeUtilisateurs')]
+    public function listeDesUtilisateurs(EntityManagerInterface $entityManager, Request $request, Trombinoscope $trombinoscope, FlashBag $flashBag): Response
     {
         $employeRepository = $entityManager->getRepository(Employe::class);
 
@@ -579,6 +587,6 @@ class RhController extends AbstractController
         $session->remove('groupe');
         $session->remove('statutEmploye');
 
-        return $this->redirectToRoute('trombinoscopeRH');
+        return $this->redirectToRoute('listeUtilisateurs');
     }
 }

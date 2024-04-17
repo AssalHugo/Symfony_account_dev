@@ -17,7 +17,7 @@
                 </div>
                 <div class="card-body">
                     <h4>Groupes : </h4>
-                    <table class="table">
+                    <table class="table table-hover">
                         <thead>
                             <tr>
                                 <th scope="col">Nom</th>
@@ -28,9 +28,9 @@
                         </thead>
                         <tbody>
                             {% for groupe in departement.groupes %}
-                                <tr>
-                                    <td><a href="{{ path('listeGroupe', {'id': groupe.id}) }}" class="link-offset-2 link-underline link-underline-opacity-0">{{ groupe.nom }}</a></td>
-                                    <td><a href="{{ path('listeGroupe', {'id': groupe.id}) }}" class="link-offset-2 link-underline link-underline-opacity-0">{{ groupe.acronyme }}</a></td>
+                                <tr onclick="window.location.href='{{ path('listeGroupe', {'id': groupe.id}) }}'" onmouseover="this.style.cursor='pointer'">
+                                    <td>{{ groupe.nom }}</td>
+                                    <td>{{ groupe.acronyme }}</td>
                                     <td><a href="{{ path('infoEmploye', {'idEmploye': groupe.responsable.id, 'idGroupe' : groupe.id}) }}" class="link-offset-2 link-underline link-underline-opacity-0">{{ groupe.responsable.nom }} {{ groupe.responsable.prenom }}</a></td>
                                     <td><a href="{{ path('removeGroupe', {'id': groupe.id}) }}" class="btn btn-danger">Supprimer</a></td>
                                 </tr>
