@@ -34,13 +34,20 @@
                         {% if loop.first %}, {% endif %}<a class="link-info" href="?groupe={{ groupe.id }}">{{ groupe.nom }}</a>{% if not loop.last %}, {% endif %}
                     {% endfor %}
                 </p>
+                {% set displayed_departments = {} %}
                 <p class="card-text">Departement(s) :
                     {% if employe.groupeprincipal.departement %}
-                        <a class="link-info" href="?departement={{ employe.groupeprincipal.departement.id }}">{{ employe.groupeprincipal.departement.nom }}</a>
+                        {% set departement_id = employe.groupeprincipal.departement.id %}
+                        <a class="link-info" href="?departement={{ departement_id }}">{{ employe.groupeprincipal.departement.nom }}</a>
+                        {% set displayed_departments = displayed_departments|merge([departement_id]) %}
                     {% endif %}
                     {% for groupe in employe.groupessecondaires %}
-                        {% if groupe.departement and groupe.departement.id != employe.groupeprincipal.departement.id %}
-                            {% if loop.first %}, {% endif %}<a class="link-info" href="?departement={{ groupe.departement.id }}">{{ groupe.departement.nom }}</a>{% if not loop.last %}, {% endif %}
+                        {% if groupe.departement %}
+                            {% set departement_id = groupe.departement.id %}
+                            {% if departement_id not in displayed_departments %}
+                                {% if loop.first %}, {% endif %}<a class="link-info" href="?departement={{ departement_id }}">{{ groupe.departement.nom }}</a>{% if not loop.last %}, {% endif %}
+                                {% set displayed_departments = displayed_departments|merge([departement_id]) %}
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                 </p>

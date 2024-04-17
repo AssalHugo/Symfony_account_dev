@@ -22,7 +22,7 @@ use App\Entity\Localisations;
 use App\Entity\Telephones;
 use App\Entity\Groupes;
 
-class HugoUserFixtures extends Fixture
+class Fixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {

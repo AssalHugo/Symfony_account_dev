@@ -38,12 +38,19 @@
                 <td>{{ employe.contrats | last.dateFin|date('d/m/Y') }}</td>
                 <td>{{ employe.contrats | last.status.type }}</td>
                 <td>
+                    {% set displayed_departments = {} %}
                     {% if employe.groupeprincipal.departement %}
-                        {{ employe.groupeprincipal.departement.nom }}<br>
+                        {% set departement_id = employe.groupeprincipal.departement.id %}
+                        {{ employe.groupeprincipal.departement.nom }}
+                        {% set displayed_departments = displayed_departments|merge([departement_id]) %}
                     {% endif %}
-                    {% for groupe in employe.groupessecondaires%}
-                        {% if groupe.departement and groupe.departement.id != employe.groupeprincipal.departement.id  %}
-                            {{ groupe.departement.nom }}<br>
+                    {% for groupe in employe.groupessecondaires %}
+                        {% if groupe.departement %}
+                            {% set departement_id = groupe.departement.id %}
+                            {% if departement_id not in displayed_departments %}
+                                {% if loop.first %},  <br>{% endif %}{{ groupe.departement.nom }}{% if not loop.last %}, {% endif %} <br>
+                                {% set displayed_departments = displayed_departments|merge([departement_id]) %}
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                 </td>
