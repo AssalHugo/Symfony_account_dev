@@ -127,6 +127,18 @@ class Employe
         $this->resServeurs = new ArrayCollection();
     }
 
+    public function getDateFinContrat(): ?\DateTimeInterface
+    {
+        $contrats = $this->contrats->toArray();
+        $dateFinContrat = null;
+        foreach ($contrats as $contrat) {
+            if ($contrat->getDateFin() > $dateFinContrat) {
+                $dateFinContrat = $contrat->getDateFin();
+            }
+        }
+        return $dateFinContrat;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

@@ -57,7 +57,6 @@ class Groupes
         $this->requetes = new ArrayCollection();
         $this->resServeurs = new ArrayCollection();
     }
-
     public function getId(): ?int
     {
         return $this->id;

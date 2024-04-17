@@ -32,25 +32,29 @@
             </thead>
             <tbody>
             {% for employe in groupe.employesgrpprincipaux %}
-                <tr>
-                    <td>{{ employe.prenom }}</td>
-                    <td>{{ employe.nom }}</td>
-                    <td>{{ employe.contrats| last .datedebut|date('d/m/Y') }}</td>
-                    <td>{{ employe.contrats| last .datefin|date('d/m/Y') }}</td>
-                    <td>{{ employe.contrats| last .status.type }}</td>
-                </tr>
+                {% if employe.contrats| last .datefin|date('Y-m-d') > "now"|date('Y-m-d') %}
+                    <tr>
+                        <td>{{ employe.prenom }}</td>
+                        <td>{{ employe.nom }}</td>
+                        <td>{{ employe.contrats| last .datedebut|date('d/m/Y') }}</td>
+                        <td>{{ employe.contrats| last .datefin|date('d/m/Y') }}</td>
+                        <td>{{ employe.contrats| last .status.type }}</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
             {% for employeSec in groupe.employegrpsecondaires %}
-                <tr>
-                    <td>{{ employeSec.prenom }}</td>
-                    <td>{{ employeSec.nom }}</td>
-                    <td>{{ employeSec.contrats| last .datedebut|date('d/m/Y') }}</td>
-                    <td>{{ employeSec.contrats| last .datefin|date('d/m/Y') }}</td>
-                    <td>{{ employeSec.contrats| last .status.type }}</td>
-                    {% if  employeSec != groupe.responsable and (app.user.roles[0] == 'ROLE_ADMIN' or app.user.roles[0] == 'ROLE_RH') or ((groupe.responsable == app.user.employe or app.user.employe in groupe.adjoints) and app.user.employe != employeSec ) %}
-                        <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': employeSec.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
-                    {% endif %}
-                </tr>
+                {% if employeSec.contrats| last .datefin|date('Y-m-d') > "now"|date('Y-m-d') %}
+                    <tr>
+                        <td>{{ employeSec.prenom }}</td>
+                        <td>{{ employeSec.nom }}</td>
+                        <td>{{ employeSec.contrats| last .datedebut|date('d/m/Y') }}</td>
+                        <td>{{ employeSec.contrats| last .datefin|date('d/m/Y') }}</td>
+                        <td>{{ employeSec.contrats| last .status.type }}</td>
+                        {% if  employeSec != groupe.responsable and (app.user.roles[0] == 'ROLE_ADMIN' or app.user.roles[0] == 'ROLE_RH') or ((groupe.responsable == app.user.employe or app.user.employe in groupe.adjoints) and app.user.employe != employeSec ) %}
+                            <td><a href="{{ path('supprimerEmployeDuGroupe', {'idEmploye': employeSec.id, 'idGroupe': groupe.id}) }}" class="btn btn-danger">Supprimer du Groupe</a></td>
+                        {% endif %}
+                    </tr>
+                {% endif %}
             {% endfor %}
             </tbody>
         </table>
