@@ -4,10 +4,21 @@
         <a href="{{ path('modifierDemandeCompteUser', {'id': demande.id}) }}" class="btn btn-primary">Modifier</a>
     </td>
 {% endblock %}
-{% block bas %}
+{% block formulaire %}
 <div class="container">
     <h2 class="text-center">Formulaire demande de compte</h2>
-    {{ form(formDemandeCompte) }}
+    {{ form_start(formDemandeCompte)}}
+    {{ form_row(formDemandeCompte.prenom) }}
+    {{ form_row(formDemandeCompte.nom) }}
+    {{ form_row(formDemandeCompte.mail) }}
+    {{ form_row(formDemandeCompte.telephone) }}
+    <strong>{{ form_label(formDemandeCompte.contrat) }}</strong>
+    {{ form_widget(formDemandeCompte.contrat) }}
+    <br>
+    <strong>{{ form_label(formDemandeCompte.localisation) }}</strong>
+    {{ form_widget(formDemandeCompte.localisation) }}
+    <br>
+    {{ form_end(formDemandeCompte) }}
 </div>
 {% endblock %}
 

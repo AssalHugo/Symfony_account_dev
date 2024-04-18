@@ -114,7 +114,9 @@ class AdminController extends AbstractController
         $employe->setPrenom($demandeCompte->getPrenom());
         $employe->setGroupePrincipal($demandeCompte->getGroupePrincipal());
         $employe->addLocalisation($demandeCompte->getLocalisation());
-        $employe->addTelephone($demandeCompte->getTelephone());
+        $telephone = new Telephones();
+        $telephone->setNumero($demandeCompte->getTelephone());
+        $employe->addTelephone($telephone);
         $employe->addContrat($demandeCompte->getContrat());
         $employe->setReferent($demandeCompte->getReferent());
 

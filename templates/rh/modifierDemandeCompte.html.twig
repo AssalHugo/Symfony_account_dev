@@ -3,7 +3,18 @@
     <div class="container">
         <h1 class="text-center">Modifier la demande de compte</h1>
 
-        {{ form(form) }}
+        {{ form_start(form)}}
+        {{ form_row(form.prenom) }}
+        {{ form_row(form.nom) }}
+        {{ form_row(form.mail) }}
+        {{ form_row(form.telephone) }}
+        <strong>{{ form_label(form.contrat) }}</strong>
+        {{ form_widget(form.contrat) }}
+        <br>
+        <strong>{{ form_label(form.localisation) }}</strong>
+        {{ form_widget(form.localisation) }}
+        <br>
+        {{ form_end(form) }}
 
         {% if formMail is defined %}
             <br>

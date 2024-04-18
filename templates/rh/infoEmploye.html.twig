@@ -36,6 +36,8 @@
         <h4>{{ form_label(form.redirection_mail) }}</h4>
         {{ form_widget(form.redirection_mail) }}
 
+        <br>
+
         <div class="localisations-container" data-prototype="{{ form_widget(form.localisation.vars.prototype)|e('html_attr') }}">
             <h4>Localisations</h4>
 
@@ -51,6 +53,9 @@
         </div>
 
         <button type="button" class="add-localisation-button btn btn-primary">Ajouter une localisation</button>
+
+        <br>
+        <br>
 
 
         <div class="groupes-container" data-prototype="{{ form_widget(form.groupes_secondaires.vars.prototype)|e('html_attr') }}">
@@ -72,6 +77,7 @@
         <h4>{{ form_label(form.groupe_principal) }}</h4>
         {{ form_widget(form.groupe_principal) }}
 
+        <br>
         <h4>{{ form_label(form.referent) }}</h4>
         {{ form_widget(form.referent) }}
 

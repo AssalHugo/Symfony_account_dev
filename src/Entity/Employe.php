@@ -65,7 +65,7 @@ class Employe
     #[ORM\ManyToMany(targetEntity: Localisations::class, inversedBy: 'employes', cascade: ['persist'])]
     private Collection $localisation;
 
-    #[ORM\OneToMany(targetEntity: Telephones::class, mappedBy: 'employe')]
+    #[ORM\OneToMany(targetEntity: Telephones::class, mappedBy: 'employe', cascade: ['persist', 'remove'])]
     private Collection $telephones;
 
     #[ORM\OneToMany(targetEntity: Groupes::class, mappedBy: 'responsable')]

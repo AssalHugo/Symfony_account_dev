@@ -27,11 +27,11 @@ class SenderMail
      */
     public function sendMail($from, $to, $subject, $body)
     {
-        $email = (new Email())
-            ->from($from)
-            ->to($to)
-            ->subject($subject)
-            ->text($body);
+        //$email = (new Email())
+        //    ->from($from)
+        //    ->to($to)
+        //    ->subject($subject)
+        //    ->text($body);
 
         //$this->mailer->send($email);
     }

@@ -69,6 +69,7 @@ class EmployeInformationsType extends AbstractType
                 'choice_label' => function (Employe $employe) {
                     return $employe->getNom() . ' ' . $employe->getPrenom();
                 },
+                'label' => 'Référent',
             ])
         ;
     }

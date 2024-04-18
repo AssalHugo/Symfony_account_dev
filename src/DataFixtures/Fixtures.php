@@ -103,8 +103,6 @@ class Fixtures extends Fixture
         $manager->persist($employeResp);
 
 
-
-
         $employeUser = new Employe();
         $employeUser->setNom("Pierre");
         $employeUser->setPrenom("Georges");

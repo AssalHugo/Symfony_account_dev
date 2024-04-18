@@ -137,7 +137,6 @@ class OutilsController extends AbstractController
     public function formulaireDemandeCompte($indexRequete, Request $request, EntityManagerInterface $entityManager, SenderMail $senderMail): Response {
 
         $requete = new Requetes();
-
         $formDemandeCompte = $this->createForm(RequeteType::class, $requete);
 
         $formDemandeCompte->add('valider', SubmitType::class, ['label' => 'Valider']);
