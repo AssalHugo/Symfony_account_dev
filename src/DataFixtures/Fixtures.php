@@ -36,7 +36,7 @@ class Fixtures extends Fixture
         $employe->setMailSecondaire("hugo2@mail.com");
         $employe->setTelephoneSecondaire("0101010101");
         $employe->setAnneeNaissance(2024);
-        $employe->setPhoto("user.png");
+        $employe->setPhoto("admin.webp");
         $employe->setRedirectionMail(true);
 
 
@@ -51,7 +51,7 @@ class Fixtures extends Fixture
         $employe2->setMailSecondaire("jean@jean");
         $employe2->setTelephoneSecondaire("0101010101");
         $employe2->setAnneeNaissance(2004);
-        $employe2->setPhoto("user.png");
+        $employe2->setPhoto("RH.jpg");
         $employe2->setRedirectionMail(true);
         $employe2->setReferent($employe);
 
@@ -89,13 +89,14 @@ class Fixtures extends Fixture
         $employeResp->setMailSecondaire("alain2@mail.com");
         $employeResp->setTelephoneSecondaire("0101010101");
         $employeResp->setAnneeNaissance(2024);
-        $employeResp->setPhoto("user.png");
+        $employeResp->setPhoto("responsable.png");
         $employeResp->setRedirectionMail(true);
+        $employeResp->setReferent($employe);
 
         $userResp = new User();
         $userResp->setUsername("responsable");
         $userResp->setEmail("responsable@mail.com");
-        $userResp->setPassword('$2y$13$bPRB3KHSR/ONptslkWuhRebHUqXt6D.5V.QSCP1sF2jeTvlpkoKm.');
+        $userResp->setPassword('$2y$13$JKmcrFw2cDOKDZHGiq7PCeqqJkqguMmDHDZC1soigVZWbE6gayLV2');
         $userResp->setEmploye($employeResp);
 
         $manager->persist($userResp);
@@ -116,11 +117,12 @@ class Fixtures extends Fixture
         $employeUser->setAnneeNaissance(2024);
         $employeUser->setPhoto("user.png");
         $employeUser->setRedirectionMail(true);
+        $employeUser->setReferent($employe);
 
         $userUser = new User();
         $userUser->setUsername("user");
         $userUser->setEmail("user@mail.com");
-        $userUser->setPassword("$2y$13$05X.k4012YLEH8wL0N8rNeWKWD4n0r1n12gyMNdX8umkBb5/9zk9u");
+        $userUser->setPassword('$2y$13$jay3l6JKPlW4sWrc4L5zv.fO.OooPsjbxXKQUppqXq9UZ3LEvcR/S');
         $userUser->setEmploye($employeUser);
 
         $manager->persist($employeUser);
@@ -206,7 +208,8 @@ class Fixtures extends Fixture
         $groupe->setNom("groupe 1");
         $groupe->setAcronyme("Grp1");
         $groupe->setResponsable($employeResp);
-        $groupe->addAdjoint($employe);
+        $employe->addGroupesSecondaire($groupe);
+        $employeUser->addGroupesSecondaire($groupe);
 
 
         $groupe2 = new Groupes();
@@ -389,7 +392,7 @@ class Fixtures extends Fixture
         $resStockageHome = new ResStockagesHome();
         $resStockageHome->setNom("home general");
         $resStockageHome->setPath("/home");
-        $resStockageHome->setUser($user);
+        $resStockageHome->setUser($userUser);
 
         $valeur = 5;
         for ($i=0; $i < 2000; $i++) {
@@ -409,7 +412,7 @@ class Fixtures extends Fixture
 
         $resStockageHome2 = new ResStockagesHome();
         $resStockageHome2->setNom("home uc");
-        $resStockageHome2->setUser($user);
+        $resStockageHome2->setUser($userUser);
         $resStockageHome2->setPath("/home" . $user->getUsername());
 
         $valeur = 10;
