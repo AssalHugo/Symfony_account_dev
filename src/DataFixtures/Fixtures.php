@@ -38,7 +38,8 @@ class Fixtures extends Fixture
         $employe->setAnneeNaissance(2024);
         $employe->setPhoto("user.png");
         $employe->setRedirectionMail(true);
-        $employe->setReferent($employe);
+
+
 
         $employe2 = new Employe();
         $employe2->setNom("Jean");
@@ -56,6 +57,11 @@ class Fixtures extends Fixture
 
         $employe->setReferent($employe2);
 
+        $manager->persist($employe);
+        $manager->persist($employe2);
+
+
+
         $user = new User();
         $user->setUsername("hassal");
         $user->setEmail("hugo@mail.com");
@@ -64,11 +70,61 @@ class Fixtures extends Fixture
         $user->setRoles(["ROLE_ADMIN"]);
 
         $user2 = new User();
-        $user2->setUsername("jean");
+        $user2->setUsername("rh");
         $user2->setEmail("jean@mail.com");
-        $user2->setPassword("jean26**");
+        $user2->setPassword("$2y$13$/Wa1X517naPcySLdKFkpheAlonXy6fvgT.AJD7gF1jrt38KcLF1Re");
         $user2->setEmploye($employe2);
         $user2->setRoles(["ROLE_RH"]);
+
+        $manager->persist($user2);
+        $manager->persist($user);
+
+        $employeResp = new Employe();
+        $employeResp->setNom("Alain");
+        $employeResp->setPrenom("Pierre");
+        $employeResp->setSyncReseda(true);
+        $employeResp->setPagePro("page");
+        $employeResp->setIdhal("sebastien-geiger");
+        $employeResp->setOrcid("0000-0003-1412-9991");
+        $employeResp->setMailSecondaire("alain2@mail.com");
+        $employeResp->setTelephoneSecondaire("0101010101");
+        $employeResp->setAnneeNaissance(2024);
+        $employeResp->setPhoto("user.png");
+        $employeResp->setRedirectionMail(true);
+
+        $userResp = new User();
+        $userResp->setUsername("responsable");
+        $userResp->setEmail("responsable@mail.com");
+        $userResp->setPassword('$2y$13$bPRB3KHSR/ONptslkWuhRebHUqXt6D.5V.QSCP1sF2jeTvlpkoKm.');
+        $userResp->setEmploye($employeResp);
+
+        $manager->persist($userResp);
+        $manager->persist($employeResp);
+
+
+
+
+        $employeUser = new Employe();
+        $employeUser->setNom("Pierre");
+        $employeUser->setPrenom("Georges");
+        $employeUser->setSyncReseda(true);
+        $employeUser->setPagePro("page");
+        $employeUser->setIdhal("sebastien-geiger");
+        $employeUser->setOrcid("0000-0003-1412-9991");
+        $employeUser->setMailSecondaire("pierre2@mail.com");
+        $employeUser->setTelephoneSecondaire("0101010101");
+        $employeUser->setAnneeNaissance(2024);
+        $employeUser->setPhoto("user.png");
+        $employeUser->setRedirectionMail(true);
+
+        $userUser = new User();
+        $userUser->setUsername("user");
+        $userUser->setEmail("user@mail.com");
+        $userUser->setPassword("$2y$13$05X.k4012YLEH8wL0N8rNeWKWD4n0r1n12gyMNdX8umkBb5/9zk9u");
+        $userUser->setEmploye($employeUser);
+
+        $manager->persist($employeUser);
+        $manager->persist($userUser);
 
         $status = new Status();
         $status->setType("Stagiaire");
@@ -104,6 +160,26 @@ class Fixtures extends Fixture
         $contrat2->setEmploye($employe2);
         $contrat2->setStatus($status);
 
+        $contrat3 = new Contrats;
+        $contrat3->setDateDebut(new \DateTime("2017-09-31"));
+        $contrat3->setDateFin(new \DateTime("2025-09-31"));
+        $contrat3->setRemarque("remarque 2");
+        $contrat3->setQuotite(20);
+        $contrat3->setEmploye($employeResp);
+        $contrat3->setStatus($status);
+
+        $manager->persist($contrat3);
+
+        $contrat4 = new Contrats;
+        $contrat4->setDateDebut(new \DateTime("2017-09-31"));
+        $contrat4->setDateFin(new \DateTime("2024-09-31"));
+        $contrat4->setRemarque("remarque 2");
+        $contrat4->setQuotite(20);
+        $contrat4->setEmploye($employeUser);
+        $contrat4->setStatus($status);
+
+        $manager->persist($contrat4);
+
         $batiment = new Batiments();
         $batiment->setNom("4");
 
@@ -129,7 +205,8 @@ class Fixtures extends Fixture
         $groupe = new Groupes();
         $groupe->setNom("groupe 1");
         $groupe->setAcronyme("Grp1");
-        $groupe->setResponsable($employe);
+        $groupe->setResponsable($employeResp);
+        $groupe->addAdjoint($employe);
 
 
         $groupe2 = new Groupes();
@@ -162,13 +239,15 @@ class Fixtures extends Fixture
         $manager->persist($user2);
         $manager->persist($employe2);
         $manager->persist($departement);
-        $manager->flush();
 
         $employe->setGroupePrincipal($groupe);
         $manager->persist($employe);
         $employe2->setGroupePrincipal($groupe2);
         $manager->persist($employe2);
-        $manager->flush();
+        $employeResp->setGroupePrincipal($groupe);
+        $manager->persist($employeResp);
+        $employeUser->setGroupePrincipal($groupe2);
+        $manager->persist($employeUser);
 
 
         //boucle qui crée 100 employés des groupes différents, des localisations différentes, des batiments différents, des départements différents, des contrats différents, des status différents, des téléphones différents
@@ -292,7 +371,6 @@ class Fixtures extends Fixture
         $manager->persist($etat5);
 
 
-        $manager->flush();
 
         $periodeJour = new Periode();
         $periodeJour->setType("30 days");
@@ -393,7 +471,6 @@ class Fixtures extends Fixture
             }
         }
 
-        $manager->flush();
 
         $manager->persist($resStockageWork);
         $manager->persist($resStockageWork2);

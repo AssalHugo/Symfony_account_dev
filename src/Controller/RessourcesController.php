@@ -31,7 +31,7 @@ class RessourcesController extends AbstractController
 
         $mesureDeChaqueResHome = $em->getRepository(StockagesMesuresHome::class)->findLatestMeasurementsByUser($user->getId());
 
-        //On récupere la derniere mesure de chaque ressource Home
+        //On récupere le pourcentage de chaque ressource
         $pourcentageHome = array_map(function($mesure) {
             return round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
         }, $mesureDeChaqueResHome);
@@ -46,11 +46,10 @@ class RessourcesController extends AbstractController
         //On ajoute le groupe principal à la liste des groupes secondaires
         $groupes[] = $employe->getGroupePrincipal();
 
-
         //On récupère les dernières mesures de chaque ressource Work
         $mesureDeChaqueResWork = $em->getRepository(StockagesMesuresWork::class)->findLatestMeasurementsByUser($groupes);
 
-        //On récupère la dernière mesure de chaque ressource Work
+        //On récupère le pourcentage de chaque ressource
         $pourcentageWork = array_map(function($mesure) {
             return round(($mesure->getValeurUse() / $mesure->getValeurMax()) * 100, 2);
         }, $mesureDeChaqueResWork);

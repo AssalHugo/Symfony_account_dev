@@ -15,10 +15,22 @@
     <script>
         //Le Javascript ici sert à écrire un message en dessous du champs mail en fonction du statut sélectionné
         document.addEventListener('DOMContentLoaded', function () {
+
             let statut = document.getElementById('requete_contrat_status');
             let mail = document.getElementById('requete_mail');
 
-            mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail personnel</small>');
+            switch (statut.options[statut.selectedIndex].text) {
+
+                case 'Stagiaire':
+                    mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail académique</small>');
+                    break;
+                case 'Collaborateur':
+                    mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail professionnel</small>');
+                    break;
+                default:
+                    mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail personnel</small>');
+                    break;
+            }
 
             statut.addEventListener('change', function () {
                 if (mail.nextElementSibling !== null) {

@@ -1,8 +1,8 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-  <section class="py-5 text-center container">
-    <div class="row py-lg-5">
+  <section class="py-5 container">
+    <div class="row py-lg-5 text-center">
       <div class="col-lg-6 col-md-8 mx-auto">
         {% if not app.user %}
           <h1 class="fw-light">Bienvenue sur le portail de gestion de comptes.</h1>
@@ -17,5 +17,82 @@
         {% endif %}
       </div>
     </div>
+      {% if app.user %}
+      <br>
+      <div class="card" onclick="window.location.href='{{ path('mesInfos') }}'" style="cursor: pointer;" onmouseover="this.style.boxShadow='0 0 10px rgba(0,0,0,0.5)'" onmouseout="this.style.boxShadow='0 0 0px rgba(0,0,0,0.5)'">
+        <div class="card-header">
+          <h3>Utilisateur</h3>
+            <p>Cliquez pour plus d'informations</p>
+        </div>
+        <div class="card-body">
+          <div class="row">
+                <div class="col-sm">
+                    <p><strong>Prénom :</strong> {{ app.user.employe.prenom }}</p>
+                    <p><strong>Nom :</strong> {{ app.user.employe.nom }}</p>
+                    <p><strong>Statut :</strong> {{ app.user.employe.contrats |last.status.type }}</p>
+                    <p><strong>Contrat date de début :</strong> {{ app.user.employe.contrats |last.dateDebut | date('d/m/Y') }}</p>
+                    <p><strong>Groupe principal :</strong> {{ app.user.employe.groupePrincipal.nom }}</p>
+                </div>
+                <div class="col-sm">
+                    <p><strong>Mail pro :</strong> {{ app.user.email }}</p>
+                    <p><strong>Mail perso :</strong> {{ app.user.employe.mailSecondaire }}</p>
+                    <p><strong>Role :</strong> {{ app.user.roles[0] }}</p>
+                    <p><strong>Contrat date de fin :</strong> {{ app.user.employe.contrats |last.dateFin | date('d/m/Y') }}</p>
+                    <div class="row">
+                        <div class="col-sm">
+                            <p><strong>Sync Reseda :</strong></p>
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="flexRadioDisabled" {% if app.user.employe.syncReseda == true %} checked {% endif %} disabled>
+                                <label class="form-check-label" for="flexRadioDisabled">
+                                    Oui
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="flexRadioDisabled" {% if app.user.employe.syncReseda == false %} checked {% endif %} disabled>
+                                <label class="form-check-label" for="flexRadioCheckedDisabled">
+                                    Non
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+          </div>
+      </div>
+      <br>
+      <div class="card" onclick="window.location.href='{{ path('stockage') }}'" style="cursor: pointer;" onmouseover="this.style.boxShadow='0 0 10px rgba(0,0,0,0.5)'" onmouseout="this.style.boxShadow='0 0 0px rgba(0,0,0,0.5)'">
+          <div class="card-header">
+              <h3>Stockage</h3>
+              <p>Cliquez pour plus d'informations</p>
+          </div>
+            <div class="card-body">
+                <div class="row">
+                    <h5>Home :</h5>
+                </div>
+                {% for resStockageHome in resStockagesHome %}
+                    <div class="row">
+                        <p> - {{ resStockageHome.nom }} {% if mesureDeChaqueResHome[loop.index0] is defined %} {{ mesureDeChaqueResHome[loop.index0].valeurUse }}/{{ mesureDeChaqueResHome[loop.index0].valeurMax }} Go {% endif %}  au {{ resStockageHome.path }} </p>
+                    </div>
+                {% endfor %}
+                <div class="row">
+                    <h5>Work :</h5>
+                </div>
+                {% for resStockageWork in resStockagesWork %}
+                    <div class="row">
+                        <p> - {{ resStockageWork.nom }} {% if mesureDeChaqueResWork[loop.index0] is defined %} {{ mesureDeChaqueResWork[loop.index0].valeurUse }}/{{ mesureDeChaqueResWork[loop.index0].valeurMax }} Go {% endif %}  au {{ resStockageWork.path }} </p>
+                    </div>
+                {% endfor %}
+            </div>
+      </div>
+        <br>
+      <h3>Support</h3>
+      <p>Une question, une anomalie, un problème ? N'hésitez pas à nous contacter.</p>
+          {{form(formContact)}}
+      {% endif %}
   </section>
+
 {% endblock %}

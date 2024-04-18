@@ -14,6 +14,8 @@ class ContactSuppportType extends AbstractType
         $builder
             ->add('corps', TextareaType::class, [
                 'label' => ' ',
+                //On met du texte d'aide dans le champ de saisie, on modifie également la taille du champ
+                'attr' => ['placeholder' => 'Saisir votre question ou votre problème ici...', 'rows' => 10, 'cols' => 50]
             ])
         ;
     }

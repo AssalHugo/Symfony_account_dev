@@ -171,43 +171,6 @@ class UserController extends AbstractController
         }
 
 
-        //--------------------Partie contact support--------------
-        $formContact = $this->createForm(ContactSuppportType::class);
-
-        $formContact->add('envoyer', SubmitType::class, ['label' => 'Envoyer']);
-
-        $formContact->handleRequest($request);
-
-        if($formContact->isSubmitted() && $formContact->isValid()){
-
-            //On récupère le corps du message 'corps'
-            $message = $formContact->getData()['corps'];
-
-            //On récupere tous les emails des admins
-            $adminRepo = $entityManager->getRepository(User::class);
-            $admins = $adminRepo->findByRole("ROLE_ADMIN");
-
-            //On envoie un mail à chaque admin
-            foreach ($admins as $admin) {
-
-                try {
-                    $senderMail->sendMail('you@example.com', $admin->getEmail(), 'Contact support', $message);
-                }
-                catch (TransportExceptionInterface $e) {
-                    $session = $request->getSession();
-                    $session->getFlashBag()->add('message', 'Le message n\'a pas pu être envoyé');
-                    $session->set('statut', 'danger');
-                    return $this->redirect($this->generateUrl('mesInfos'));
-                }
-            }
-
-            $session = $request->getSession();
-            $session->getFlashBag()->add('message', 'Le message a bien été envoyé');
-            $session->set('statut', 'success');
-
-            return $this->redirectToRoute('mesInfos');
-        }
-
 
 
         //-----------------Partie upload photo profil-----------------
@@ -243,7 +206,6 @@ class UserController extends AbstractController
             'formLocalisation' => $formLocalisation->createView(),
             'formsTelephones' => $formsTelephones,
             'formTelephone' => $formTelephone->createView(),
-            'formContact' => $formContact->createView(),
             'telephones' => $telephones,
             'formPhoto' => $formUploadPhoto->createView(),
         ]);
