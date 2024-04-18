@@ -456,7 +456,7 @@ class Fixtures extends Fixture
 
         $resStockageWork2 = new ResStockageWork();
         $resStockageWork2->setNom("uc");
-        $resStockageWork->setPath("/work/uc");
+        $resStockageWork2->setPath("/work/uc");
         $resStockageWork2->setGroupe($groupe);
 
         $valeur = 10;
