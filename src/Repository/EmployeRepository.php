@@ -131,16 +131,27 @@ class EmployeRepository extends ServiceEntityRepository
                     ->getSingleScalarResult();
     }
 
+    /**
+     * Fonction qui retourne le no
+     * @return int
+     */
     public function countEmployesEntreDates() : int {
 
+        $subQuery = $this->createQueryBuilder('e1')
+            ->select('MAX(c1.date_fin)')
+            ->innerJoin('e1.contrats', 'c1')
+            ->where('e1.id = e.id')
+            ->getDQL();
+
         return $this->createQueryBuilder('e')
-                            ->select('count(e.id)')
-                            ->leftJoin('e.contrats', 'c')
-                            ->where('c.date_debut <= :date')
-                            ->andWhere('c.date_fin >= :date')
-                            ->setParameter('date', new \DateTime())
-                            ->getQuery()
-                            ->getSingleScalarResult();
+            ->select('count(e.id)')
+            ->innerJoin('e.contrats', 'c')
+            ->where('c.date_debut <= :date')
+            ->andWhere('c.date_fin >= :date')
+            ->andWhere('c.date_fin = (' . $subQuery . ')')
+            ->setParameter('date', new \DateTime())
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     //    /**
