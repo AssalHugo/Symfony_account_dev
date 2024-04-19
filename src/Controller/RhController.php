@@ -25,6 +25,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -510,12 +511,27 @@ class RhController extends AbstractController {
         //On crée le formulaire de filtre
         $formFiltre = $this->createForm(TrombinoscopeType::class);
 
+        //On ajoute un bouton pour filtrer en fonction de si le compte est actif ou non
+        $formFiltre->add('actif', CheckboxType::class, [
+            'required' => false,
+            'label' => 'Compte actif',
+            'attr' => ['class' => 'form-check-input'],
+        ]);
+
         $formFiltre->add('filtrer', SubmitType::class, ['label' => 'Filtrer']);
 
         $formFiltre->handleRequest($request);
 
         $employes = $trombinoscope->getQuery($formFiltre, $request, $employeRepository)->getQuery()->getResult();
 
+        //On traite la partie actif ou pas du formulaire
+        if ($formFiltre->isSubmitted() && $formFiltre->isValid()) {
+            $data = $formFiltre->getData();
+
+            if ($data['actif']) {
+                $employes = $trombinoscope->getEmployesActifs($employes);
+            }
+        }
         //On récupère le nombres d'employés, de départements et de groupes au total dans la bd et le nombre affiché
         $nbEmployes = $employeRepository->countEmployes();
 

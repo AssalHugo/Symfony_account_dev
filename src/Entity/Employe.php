@@ -139,6 +139,18 @@ class Employe
         return $dateFinContrat;
     }
 
+    public function getDateDebutContrat(): ?\DateTimeInterface
+    {
+        $contrats = $this->contrats->toArray();
+        $dateDebutContrat = null;
+        foreach ($contrats as $contrat) {
+            if ($contrat->getDateDebut() < $dateDebutContrat) {
+                $dateDebutContrat = $contrat->getDateDebut();
+            }
+        }
+        return $dateDebutContrat;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

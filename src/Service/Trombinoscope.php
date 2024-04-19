@@ -125,4 +125,19 @@ class Trombinoscope
             }
         }
     }
+
+    /**
+     * Si la date de fin de contrat est supérieure à la date du jour et la date de début de contrat est inférieure à la date du jour, l'employé est actif
+     * @param mixed $employes
+     * @return void
+     */
+    public function getEmployesActifs(mixed $employes) : array {
+        $employesActifs = [];
+        foreach ($employes as $employe) {
+            if ($employe->getDateFinContrat() == null || $employe->getDateFinContrat() > new \DateTime() && $employe->getDateDebutContrat() < new \DateTime()) {
+                $employesActifs[] = $employe;
+            }
+        }
+        return $employesActifs;
+    }
 }
