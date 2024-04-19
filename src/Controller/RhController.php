@@ -23,6 +23,7 @@ use App\Service\SenderMail;
 use App\Service\Trombinoscope;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -33,6 +34,13 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class RhController extends AbstractController {
+
+    private PaginatorInterface $paginator;
+
+    public function __construct(PaginatorInterface $paginator)
+    {
+        $this->paginator = $paginator;
+    }
 
     /**
      * @param EntityManagerInterface $entityManager
@@ -515,6 +523,7 @@ class RhController extends AbstractController {
         $formFiltre->add('actif', CheckboxType::class, [
             'required' => false,
             'label' => 'Compte actif',
+            'data' => true,
             'attr' => ['class' => 'form-check-input'],
         ]);
 
@@ -522,7 +531,10 @@ class RhController extends AbstractController {
 
         $formFiltre->handleRequest($request);
 
-        $employes = $trombinoscope->getQuery($formFiltre, $request, $employeRepository)->getQuery()->getResult();
+        $query = $trombinoscope->getQuery($formFiltre, $request, $employeRepository)->getQuery();
+        $query2 = $query;
+        $employes = $query2->getResult();
+
 
         //On traite la partie actif ou pas du formulaire
         if ($formFiltre->isSubmitted() && $formFiltre->isValid()) {
@@ -548,6 +560,16 @@ class RhController extends AbstractController {
         $nbDepartementsAffiches = 0;
         $trombinoscope->setNbGroupesAffichesEtNbDepAffiches($employes, $nbGroupesAffiches, $nbDepartementsAffiches);
 
+        $page = $request->query->getInt('p', 1);
+
+        $employes = $this->paginator->paginate(
+            $query,
+            1,
+            $nbEmployesAffiches,
+            array(
+                'defaultSortDirection' => 'asc',
+                'wrap-queries'=>true)
+        );
 
         if (count($employes) == 0){
 

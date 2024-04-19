@@ -71,6 +71,8 @@ class EmployeRepository extends ServiceEntityRepository
 
         return $this->createQueryBuilder('e')
             ->leftJoin('e.contrats', 'c')
+            ->leftJoin('c.status', 's')
+            ->leftJoin('e.groupe_principal', 'gP')
                     ->select('e');
     }
 

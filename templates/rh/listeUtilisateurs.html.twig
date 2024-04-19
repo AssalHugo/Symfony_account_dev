@@ -19,11 +19,11 @@
         <thead>
             <tr>
                 <th>Photo</th>
-                <th>Prénom</th>
-                <th>Nom</th>
-                <th>Date d'arrivée</th>
-                <th>Date de départ</th>
-                <th>Status</th>
+                <th>{{ knp_pagination_sortable(employes, 'prenom', 'e.prenom') }}</th>
+                <th>{{ knp_pagination_sortable(employes, 'nom', 'e.nom') }}</th>
+                <th>{{ knp_pagination_sortable(employes, 'dateDebut', 'c.date_debut') }}</th>
+                <th>{{ knp_pagination_sortable(employes, 'dateFin', 'c.date_fin') }}</th>
+                <th>{{ knp_pagination_sortable(employes, 'status', 's.type') }}</th>
                 <th>Departements</th>
                 <th>Groupes</th>
             </tr>
