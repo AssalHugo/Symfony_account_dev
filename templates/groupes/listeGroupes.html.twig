@@ -59,6 +59,9 @@
             </tbody>
         </table>
         <br>
+        {% if (app.user.roles[0] == 'ROLE_ADMIN' or app.user.roles[0] == 'ROLE_RH') or ((groupe.responsable == app.user.employe or app.user.employe in groupe.adjoints) ) %}
+            {{ form(forms[loop.index0]) }}
+        {% endif %}
         <br>
     {% endfor %}
     </div>

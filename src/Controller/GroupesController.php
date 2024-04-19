@@ -2,9 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Employe;
-use App\Entity\Localisations;
-use App\Form\LocalisationType;
+use App\Form\AjoutEmployeAGroupeType;
+use App\Service\GroupesService;
 use App\Service\Remove;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +13,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class GroupesController extends AbstractController
 {
@@ -151,7 +149,7 @@ class GroupesController extends AbstractController
      * Controleur qui permet d'afficher la liste des utilisateurs de chaque groupe appartenant à l'employé connecté
      */
     #[Route('/groupes/liste', name: 'liste')]
-    public function liste(Request $request, EntityManagerInterface $entityManager): Response
+    public function liste(Request $request, EntityManagerInterface $entityManager, GroupesService $groupesService): Response
     {
         $employe = $this->getUser()->getEmploye();
 
@@ -160,8 +158,41 @@ class GroupesController extends AbstractController
         //On ajoute le groupe principal à la liste des groupes secondaires
         $groupes[] = $employe->getGroupePrincipal();
 
+        $forms = [];
+
+
+        foreach ($groupes as $groupe) {
+            $employesNonGroupe = $groupesService->getEmployeNonGroupe($groupe, $entityManager);
+
+            $formAjoutEmploye = $this->createForm(AjoutEmployeAGroupeType::class, null, ['employesNonGroupe' => $employesNonGroupe]);
+
+            $formAjoutEmploye->handleRequest($request);
+
+            //On vérifie si le formulaire est soumis et valide et que ce soit le bon formulaire
+            if ($formAjoutEmploye->isSubmitted() && $formAjoutEmploye->isValid() && $formAjoutEmploye->get('submit')->isClicked() && $formAjoutEmploye->getData()['groupesSecondaires'] != null) {
+                $data = $formAjoutEmploye->getData();
+
+                $employe = $data['groupesSecondaires'];
+
+                $employe->addGroupesSecondaire($groupe);
+
+                $entityManager->persist($employe);
+                $entityManager->flush();
+
+                //On crée un message flash pour informer l'utilisateur que l'employé a bien été ajouté
+                $session = $request->getSession();
+                $session->getFlashBag()->add('message', "L'employé a bien été ajouté.");
+                $session->set('statut', 'success');
+
+                return $this->redirectToRoute('liste');
+            }
+
+            $forms[] = $formAjoutEmploye->createView();
+        }
+
         return $this->render('groupes/listeGroupes.html.twig', [
             'groupes' => $groupes,
+            'forms' => $forms,
         ]);
     }
 

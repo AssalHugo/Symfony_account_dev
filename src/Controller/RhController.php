@@ -8,6 +8,7 @@ use App\Entity\EtatsRequetes;
 use App\Entity\Groupes;
 use App\Entity\Requetes;
 use App\Entity\User;
+use App\Form\AjoutEmployeAGroupeType;
 use App\Form\AjouterGroupeType;
 use App\Form\DepartementType;
 use App\Form\EmployeInformationsType;
@@ -16,6 +17,7 @@ use App\Form\ResponsableType;
 use App\Form\TrombinoscopeType;
 use App\Service\DemandeCompte;
 use App\Service\FlashBag;
+use App\Service\GroupesService;
 use App\Service\Remove;
 use App\Service\SenderMail;
 use App\Service\Trombinoscope;
@@ -342,7 +344,7 @@ class RhController extends AbstractController {
     }
 
     #[Route('/rh/listeGroupe/{id}', name: 'listeGroupe')]
-    public function listeGroupe($id, EntityManagerInterface $entityManager, Request $request): Response
+    public function listeGroupe($id, EntityManagerInterface $entityManager, Request $request, GroupesService $groupes): Response
     {
 
         //On récupère le departement
@@ -387,36 +389,8 @@ class RhController extends AbstractController {
 
         //Formulaire ajout d'un employé dans le groupe
         //On récupère les employés qui ne sont pas dans le groupe
-        $employeRepo = $entityManager->getRepository(Employe::class);
-
-        $employes = $employeRepo->findAll();
-
-        $employesGroupePrincipaux = $groupe->getEmployesGrpPrincipaux()->toArray();
-
-        $employesGroupeSecondaires = $groupe->getEmployeGrpSecondaires()->toArray();
-
-        $employesGroupe = array_merge($employesGroupePrincipaux, $employesGroupeSecondaires);
-
-        $employesNonGroupe = array_udiff($employes, $employesGroupe,
-            function ($obj_a, $obj_b) {
-                return $obj_a->getId() - $obj_b->getId();
-            }
-        );
-
         //On met dans le formulaire les nom des employés
-        $formAjoutEmploye = $this->createFormBuilder()
-            ->add('groupesSecondaires', EntityType::class, [
-                'choices' => $employesNonGroupe,
-                'class' => Employe::class,
-                'choice_label' => function ($employe) {
-                    return $employe->getPrenom() . ' ' . $employe->getNom();
-                },
-                'label' => 'Ajouter un employé :',
-            ])
-            ->add('submit', SubmitType::class, [
-                'label' => 'Ajouter',
-            ])
-            ->getForm();
+        $formAjoutEmploye = $this->createForm(AjoutEmployeAGroupeType::class, null, ['employesNonGroupe' => $groupes->getEmployeNonGroupe($groupe, $entityManager)]);
 
         $formAjoutEmploye->handleRequest($request);
 

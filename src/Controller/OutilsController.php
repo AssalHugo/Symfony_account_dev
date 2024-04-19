@@ -8,7 +8,6 @@ use App\Entity\EtatsRequetes;
 use App\Entity\Groupes;
 use App\Entity\Requetes;
 use App\Entity\User;
-use App\Form\ContactSecondairesType;
 use App\Form\RedirectionMailType;
 use App\Form\RequeteType;
 use App\Form\TrombinoscopeType;
@@ -17,15 +16,12 @@ use App\Service\SenderMail;
 use App\Service\Trombinoscope;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 class OutilsController extends AbstractController
