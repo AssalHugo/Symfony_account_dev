@@ -18,7 +18,8 @@ class ChangerMDPType extends AbstractType
             ->add('user', EntityType::class, [
                 'class' => User::class,
                 'choice_label' => 'username',
-                'label' => 'Nom d\'utilisateur : '
+                'label' => 'Nom d\'utilisateur : ',
+                'autocomplete' => true
             ])
             ->add('password', null, [
                 'label' => 'Nouveau mot de passe : '

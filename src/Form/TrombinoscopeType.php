@@ -35,7 +35,7 @@ class TrombinoscopeType extends AbstractType
             ->add('nom', null, [
                 'required' => false,
                 'label' => 'Nom : ',
-                'data' => $prenom
+                'data' => $nom
             ])
             ->add('prenom', null, [
                 'required' => false,

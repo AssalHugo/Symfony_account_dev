@@ -2,13 +2,11 @@
 
 namespace App\Form;
 
-use App\Entity\Employe;
 use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ChangerRoleType extends AbstractType
 {
@@ -19,7 +17,8 @@ class ChangerRoleType extends AbstractType
                 'class' => User::class,
                 'choice_label' => 'username',
                 'label' => 'Nom d\'utilisateur : ',
-                'attr' => ['id' => 'user_select']
+                'attr' => ['id' => 'user_select'],
+                'autocomplete' => true
             ])
             ->add('role', ChoiceType::class, [
                 'choices' => [
