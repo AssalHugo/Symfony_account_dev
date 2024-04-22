@@ -27,6 +27,7 @@ use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -553,6 +554,36 @@ class RhController extends AbstractController {
 
         $page = $request->query->getInt('p', 1);
 
+        $formFiltreParPage = $this->createFormBuilder()
+            ->setMethod('GET')
+            ->getForm();
+
+        //on ajoute un formulaire pour modifier le nombre d'employés affichés par page
+        $formFiltreParPage->add('nbEmployesAffiches', ChoiceType::class, [
+            'choices' => [
+                '5' => 5,
+                '10' => 10,
+                '15' => 15,
+                '20' => 20,
+                '25' => 25,
+                '50' => 50,
+                '100' => 100,
+            ],
+            'label' => 'Nombre d\'employés affichés par page : ',
+            'required' => true,
+            'attr' => ['onchange' => 'this.form.submit()'],
+        ]);
+
+        $formFiltreParPage->handleRequest($request);
+
+        if ($formFiltreParPage->isSubmitted() && $formFiltreParPage->isValid()) {
+            $nbEmployesAffichesParPage = $formFiltreParPage->get('nbEmployesAffiches')->getData();
+        }
+        else {
+            $nbEmployesAffichesParPage = 10;
+        }
+
+
         if (count($employes) == 0){
 
             $flashBag->flashBagDanger("Aucun employé ne correspond à votre recherche.", $request);
@@ -560,8 +591,8 @@ class RhController extends AbstractController {
         else {
             $employes = $this->paginator->paginate(
                 $query,
-                1,
-                $nbEmployesAffiches,
+                $page,
+                $nbEmployesAffichesParPage,
                 array(
                     'defaultSortDirection' => 'asc',
                     'wrap-queries'=>true)
@@ -578,6 +609,7 @@ class RhController extends AbstractController {
             'nbEmployesAffiches' => $nbEmployesAffiches,
             'nbGroupesAffiches' => $nbGroupesAffiches,
             'nbDepartementsAffiches' => $nbDepartementsAffiches,
+            'formFiltreParPage' => $formFiltreParPage->createView(),
         ]);
     }
 
