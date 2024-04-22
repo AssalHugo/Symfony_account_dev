@@ -531,19 +531,10 @@ class RhController extends AbstractController {
 
         $formFiltre->handleRequest($request);
 
-        $query = $trombinoscope->getQuery($formFiltre, $request, $employeRepository)->getQuery();
+        $query = $trombinoscope->getQueryBuilder($formFiltre, $request, $employeRepository)->getQuery();
         $query2 = $query;
         $employes = $query2->getResult();
 
-
-        //On traite la partie actif ou pas du formulaire
-        if ($formFiltre->isSubmitted() && $formFiltre->isValid()) {
-            $data = $formFiltre->getData();
-
-            if ($data['actif']) {
-                $employes = $trombinoscope->getEmployesActifs($employes);
-            }
-        }
         //On récupère le nombres d'employés, de départements et de groupes au total dans la bd et le nombre affiché
         $nbEmployes = $employeRepository->countEmployes();
 

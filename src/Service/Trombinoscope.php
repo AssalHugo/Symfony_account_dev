@@ -16,7 +16,7 @@ class Trombinoscope
      * @param EmployeRepository $employeRepository
      * @return QueryBuilder
      */
-    public function getQuery(FormInterface $formFiltre, Request $request, EmployeRepository $employeRepository) : QueryBuilder {
+    public function getQueryBuilder(FormInterface $formFiltre, Request $request, EmployeRepository $employeRepository) : QueryBuilder {
 
         //Si le formulaire est soumis et valide
         if ($formFiltre->isSubmitted() && $formFiltre->isValid()) {
@@ -32,8 +32,14 @@ class Trombinoscope
             $groupe = $data['groupe'];
             $statut = $data['statut'];
 
+            if (isset($data['actif'])) {
+                $actif = $data['actif'];
+            } else {
+                $actif = true;
+            }
+
             //On récupère les utilisateurs en fonction des filtres
-            $query = $employeRepository->findByFiltre($nom, $prenom, $departement, $groupe, $statut);
+            $query = $employeRepository->findByFiltre($nom, $prenom, $departement, $groupe, $statut, $actif);
 
             //On met les informations dans la session pour les garder en mémoire
             $session = $request->getSession();
@@ -84,12 +90,12 @@ class Trombinoscope
             $groupe = $session->get('groupe');
             $statut = $session->get('statutEmploye');
 
-            $query = $employeRepository->findByFiltre($nom, $prenom, $departement, $groupe, $statut);
+            $query = $employeRepository->findByFiltre($nom, $prenom, $departement, $groupe, $statut, null);
         } //Sinon on récupère tous les utilisateurs
         else {
 
             //On récupère tous les utilisateurs
-            $query = $employeRepository->findAllEmployes();
+            $query = $employeRepository->findAllEmployesActifs();
         }
 
         return $query;
@@ -124,20 +130,5 @@ class Trombinoscope
                 $departements[] = $groupe->getDepartement();
             }
         }
-    }
-
-    /**
-     * Si la date de fin de contrat est supérieure à la date du jour et la date de début de contrat est inférieure à la date du jour, l'employé est actif
-     * @param mixed $employes
-     * @return void
-     */
-    public function getEmployesActifs(mixed $employes) : array {
-        $employesActifs = [];
-        foreach ($employes as $employe) {
-            if ($employe->getDateFinContrat() == null || $employe->getDateFinContrat() > new \DateTime() && $employe->getDateDebutContrat() < new \DateTime()) {
-                $employesActifs[] = $employe;
-            }
-        }
-        return $employesActifs;
     }
 }

@@ -51,7 +51,7 @@ class OutilsController extends AbstractController
         $formFiltre->handleRequest($request);
 
         //On récupère la query en fonction des filtres
-        $query = $trombinoscope->getQuery($formFiltre, $request, $employeRepository);
+        $query = $trombinoscope->getQueryBuilder($formFiltre, $request, $employeRepository);
 
         //On ne récupere que les employés actifs (qui ont une date de début de contrat inférieure à la date du jour et une date de fin de contrat supérieure à la date du jour)
         $query

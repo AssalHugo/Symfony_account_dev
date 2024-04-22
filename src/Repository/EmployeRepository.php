@@ -27,7 +27,7 @@ class EmployeRepository extends ServiceEntityRepository
     /**
      * Fonction qui permet de récupérer les employés en fonction des filtres
      */
-    public function findByFiltre($nom, $prenom, $departement, $groupe, $statut): QueryBuilder {
+    public function findByFiltre($nom, $prenom, $departement, $groupe, $statut, $actif): QueryBuilder {
 
         //ne pas oublier que l'employé peut posséder plusieurs groupes il a les groupes secondaires et sont groupe principal
         $qb = $this->createQueryBuilder('e')
@@ -64,16 +64,28 @@ class EmployeRepository extends ServiceEntityRepository
                 ->setParameter('departement', '%'.$departement.'%');
         }
 
+        if ($actif != null){
+            $qb->andWhere('c.date_debut <= :date')
+                ->andWhere('c.date_fin >= :date')
+                ->setParameter('date', new \DateTime());
+        }
+
         return $qb;
     }
 
-    public function findAllEmployes() : QueryBuilder{
+    /**
+     * Fonction qui permet de récupérer tous les employés actifs
+     * @return QueryBuilder
+     */
+    public function findAllEmployesActifs() : QueryBuilder{
 
         return $this->createQueryBuilder('e')
             ->leftJoin('e.contrats', 'c')
             ->leftJoin('c.status', 's')
             ->leftJoin('e.groupe_principal', 'gP')
-                    ->select('e');
+            ->Where('c.date_debut <= :date')
+            ->andWhere('c.date_fin >= :date')
+            ->setParameter('date', new \DateTime());
     }
 
     public function findByPrenomNom($prenom, $nom): array
