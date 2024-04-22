@@ -173,6 +173,16 @@ class RessourcesController extends AbstractController
             'datasets' => $dataSet,
         ]);
 
+        if ($periode == '30 days') {
+            $textX = 'jour/mois/année heure:minute:seconde';
+        }
+        elseif ($periode == '1 year') {
+            $textX = 'Semaine/Année';
+        }
+        else {
+            $textX = 'Année';
+        }
+
         //On échange de sens les labels pour les rendre plus lisibles
         $chart->setOptions([
             'scales' => [
@@ -187,7 +197,7 @@ class RessourcesController extends AbstractController
                 'x' => [
                     'title' => [
                         'display' => true,
-                        'text' => 'Date',
+                        'text' => $textX,
                         ],
                 ],
             ],

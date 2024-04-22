@@ -19,11 +19,19 @@
         <thead>
             <tr>
                 <th>Photo</th>
-                <th>{{ knp_pagination_sortable(employes, 'prenom', 'e.prenom') }}</th>
-                <th>{{ knp_pagination_sortable(employes, 'nom', 'e.nom') }}</th>
-                <th>{{ knp_pagination_sortable(employes, 'dateDebut', 'c.date_debut') }}</th>
-                <th>{{ knp_pagination_sortable(employes, 'dateFin', 'c.date_fin') }}</th>
-                <th>{{ knp_pagination_sortable(employes, 'status', 's.type') }}</th>
+                {% if not is_array(employes) %}
+                    <th>{{ knp_pagination_sortable(employes, 'prenom', 'e.prenom') }}</th>
+                    <th>{{ knp_pagination_sortable(employes, 'nom', 'e.nom') }}</th>
+                    <th>{{ knp_pagination_sortable(employes, 'dateDebut', 'c.date_debut') }}</th>
+                    <th>{{ knp_pagination_sortable(employes, 'dateFin', 'c.date_fin') }}</th>
+                    <th>{{ knp_pagination_sortable(employes, 'status', 's.type') }}</th>
+                {% else %}
+                    <th>Prenom</th>
+                    <th>Nom</th>
+                    <th>Date de debut</th>
+                    <th>Date de fin</th>
+                    <th>Status</th>
+                {% endif %}
                 <th>Departements</th>
                 <th>Groupes</th>
             </tr>

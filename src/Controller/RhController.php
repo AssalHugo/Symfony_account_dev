@@ -553,19 +553,21 @@ class RhController extends AbstractController {
 
         $page = $request->query->getInt('p', 1);
 
-        $employes = $this->paginator->paginate(
-            $query,
-            1,
-            $nbEmployesAffiches,
-            array(
-                'defaultSortDirection' => 'asc',
-                'wrap-queries'=>true)
-        );
-
         if (count($employes) == 0){
 
             $flashBag->flashBagDanger("Aucun employé ne correspond à votre recherche.", $request);
         }
+        else {
+            $employes = $this->paginator->paginate(
+                $query,
+                1,
+                $nbEmployesAffiches,
+                array(
+                    'defaultSortDirection' => 'asc',
+                    'wrap-queries'=>true)
+            );
+        }
+
 
         return $this->render('rh/listeUtilisateurs.html.twig', [
             'employes' => $employes,
