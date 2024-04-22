@@ -2,7 +2,10 @@
 
 namespace App\Form;
 
+use App\Entity\Employe;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -32,7 +35,7 @@ class TrombinoscopeType extends AbstractType
             ->add('nom', null, [
                 'required' => false,
                 'label' => 'Nom : ',
-                'data' => $nom
+                'data' => $prenom
             ])
             ->add('prenom', null, [
                 'required' => false,
