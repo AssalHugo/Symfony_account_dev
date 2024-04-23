@@ -87,10 +87,28 @@ class AdminController extends AbstractController
         //On récupère les employés qui sont LIKE %nom% et LIKE %prenom%
         $employes = $employeRepo->findByPrenomNom($prenom, $nom);
 
+        //On crée un formulaire pour suggérer un login
+        $formSuggestion = $this->createFormBuilder()
+            ->add('suggestion', TextType::class, ['label' => 'Suggestion :', 'data' => $this->generateUsername($demandeCompte, $entityManager)])
+            ->add('creer', SubmitType::class, ['label' => 'Créer un Compte', 'attr' => ['class' => 'btn-success']])
+            ->getForm();
+
+        $formSuggestion->handleRequest($request);
+
+        if ($formSuggestion->isSubmitted() && $formSuggestion->isValid() && $formSuggestion->get('creer')->isClicked()) {
+            $data = $formSuggestion->getData();
+
+            $entityManager->persist($demandeCompte);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('validerDemandeCompteAdmin', ['idDemandeCompte' => $demandeCompte->getId(), 'username' => $data['suggestion']]);
+        }
+
         return $this->render('admin/verificationDemandeCompte.html.twig', [
             'form' => $formPrenomNom->createView(),
             'employes' => $employes,
             'demande' => $demandeCompte,
+            'formSuggestion' => $formSuggestion->createView(),
         ]);
     }
 
@@ -169,9 +187,25 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('listeDemandesComptesAdmin');
     }
 
+    private function generateUsername($demandeCompte, $entityManager) {
+        $username = substr($demandeCompte->getPrenom(), 0, 1) . $demandeCompte->getNom();
+        $username = substr($username, 0, 8);
 
-    #[Route('/admin/validerDemandeCompte/{idDemandeCompte}', name: 'validerDemandeCompteAdmin')]
-    public function validerDemandeCompte($idDemandeCompte, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher, SenderMail $senderMail): Response {
+        //On vérifie si le nom d'utilisateur n'est pas déjà utilisé dans la base de données
+        $userRepo = $entityManager->getRepository(User::class);
+        $userMemeNom = $userRepo->findBy(['username' => $username]);
+        //Si la taille de la liste est supérieure à 0, cela signifie que le nom d'utilisateur est déjà utilisé
+        if (count($userMemeNom) > 0) {
+            //On rajoute un chiffre à la fin du nom d'utilisateur
+            $username = $username . count($userMemeNom);
+        }
+
+        return $username;
+    }
+
+
+    #[Route('/admin/validerDemandeCompte/{idDemandeCompte}/{username}', name: 'validerDemandeCompteAdmin', requirements: ['username' => '[a-zA-Z0-9]+'], defaults: ['username' => ''])]
+    public function validerDemandeCompte($idDemandeCompte, $username, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher, SenderMail $senderMail): Response {
 
         //On récupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
@@ -188,17 +222,6 @@ class AdminController extends AbstractController
         $user->addResStockagesHome($resStockageHome);
 
         //On set le nom d'utilisateur de l'utilisateur la premiere lettre du prenom suivie du nom avec un max de 8 caracteres
-        $username = substr($demandeCompte->getPrenom(), 0, 1) . $demandeCompte->getNom();
-        $username = substr($username, 0, 8);
-
-        //On vérifie si le nom d'utilisateur n'est pas déjà utilisé dans la base de données
-        $userRepo = $entityManager->getRepository(User::class);
-        $userMemeNom = $userRepo->findBy(['username' => $username]);
-        //Si la taille de la liste est supérieure à 0, cela signifie que le nom d'utilisateur est déjà utilisé
-        if (count($userMemeNom) > 0) {
-            //On rajoute un chiffre à la fin du nom d'utilisateur
-            $username = $username . count($userMemeNom);
-        }
         $user->setUsername($username);
 
         //On set le mot de passe de l'utilisateur qui va etre généré automatiquement
