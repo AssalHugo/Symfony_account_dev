@@ -304,7 +304,7 @@ class RessourcesController extends AbstractController
         $labels = [];
         //On met les labels dans le bon format
         foreach($labelsMesures as $label){
-            $labels[] = $label['date_mesure']->format('d/m/Y H:i:s');
+            $labels[] = $label['date_mesure']->format('d/m/Y');
         }
 
         // On récupère les mesures de chaque serveur
@@ -340,7 +340,7 @@ class RessourcesController extends AbstractController
                     foreach($mesures as $mesure){
 
                         // Si la date de la mesure est égale à la date du label, on récupère la valeur
-                        if($label == $mesure->getDateMesure()->format('d/m/Y H:i:s')){
+                        if($label == $mesure->getDateMesure()->format('d/m/Y')){
                             $valeurCpu = $mesure->getCpu();
                             $valeurRam = $mesure->getRamUtilise();
                             $valeurNbUsers = $mesure->getNbUtilisateurs();

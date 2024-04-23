@@ -485,6 +485,16 @@ class Fixtures extends Fixture
                 $this->creerServeur($groupe2, $employe, $manager, "serveur" . $i);
             }
         }
+
+
+        //On crée un user qui va permettre de communiquer avec les API
+        $userApi = new User();
+        $userApi->setUsername("api");
+        $userApi->setEmail('');
+        $userApi->setPassword('$2y$13$G96OoQ1QoGgglja7bZegW.2a2U4Ryi98PLQuVx.yaGlSq9xeCV5sC');
+        $userApi->setRoles(["ROLE_API"]);
+        $manager->persist($userApi);
+
         $manager->flush();
     }
 
