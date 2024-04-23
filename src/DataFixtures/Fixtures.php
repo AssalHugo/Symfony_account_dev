@@ -490,10 +490,17 @@ class Fixtures extends Fixture
         //On crée un user qui va permettre de communiquer avec les API
         $userApi = new User();
         $userApi->setUsername("api");
-        $userApi->setEmail('');
+        $userApi->setEmail(null);
         $userApi->setPassword('$2y$13$G96OoQ1QoGgglja7bZegW.2a2U4Ryi98PLQuVx.yaGlSq9xeCV5sC');
         $userApi->setRoles(["ROLE_API"]);
         $manager->persist($userApi);
+
+        $userApiMdp = new User();
+        $userApiMdp->setUsername("api_mdp");
+        $userApiMdp->setEmail(null);
+        $userApiMdp->setPassword('$2y$13$3FGx5DvBEdZHsFMyPW4kheasOdycVMNLTud5el4JftId.RE9lH0Ca');
+        $userApiMdp->setRoles(["ROLE_API_MDP"]);
+        $manager->persist($userApiMdp);
 
         $manager->flush();
     }

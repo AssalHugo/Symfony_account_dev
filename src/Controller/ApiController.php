@@ -16,9 +16,6 @@ class ApiController extends AbstractController
     #[IsGranted('ROLE_API')]
     public function getDemandesEnCours(RequetesRepository $repository): JsonResponse
     {
-        // Vérifie si l'utilisateur est connecté et a le rôle ROLE_ADMIN
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
         $demandes = $repository->findByEtatRequete('Validé par admin');
 
         $data = [];
@@ -27,8 +24,9 @@ class ApiController extends AbstractController
                 'id' => $demande->getId(),
                 'nom' => $demande->getNom(),
                 'prenom' => $demande->getPrenom(),
-                'groupe_principal' => $demande->getGroupePrincipal()->getNom(),
+                'date_de_debut_de_contrat' => $demande->getContrat()->getDateDebut()->format('Y-m-d'),
                 'date_de_fin_de_contrat' => $demande->getContrat()->getDateFin()->format('Y-m-d'),
+                'groupe_principal' => $demande->getGroupePrincipal()->getNom(),
             ];
         }
 
