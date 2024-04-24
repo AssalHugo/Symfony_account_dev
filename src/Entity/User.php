@@ -42,9 +42,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: ResStockagesHome::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private Collection $resStockagesHomes;
 
+    /**
+     * @var Collection<int, Requetes>
+     */
+    #[ORM\OneToMany(targetEntity: Requetes::class, mappedBy: 'user_cree')]
+    private Collection $requetes;
+
     public function __construct()
     {
         $this->resStockagesHomes = new ArrayCollection();
+        $this->requetes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -179,6 +186,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($resStockagesHome->getUser() === $this) {
                 $resStockagesHome->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Requetes>
+     */
+    public function getRequetes(): Collection
+    {
+        return $this->requetes;
+    }
+
+    public function addRequete(Requetes $requete): static
+    {
+        if (!$this->requetes->contains($requete)) {
+            $this->requetes->add($requete);
+            $requete->setUserCree($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRequete(Requetes $requete): static
+    {
+        if ($this->requetes->removeElement($requete)) {
+            // set the owning side to null (unless already changed)
+            if ($requete->getUserCree() === $this) {
+                $requete->setUserCree(null);
             }
         }
 

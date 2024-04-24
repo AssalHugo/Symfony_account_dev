@@ -51,6 +51,15 @@ class Requetes
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $date_validation = null;
 
+    #[ORM\ManyToOne(inversedBy: 'requetes')]
+    private ?EtatSystemeRequete $etat_systeme_requete = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $mdp_provisoire = null;
+
+    #[ORM\ManyToOne(inversedBy: 'requetes')]
+    private ?User $user_cree = null;
+
 
     public function getId(): ?int
     {
@@ -197,6 +206,42 @@ class Requetes
     public function setDateValidation(?\DateTimeInterface $date_validation): static
     {
         $this->date_validation = $date_validation;
+
+        return $this;
+    }
+
+    public function getEtatSystemeRequete(): ?EtatSystemeRequete
+    {
+        return $this->etat_systeme_requete;
+    }
+
+    public function setEtatSystemeRequete(?EtatSystemeRequete $etat_systeme_requete): static
+    {
+        $this->etat_systeme_requete = $etat_systeme_requete;
+
+        return $this;
+    }
+
+    public function getMdpProvisoire(): ?string
+    {
+        return $this->mdp_provisoire;
+    }
+
+    public function setMdpProvisoire(?string $mdp_provisoire): static
+    {
+        $this->mdp_provisoire = $mdp_provisoire;
+
+        return $this;
+    }
+
+    public function getUserCree(): ?User
+    {
+        return $this->user_cree;
+    }
+
+    public function setUserCree(?User $user_cree): static
+    {
+        $this->user_cree = $user_cree;
 
         return $this;
     }

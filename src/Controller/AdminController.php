@@ -127,6 +127,9 @@ class AdminController extends AbstractController
 
         $demandeCompte = $requetesRepo->find($idRequete);
 
+        //On ajoute l'user à la demande de compte
+        $demandeCompte->setUser($user);
+
         //On met à jour l'employé avec les informations de la demande de compte
         $employe->setNom($demandeCompte->getNom());
         $employe->setPrenom($demandeCompte->getPrenom());
@@ -215,6 +218,9 @@ class AdminController extends AbstractController
         //On crée un nouvel utilisateur
         $user = new User();
 
+        //On ajoute l'user à la demande de compte
+        $demandeCompte->setUser($user);
+
         //On crée un resStockageHome pour l'utilisateur
         $resStockageHome = new ResStockagesHome();
         $resStockageHome->setNom('home générale');
@@ -230,6 +236,9 @@ class AdminController extends AbstractController
         //On hashe le mot de passe
         $hashedPassword = $passwordHasher->hashPassword($user, $mdp);
         $user->setPassword($hashedPassword);
+
+        //On set le mot de passe provisoire
+        $demandeCompte->setMdpProvisoire($mdp);
 
         //On set le role de l'utilisateur
         $user->setRoles(['ROLE_USER']);
