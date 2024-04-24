@@ -502,6 +502,31 @@ class Fixtures extends Fixture
         $userApiMdp->setRoles(["ROLE_API_MDP"]);
         $manager->persist($userApiMdp);
 
+        //On crée des etat Systeme Requete
+        $etatSystemeRequete1 = new EtatsRequetes();
+        $etatSystemeRequete1->setEtat("D");
+        $manager->persist($etatSystemeRequete1);
+
+        $etatSystemeRequete2 = new EtatsRequetes();
+        $etatSystemeRequete2->setEtat('C_V');
+        $manager->persist($etatSystemeRequete2);
+
+        $etatSystemeRequete3 = new EtatsRequetes();
+        $etatSystemeRequete3->setEtat('C_E');
+        $manager->persist($etatSystemeRequete3);
+
+        $etatSystemeRequete4 = new EtatsRequetes();
+        $etatSystemeRequete4->setEtat('U');
+        $manager->persist($etatSystemeRequete4);
+
+        $etatSystemeRequete5 = new EtatsRequetes();
+        $etatSystemeRequete5->setEtat('U_V');
+        $manager->persist($etatSystemeRequete5);
+
+        $etatSystemeRequete6 = new EtatsRequetes();
+        $etatSystemeRequete6->setEtat('U_E');
+        $manager->persist($etatSystemeRequete6);
+
         $manager->flush();
     }
 

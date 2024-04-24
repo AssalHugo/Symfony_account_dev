@@ -219,7 +219,7 @@ class AdminController extends AbstractController
         $user = new User();
 
         //On ajoute l'user à la demande de compte
-        $demandeCompte->setUser($user);
+        $demandeCompte->setUserCree($user);
 
         //On crée un resStockageHome pour l'utilisateur
         $resStockageHome = new ResStockagesHome();

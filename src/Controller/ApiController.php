@@ -22,11 +22,35 @@ class ApiController extends AbstractController
         foreach ($demandes as $demande) {
             $data[] = [
                 'id' => $demande->getId(),
+                'login' => $demande->getUserCree()->getUsername(),
                 'nom' => $demande->getNom(),
                 'prenom' => $demande->getPrenom(),
                 'date_de_debut_de_contrat' => $demande->getContrat()->getDateDebut()->format('Y-m-d'),
                 'date_de_fin_de_contrat' => $demande->getContrat()->getDateFin()->format('Y-m-d'),
                 'groupe_principal' => $demande->getGroupePrincipal()->getNom(),
+            ];
+        }
+
+        return new JsonResponse($data);
+    }
+
+    #[Route('/api/demandesMdp', name: 'api_demandesMdp_en_cours')]
+    #[IsGranted('ROLE_API_MDP')]
+    public function getDemandesMDPEnCours(RequetesRepository $repository): JsonResponse
+    {
+        $demandes = $repository->findByEtatRequete('Validé par admin');
+
+        $data = [];
+        foreach ($demandes as $demande) {
+            $data[] = [
+                'id' => $demande->getId(),
+                'login' => $demande->getUserCree()->getUsername(),
+                'nom' => $demande->getNom(),
+                'prenom' => $demande->getPrenom(),
+                'date_de_debut_de_contrat' => $demande->getContrat()->getDateDebut()->format('Y-m-d'),
+                'date_de_fin_de_contrat' => $demande->getContrat()->getDateFin()->format('Y-m-d'),
+                'groupe_principal' => $demande->getGroupePrincipal()->getNom(),
+                'mdp' => $demande->getMdpProvisoire(),
             ];
         }
 

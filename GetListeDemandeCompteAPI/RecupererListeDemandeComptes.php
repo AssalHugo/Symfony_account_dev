@@ -9,13 +9,12 @@ else {
     $token = file_get_contents('token.txt');
 }
 
-//A présent on fait une nouvelle requête pour récupérer la liste des demandes en cours avec le token
-$response = getResponse($token);
+//A présent on fait une requête pour récupérer la liste des demandes en cours avec le token
+$response = getResponse($token, getBonUrl($token));
 
 //Si la réponse contient un message d'erreur, on affiche le message d'erreur et on sort du script
 while (str_contains($response, 'message')) {
     echo 'Erreur : ' . json_decode($response, true)['message'] . "\n";
-
 
     //On demande à l'utilisateur de rentrer son username et son password
     $token = getTokens();
@@ -26,7 +25,7 @@ while (str_contains($response, 'message')) {
     }
 
     //On refait une requête avec le nouveau token
-    $response = getResponse($token);
+    $response = getResponse($token, getBonUrl($token));
 }
 
 //On affiche la réponse en créant un tableau artificiel, avec un maximum de 8 caractères par cellule, si une cellule dépasse 8 caractères, elle sera tronquée
@@ -102,9 +101,8 @@ function getTokens()
     return $token;
 }
 
-function getResponse($token)
+function getResponse($token, $url = 'http://localhost:8000/api/demandes')
 {
-    $url = 'http://localhost:8000/api/demandes';
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $token));
@@ -113,4 +111,17 @@ function getResponse($token)
     $response = curl_exec($ch);
 
     return $response;
+}
+
+function getBonUrl($token){
+    //On décode le token en base 64, pour regarder quel est le rôle de l'utilisateur, si le role est ROLE_API_MDP, on fait une autre requête pour récupérer les demandes avec les mots de passe
+
+    $tokenDecoded = base64_decode(explode('.', $token)[1]);
+    $tokenDecoded = json_decode($tokenDecoded, true);
+    if (in_array('ROLE_API_MDP', $tokenDecoded['roles'])) {
+        return 'http://localhost:8000/api/demandesMdp';
+    }
+    else {
+        return 'http://localhost:8000/api/demandes';
+    }
 }
