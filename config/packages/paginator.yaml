@@ -7,4 +7,4 @@ knp_paginator:
     distinct: true                 # ensure distinct results, useful when ORM queries are using GROUP BY statements
   template:
     pagination: '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig'     # sliding pagination controls template
-    sortable: '@KnpPaginator/Pagination/bootstrap_v5_fa_sortable_link.html.twig' # sort link template
+    sortable: 'bundles/KnpPaginatorBundle/Pagination/sortable_link.html.twig' # sort link template
