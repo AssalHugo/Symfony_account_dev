@@ -89,7 +89,7 @@ class AdminController extends AbstractController
 
         //On crée un formulaire pour suggérer un login
         $formSuggestion = $this->createFormBuilder()
-            ->add('suggestion', TextType::class, ['label' => 'Suggestion :', 'data' => $this->generateUsername($demandeCompte, $entityManager)])
+            ->add('suggestion', TextType::class, ['label' => 'Donner un login à l\'utilisateur :', 'data' => $this->generateUsername($demandeCompte, $entityManager)])
             ->add('creer', SubmitType::class, ['label' => 'Créer un Compte', 'attr' => ['class' => 'btn-success']])
             ->getForm();
 
@@ -209,6 +209,20 @@ class AdminController extends AbstractController
 
     #[Route('/admin/validerDemandeCompte/{idDemandeCompte}/{username}', name: 'validerDemandeCompteAdmin', requirements: ['username' => '[a-zA-Z0-9]+'], defaults: ['username' => ''])]
     public function validerDemandeCompte($idDemandeCompte, $username, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher, SenderMail $senderMail): Response {
+
+        //On regarde si un username du meme nom dans la base de données existe déjà
+        $userRepo = $entityManager->getRepository(User::class);
+        $userMemeNom = $userRepo->findBy(['username' => $username]);
+
+//Si la taille de la liste est supérieure à 0, cela signifie que le nom d'utilisateur est déjà utilisé
+        if (count($userMemeNom) > 0) {
+            //On crée un message flash pour informer l'utilisateur que le nom d'utilisateur est déjà utilisé
+            $session = $request->getSession();
+            $session->getFlashBag()->add('message', "Le nom d'utilisateur est déjà utilisé.");
+            $session->set('statut', 'danger');
+
+            return $this->redirectToRoute('verificationDemandeCompteAdmin', ['id' => $idDemandeCompte]);
+        }
 
         //On récupère la demande de compte
         $requetesRepo = $entityManager->getRepository(Requetes::class);
