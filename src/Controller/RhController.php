@@ -520,11 +520,18 @@ class RhController extends AbstractController {
         //On crée le formulaire de filtre
         $formFiltre = $this->createForm(TrombinoscopeType::class);
 
+        //On récupere dans la session si c'est actif
+        $session = $request->getSession();
+        if ($session->get('actif') !== null) {
+            $actif = $session->get('actif');
+        } else {
+            $actif = true;
+        }
         //On ajoute un bouton pour filtrer en fonction de si le compte est actif ou non
         $formFiltre->add('actif', CheckboxType::class, [
             'required' => false,
             'label' => 'Compte actif',
-            'data' => true,
+            'data' => $actif,
             'attr' => ['class' => 'form-check-input'],
         ]);
 
@@ -571,6 +578,7 @@ class RhController extends AbstractController {
             ],
             'label' => 'Nombre d\'employés affichés par page : ',
             'required' => true,
+            'data' => 10,
             'attr' => ['onchange' => 'this.form.submit()'],
         ]);
 

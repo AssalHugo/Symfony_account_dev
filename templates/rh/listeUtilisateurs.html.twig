@@ -76,7 +76,11 @@
             {% endfor %}
         </tbody>
     </table>
-    {{ knp_pagination_render(employes) }}
+    {% if not is_array(employes) %}
+        <div class="navigation text-center">
+            {{ knp_pagination_render(employes) }}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
 

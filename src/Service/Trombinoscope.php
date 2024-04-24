@@ -48,6 +48,7 @@ class Trombinoscope
             $session->set('departement', $departement);
             $session->set('groupe', $groupe);
             $session->set('statutEmploye', $statut);
+            $session->set('actif', $actif);
 
         } //Sinon si le GET contient des filtres
         else if ($request->query->get('nom') != null || $request->query->get('prenom') != null || $request->query->get('departement') != null || $request->query->get('groupe') != null || $request->query->get('statut') != null) {
