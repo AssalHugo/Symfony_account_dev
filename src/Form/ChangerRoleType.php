@@ -25,6 +25,8 @@ class ChangerRoleType extends AbstractType
                     'User' => 'ROLE_USER',
                     'RH' => 'ROLE_RH',
                     'Administrateur' => 'ROLE_ADMIN',
+                    'API' => 'ROLE_API',
+                    'API_MDP' => 'ROLE_API_MDP'
                 ],
                 'label' => 'Rôle : ',
                 'attr' => ['id' => 'role_select']
