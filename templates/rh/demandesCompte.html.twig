@@ -24,16 +24,21 @@
                     <th>Téléphone</th>
                     <th>Etat</th>
                     <th>Commentaire</th>
-                    <th>Valider</th>
-                    <th>Modifier</th>
-                    <th>Refuser</th>
                 </tr>
             </thead>
             <tbody>
                 {% for demande in demandes %}
                     <tr>
-                        <td>{{ demande.dateRequete|date('d/m/Y/H:i:s') }}</td>
-                        <td>{% if demande.dateValidation %}{{ demande.dateValidation|date('d/m/Y/H:i:s') }}{% endif %}</td>
+                        <td>
+                            {{ demande.dateRequete|date('d/m/Y') }}
+                            {{ demande.dateRequete|date('H:i:s') }}
+                        </td>
+                        <td>
+                            {% if demande.dateValidation %}
+                                {{ demande.dateValidation|date('d/m/Y') }}
+                                {{ demande.dateValidation|date('H:i:s') }}
+                            {% endif %}
+                        </td>
                         <td>{{ demande.prenom }}</td>
                         <td>{{ demande.nom }}</td>
                         <td>{{ demande.contrat.datedebut|date('d/m/Y') }}</td>

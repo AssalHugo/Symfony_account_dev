@@ -61,7 +61,6 @@ echo "\n";
 $reponseAAPi = [];
 
 
-
 // On parcourt chaque ligne du tableau
 foreach ($responseArray as $row) {
     //Si la derniere colonne de la ligne contient la valeur 'C' on renvoie une 'C_V' avec l'id de la requete à l'API pour dire que le compte a été validé
