@@ -64,7 +64,7 @@ class EmployeRepository extends ServiceEntityRepository
                 ->setParameter('departement', '%'.$departement.'%');
         }
 
-        if ($actif != null){
+        if ($actif){
             $qb->andWhere('c.date_debut <= :date')
                 ->andWhere('c.date_fin >= :date')
                 ->setParameter('date', new \DateTime());

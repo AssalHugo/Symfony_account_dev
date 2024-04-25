@@ -82,7 +82,7 @@ class Trombinoscope
 
             $query = $employeRepository->findByFiltreId($departement, $groupe, $statut);
         }//Sinon si les filtre sont dans la session
-        else if ($request->getSession()->get('nom') != null || $request->getSession()->get('prenom') != null || $request->getSession()->get('departement') != null || $request->getSession()->get('groupe') != null || $request->getSession()->get('statutEmploye') != null) {
+        else if ($request->getSession()->get('nom') != null || $request->getSession()->get('prenom') != null || $request->getSession()->get('departement') != null || $request->getSession()->get('groupe') != null || $request->getSession()->get('statutEmploye') != null || $request->getSession()->get('actif') !== null) {
             //On récupère les utilisateurs en fonction des filtres
             $session = $request->getSession();
             $nom = $session->get('nom');
@@ -90,8 +90,9 @@ class Trombinoscope
             $departement = $session->get('departement');
             $groupe = $session->get('groupe');
             $statut = $session->get('statutEmploye');
+            $actif = $session->get('actif');
 
-            $query = $employeRepository->findByFiltre($nom, $prenom, $departement, $groupe, $statut, null);
+            $query = $employeRepository->findByFiltre($nom, $prenom, $departement, $groupe, $statut, $actif);
         } //Sinon on récupère tous les utilisateurs
         else {
 

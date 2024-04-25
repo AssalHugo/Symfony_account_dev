@@ -631,6 +631,7 @@ class RhController extends AbstractController {
         $session->remove('departement');
         $session->remove('groupe');
         $session->remove('statutEmploye');
+        $session->remove('actif');
 
         return $this->redirectToRoute('listeUtilisateurs');
     }
