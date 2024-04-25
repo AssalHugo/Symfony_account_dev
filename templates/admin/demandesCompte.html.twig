@@ -1,5 +1,10 @@
 {% extends 'rh/demandesCompte.html.twig' %}
 {% block validerSupprimer %}
+    <td>
+        {% if demande.etatsystemerequete != null %}
+            <a class="btn btn-{% if demande.etatsystemerequete.etat == 'C_V' or demande.etatsystemerequete.etat == 'U_V' %}success{% elseif demande.etatsystemerequete.etat == 'C_E' or demande.etatsystemerequete.etat == 'U_E' %}danger{% else %}secondary{% endif %}">{{ demande.etatsystemerequete.etat }}</a>
+        {% endif %}
+    </td>
     {% if demande.etatRequete.etat != 'Validé par admin' and demande.etatRequete.etat != 'Refusé' %}
     <td>
         <a href="{{ path('verificationDemandeCompteAdmin', {'id': demande.id}) }}" class="btn btn-success">Formulaire de validation</a>

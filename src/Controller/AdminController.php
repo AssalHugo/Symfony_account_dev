@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Employe;
 use App\Entity\EtatsRequetes;
+use App\Entity\EtatSystemeRequete;
 use App\Entity\ResServeur;
 use App\Entity\ResStockagesHome;
 use App\Entity\Requetes;
@@ -130,6 +131,11 @@ class AdminController extends AbstractController
         //On ajoute l'user à la demande de compte
         $demandeCompte->setUser($user);
 
+        //On modifie le statut systeme de la demande de compte
+        //On récupere l'état systeme 'D'
+        $etatSystemeRequete = $entityManager->getRepository(EtatSystemeRequete::class)->findOneBy(['etat' => 'U']);
+        $demandeCompte->setEtatSystemeRequete($etatSystemeRequete);
+
         //On met à jour l'employé avec les informations de la demande de compte
         $employe->setNom($demandeCompte->getNom());
         $employe->setPrenom($demandeCompte->getPrenom());
@@ -234,6 +240,11 @@ class AdminController extends AbstractController
 
         //On ajoute l'user à la demande de compte
         $demandeCompte->setUserCree($user);
+
+        //On modifie le statut systeme de la demande de compte
+        //On récupere l'état systeme 'D'
+        $etatSystemeRequete = $entityManager->getRepository(EtatSystemeRequete::class)->findOneBy(['etat' => 'D']);
+        $demandeCompte->setEtatSystemeRequete($etatSystemeRequete);
 
         //On crée un resStockageHome pour l'utilisateur
         $resStockageHome = new ResStockagesHome();

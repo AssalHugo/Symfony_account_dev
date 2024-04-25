@@ -504,7 +504,7 @@ class Fixtures extends Fixture
 
         //On crée des etat Systeme Requete
         $etatSystemeRequete1 = new EtatsRequetes();
-        $etatSystemeRequete1->setEtat("D");
+        $etatSystemeRequete1->setEtat("C");
         $manager->persist($etatSystemeRequete1);
 
         $etatSystemeRequete2 = new EtatsRequetes();

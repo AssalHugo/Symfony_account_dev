@@ -10,11 +10,21 @@ else {
 }
 
 //A présent on fait une requête pour récupérer la liste des demandes en cours avec le token
-$response = getResponse($token, getBonUrl($token));
+if ($token !== null) {
+    $response = getResponse($token, getBonUrl($token));
+}
+else {
+    $response = null;
+}
 
 //Si la réponse contient un message d'erreur, on affiche le message d'erreur et on sort du script
-while (str_contains($response, 'message')) {
-    echo 'Erreur : ' . json_decode($response, true)['message'] . "\n";
+while ($response === null || str_contains($response, 'message')) {
+    if ($response === null) {
+        echo 'Erreur : Impossible de récupérer les demandes en cours' . "\n";
+    }
+    else{
+        echo 'Erreur : ' . json_decode($response, true)['message'] . "\n";
+    }
 
     //On demande à l'utilisateur de rentrer son username et son password
     $token = getTokens();
@@ -27,6 +37,7 @@ while (str_contains($response, 'message')) {
     //On refait une requête avec le nouveau token
     $response = getResponse($token, getBonUrl($token));
 }
+
 
 //On affiche la réponse en créant un tableau artificiel, avec un maximum de 8 caractères par cellule, si une cellule dépasse 8 caractères, elle sera tronquée
 // On décode la réponse JSON en tableau PHP
@@ -46,8 +57,35 @@ foreach ($keys as $key) {
 }
 echo "\n";
 
+//On crée un tableau avec les différents éléments de la réponse
+$reponseAAPi = [];
+
+
+
 // On parcourt chaque ligne du tableau
 foreach ($responseArray as $row) {
+    //Si la derniere colonne de la ligne contient la valeur 'C' on renvoie une 'C_V' avec l'id de la requete à l'API pour dire que le compte a été validé
+    if ($row["etat_Système"] === 'C') {
+        //Une fois sur deux on donne C_V, pour simuler que le compte a été validé et l'autre fois on donne C_E pour simuler que le compte a été refusé
+        $rand = rand(0, 1);
+        if ($rand === 0) {
+            $reponseAAPi[$row['id']] = 'C_V';
+        }
+        else {
+            $reponseAAPi[$row['id']] = 'C_E';
+        }
+    }
+    else if ($row["etat_Système"] === 'U') {
+        //Une fois sur deux on donne U_V, pour simuler que le compte a été validé et l'autre fois on donne U_E pour simuler que le compte a été refusé
+        $rand = rand(0, 1);
+        if ($rand === 0) {
+            $reponseAAPi[$row['id']] = 'U_V';
+        }
+        else {
+            $reponseAAPi[$row['id']] = 'U_E';
+        }
+    }
+
     // On parcourt chaque cellule de la ligne
     foreach ($row as $key => $cell) {
         // On tronque la cellule à 15 caractères et on ajoute des espaces si nécessaire
@@ -56,6 +94,19 @@ foreach ($responseArray as $row) {
 
     // On affiche la ligne tronquée
     echo implode('|', $row) . "\n";
+}
+
+//On envoie la réponse à l'API
+$ch = curl_init(getBonUrl($token));
+curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $token, 'Content-Type: application/json'));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($reponseAAPi));
+
+$response = curl_exec($ch);
+
+if (isset(json_decode($response, true)['message'])){
+    echo json_decode($response, true)['message'] . "\n";
 }
 
 /**
@@ -77,6 +128,11 @@ function getTokens()
     echo 'Password : ';
     $password = trim(fgets(STDIN));
 
+    //Si l'username ou le password est vide, on sort de la fonction
+    if (empty($username) || empty($password)) {
+        return null;
+    }
+
     //On crée un tableau associatif avec le username et le password
     $data = array('username' => $username, 'password' => $password);
 
@@ -90,7 +146,7 @@ function getTokens()
 
     $response = curl_exec($ch);
 
-    if (isset(json_decode($response, true)['message'])) {
+    if (isset(json_decode($response, true)['message']) || empty($response)) {
         return null;
     }
     $token = json_decode($response, true)['token'];
@@ -108,9 +164,7 @@ function getResponse($token, $url = 'http://localhost:8000/api/demandes')
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $token));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-    $response = curl_exec($ch);
-
-    return $response;
+    return curl_exec($ch);
 }
 
 function getBonUrl($token){
