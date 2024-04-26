@@ -104,7 +104,7 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($reponseAAPi));
 
 $response = curl_exec($ch);
 
-if (isset(json_decode($response, true)['message'])){
+if (isset(json_decode($response, true)['message'])) {
     echo json_decode($response, true)['message'] . "\n";
 }
 

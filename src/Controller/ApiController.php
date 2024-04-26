@@ -21,18 +21,7 @@ class ApiController extends AbstractController
     {
         //Si le POST contient la réponse de l'admin, on met à jour l'état de la requête
         if ($request->getMethod() === 'PUT') {
-            $data = json_decode($request->getContent(), true);
-            //On modifie l'état systeme des requete d'ont l'id est la clé de la réponse
-            foreach ($data as $id => $reponse) {
-                $requete = $repository->find($id);
-                //on récupere l'état système correspondant à la réponse
-                $etatSysteme = $em->getRepository(EtatSystemeRequete::class)->findOneBy(['etat' => $reponse]);
-                $requete->setEtatSystemeRequete($etatSysteme);
-                $em->persist($requete);
-            }
-            $em->flush();
-            //On renvoie un message de succès
-            return new JsonResponse(['message' => "Mise à jour effectuée sur les requêtes : " . implode(', ', array_keys($data))]);
+            return $this->updateRequete($repository, $em, $request);
         }
 
         $demandes = $repository->findByEtatRequete('Validé par admin');
@@ -56,8 +45,11 @@ class ApiController extends AbstractController
 
     #[Route('/api/demandesMdp', name: 'api_demandesMdp_en_cours')]
     #[IsGranted('ROLE_API_MDP')]
-    public function getDemandesMDPEnCours(RequetesRepository $repository): JsonResponse
+    public function getDemandesMDPEnCours(RequetesRepository $repository, EntityManagerInterface $em, Request $request): JsonResponse
     {
+        if ($request->getMethod() === 'PUT') {
+            return $this->updateRequete($repository, $em, $request);
+        }
         $demandes = $repository->findByEtatRequete('Validé par admin');
 
         $data = [];
@@ -76,5 +68,20 @@ class ApiController extends AbstractController
         }
 
         return new JsonResponse($data);
+    }
+
+    private function updateRequete(RequetesRepository $repository, EntityManagerInterface $em, Request $request) : JsonResponse{
+        $data = json_decode($request->getContent(), true);
+        //On modifie l'état systeme des requete d'ont l'id est la clé de la réponse
+        foreach ($data as $id => $reponse) {
+            $requete = $repository->find($id);
+            //on récupere l'état système correspondant à la réponse
+            $etatSysteme = $em->getRepository(EtatSystemeRequete::class)->findOneBy(['etat' => $reponse]);
+            $requete->setEtatSystemeRequete($etatSysteme);
+            $em->persist($requete);
+        }
+        $em->flush();
+        //On renvoie un message de succès
+        return new JsonResponse(['message' => "Mise à jour effectuée sur les requêtes : " . implode(', ', array_keys($data))]);
     }
 }
