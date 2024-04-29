@@ -68,11 +68,12 @@ class UserController extends AbstractController
             $newLocalisation->setBatiment($localisation->getBatiment());
 
             $form = $this->createForm(LocalisationType::class, $newLocalisation);
+            //On ajoute un attribut data-index pour savoir quel formulaire a été soumis
             $form->add('modifier', SubmitType::class, ['label' => 'Modifier', 'attr' => ['data-index' => $indexLocalisation]]);
             $form->handleRequest($request);
 
             //Si le formulaire est soumis et valide et que ce soit le bon formulaire
-            if($form->isSubmitted() && $form->isValid() && $i == $indexLocalisation && $indexLocalisation != null){
+            if($form->isSubmitted() && $form->isValid() && $indexLocalisation != null && $i == $indexLocalisation){
                 // Mettez à jour l'adresse original avec les nouvelles informations
                 $localisation->setBureau($newLocalisation->getBureau());
                 $localisation->setBatiment($newLocalisation->getBatiment());
@@ -210,21 +211,6 @@ class UserController extends AbstractController
             'formPhoto' => $formUploadPhoto->createView(),
         ]);
     }
-
-    function uuid($data = null) {
-        // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
-        $data = $data ?? random_bytes(16);
-        assert(strlen($data) == 16);
-
-        // Set version to 0100
-        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
-        // Set bits 6-7 to 10
-        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
-
-        // Output the 36 character UUID.
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
-    }
-
     /**
      * Fonction qui permet de supprimer une localisation
      * @param Request $request
@@ -327,8 +313,6 @@ class UserController extends AbstractController
 
             $data = $formTest->getData();
 
-            $q = "";
-
             if ($data["idhal"] && $data["orcid"] ){
 
                 $idhal = $employe->getIdhal();
@@ -351,8 +335,8 @@ class UserController extends AbstractController
 
                 return $this->render('user/identifiantsNumeriques.html.twig', [
 
-                    'formIdentifiants' => $formIdentifiants,
-                    'formTest' => $formTest,
+                    'formIdentifiants' => $formIdentifiants->createView(),
+                    'formTest' => $formTest->createView(),
                     'content' => "",
                 ]);
             }
@@ -380,8 +364,8 @@ class UserController extends AbstractController
 
         return $this->render('user/identifiantsNumeriques.html.twig', [
 
-            'formIdentifiants' => $formIdentifiants,
-            'formTest' => $formTest,
+            'formIdentifiants' => $formIdentifiants->createView(),
+            'formTest' => $formTest->createView(),
             'content' => $content,
         ]);
     }

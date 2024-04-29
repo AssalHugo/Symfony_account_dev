@@ -35,5 +35,4 @@ class SenderMail
 
         //$this->mailer->send($email);
     }
-
 }

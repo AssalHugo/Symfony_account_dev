@@ -30,33 +30,40 @@
             let statut = document.getElementById('requete_contrat_status');
             let mail = document.getElementById('requete_mail');
 
+            let star = document.createElement('span');
+            star.textContent = '*';
+            star.style.color = 'red';
+
+
             switch (statut.options[statut.selectedIndex].text) {
 
                 case 'Stagiaire':
-                    mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail académique</small>');
+                    mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail académique</small>' + star.outerHTML);
                     break;
                 case 'Collaborateur':
-                    mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail professionnel</small>');
+                    mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail professionnel</small>' + star.outerHTML);
                     break;
                 default:
-                    mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail personnel</small>');
+                    mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail personnel</small>' + star.outerHTML);
                     break;
             }
 
             statut.addEventListener('change', function () {
                 if (mail.nextElementSibling !== null) {
                     mail.nextElementSibling.innerHTML = '';
+                    //On eneleve l'étoile
+                    mail.nextElementSibling.nextElementSibling.remove();
                 }
                 switch (statut.options[statut.selectedIndex].text) {
 
                     case 'Stagiaire':
-                        mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail académique</small>');
+                        mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail académique</small>'  + star.outerHTML);
                         break;
                     case 'Collaborateur':
-                        mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail professionnel</small>');
+                        mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail professionnel</small>' + star.outerHTML);
                         break;
                     default:
-                        mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail personnel</small>');
+                        mail.insertAdjacentHTML('afterend', '<small class="text-muted">Merci de saisir le mail personnel</small>' + star.outerHTML);
                         break;
                 }
             });
