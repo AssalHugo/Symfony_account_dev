@@ -4,14 +4,14 @@ namespace App\Service;
 
 use App\Entity\EtatsRequetes;
 use App\Entity\Requetes;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class DemandeCompte {
 
-    private EntityManager $entityManager;
+    private EntityManagerInterface $entityManager;
 
-    public function __construct(EntityManager $entityManager) {
+    public function __construct(EntityManagerInterface $entityManager) {
         $this->entityManager = $entityManager;
     }
 
@@ -20,8 +20,6 @@ class DemandeCompte {
      * @param $id
      * @param Request $request
      * @return void
-     * @throws \Doctrine\ORM\Exception\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function refuserDemandeCompte($id, Request $request) : void {
 

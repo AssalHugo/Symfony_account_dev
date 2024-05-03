@@ -82,29 +82,24 @@
                 }
             }
 
-            // Remove all servers from the form
+            // On supprime les serveurs actuels
             Formserveurs.innerHTML = '';
 
-            // Add the servers for the selected groups
+            // On récupère les serveurs pour chaque groupe
             for (let i = 0; i < groupes.length; i++) {
-                // If the servers for this group have already been fetched, use them or
+                // Si les serveurs pour ce groupe sont déjà stockés, on les ajoute au formulaire
                 if (groupServers[groupes[i]]) {
 
                     addServersToForm(groupServers[groupes[i]]);
-                }//if there already are a fetch request for this group, we wait for the response
-                else if (groupServers[groupes[i]] === 'fetching') {
-                    console.log('waiting for response');
-                    setTimeout(updateServeur, 400);
-                    return;
                 }
-                else {
+                else if (groupServers[groupes[i]] !== 'fetching') {
                     fetch('/ressources/serveurs/' + groupes[i])
                         .then(response => response.json(), groupServers[groupes[i]] = 'fetching')
                         .then(data => {
-                            // Store the servers for this group
+                            // On stocke les serveurs pour ce groupe
                             groupServers[groupes[i]] = data;
 
-                            // Add the servers to the form
+                            // On ajoute les serveurs au formulaire
                             addServersToForm(data);
                         });
                 }

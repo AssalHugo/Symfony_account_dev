@@ -2,7 +2,7 @@
 
 //Si on a pas de token, on demande à l'utilisateur de rentrer son username et son password
 if (!file_exists('token.txt') || empty(file_get_contents('token.txt'))) {
-    $token = getTokens();
+    $token = getToken();
 }
 else {
     //Si on a déjà un token, on le récupère
@@ -17,7 +17,7 @@ else {
     $response = null;
 }
 
-//Si la réponse contient un message d'erreur, on affiche le message d'erreur et on sort du script
+//Si la réponse contient un message d'erreur
 while ($response === null || str_contains($response, 'message')) {
     if ($response === null) {
         echo 'Erreur : Impossible de récupérer les demandes en cours' . "\n";
@@ -27,7 +27,7 @@ while ($response === null || str_contains($response, 'message')) {
     }
 
     //On demande à l'utilisateur de rentrer son username et son password
-    $token = getTokens();
+    $token = getToken();
 
     if ($token === null) {
         //On passe à la prochaine itération
@@ -112,7 +112,7 @@ if (isset(json_decode($response, true)['message'])) {
  * Fonction pour récupérer le token
  * @return mixed
  */
-function getTokens()
+function getToken()
 {
 
     echo 'Bonjour, veuillez entrer votre username et votre password pour accéder à la liste des demandes en cours : ' . "\n";
@@ -138,6 +138,7 @@ function getTokens()
     //On encode le tableau en JSON
     $data = json_encode($data);
 
+    //On fait une requête POST pour récupérer le token
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -145,9 +146,11 @@ function getTokens()
 
     $response = curl_exec($ch);
 
+    //Si la réponse contient un message d'erreur, on sort de la fonction
     if (isset(json_decode($response, true)['message']) || empty($response)) {
         return null;
     }
+    //On récupère le token
     $token = json_decode($response, true)['token'];
 
     //On stocke le token dans un fichier token.txt

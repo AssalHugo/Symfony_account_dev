@@ -48,10 +48,8 @@ class ServeursMesuresRepository extends ServiceEntityRepository
             ->andWhere('s.date_mesure >= :date')
             ->setParameter('serveurs', $serveurs)
             ->setParameter('date', new \DateTimeImmutable('-30 days'))
-        //On trie par date de mesure
+            //On trie par date de mesure
             ->orderBy('s.date_mesure', 'ASC')
-
-        //On ne séléctionne pas les mesures qui ont une date de mesure deja présente
             ->groupBy('s.date_mesure');
 
         return $qb->getQuery()->getResult();
@@ -69,10 +67,9 @@ class ServeursMesuresRepository extends ServiceEntityRepository
             ->andWhere('s.date_mesure >= :date')
             ->setParameter('serveur', $serveur)
             ->setParameter('date', new \DateTimeImmutable('-30 days'))
-        //On trie par date de mesure
+            //On trie par date de mesure
             ->orderBy('s.date_mesure', 'ASC')
-
-        ->groupBy('s.date_mesure');
+            ->groupBy('s.date_mesure');
 
         return $qb->getQuery()->getResult();
     }

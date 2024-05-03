@@ -288,7 +288,6 @@ class RessourcesController extends AbstractController
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){
-            $groupes = $form->getData()['groupes'];
             $serveursChart = $form->getData()['serveurs'];
         }
         else{
@@ -297,7 +296,6 @@ class RessourcesController extends AbstractController
 
         
         //---------------------------------Graphique---------------------------------
-
         //On récupère les labels en fonction des serveurs
         $labelsMesures = $serveurMesuresRepo->findlabelEnFonctionDesServeurs($serveursChart);
 
@@ -314,6 +312,7 @@ class RessourcesController extends AbstractController
             //On récupère les mesures du serveur qui n'ont pas comme date de mesure une date inférieure à la date actuelle -30 jours
             $mesures = $serveurMesuresRepo->findMesuresEnFonctionDuServeur($serveur);
 
+            //Si le nombre de mesures est égal au nombre de labels, on récupère directement les valeurs
             if (count($mesures) == count($labels)) {
 
                 $dataCpu = array_map(function($mesure) {
@@ -400,7 +399,7 @@ class RessourcesController extends AbstractController
                     'position' => 'left',
                     'title' => [
                         'display' => true,
-                        'text' => 'RAM / CPU',
+                        'text' => 'CPU %',
                     ],
                     'suggestedMin' => 0,
                     'suggestedMax' => 100,
@@ -464,12 +463,11 @@ class RessourcesController extends AbstractController
     /**
      * Récupérer les serveurs (id, nom) d'un groupe
      * @param EntityManagerInterface $em
-     * @param Request $request
      * @param $id
      * @return Response
      */
     #[Route('/ressources/serveurs/{id}', name: 'serveurs_du_groupe')]
-    public function getServeursDuGroupe(EntityManagerInterface $em, Request $request, $id): Response {
+    public function getServeursDuGroupe(EntityManagerInterface $em, $id): Response {
 
         //On récupère les serveurs du groupe
         $groupe = $em->getRepository(Groupes::class)->find($id);

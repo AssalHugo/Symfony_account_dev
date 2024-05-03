@@ -129,10 +129,10 @@ class AdminController extends AbstractController
         $demandeCompte = $requetesRepo->find($idRequete);
 
         //On ajoute l'user à la demande de compte
-        $demandeCompte->setUser($user);
+        $demandeCompte->setUserCree($user);
 
         //On modifie le statut systeme de la demande de compte
-        //On récupere l'état systeme 'D'
+        //On récupere l'état systeme 'U'
         $etatSystemeRequete = $entityManager->getRepository(EtatSystemeRequete::class)->findOneBy(['etat' => 'U']);
         $demandeCompte->setEtatSystemeRequete($etatSystemeRequete);
 
